@@ -11,7 +11,9 @@ Lyra 애니메이션 학습 문서는 폴더명이나 asset type 기준이 아�
 
 검증 결과, 문서의 큰 방향은 적절하다. 다만 두 가지는 수정이 필요하다. 첫째, 애셋 수량은 조사 범위에 따라 달라지므로 "핵심 animation 폴더 기준"과 "post process/retarget 포함 확장 기준"을 구분해야 한다. 둘째, `Actions/Montage`와 `Aiming/ADS`는 모두 상체 pose에 영향을 주지만 성격이 다르다. 전자는 짧은 action montage이고 후자는 상시 aim offset·blend weight 흐름이므로 최종 학습 문서에서는 분리하는 편이 낫다.
 
-추천 상위 섹션은 다음 12개다.
+추천 상위 섹션은 다음 14개로, **메커니즘 학습 12개 + 설계 의도와 트레이드오프 2개** 의 두 묶음으로 나뉜다.
+
+메커니즘 학습 (섹션 1–섹션 12) — "무엇이 어떻게 동작하는가":
 
 1. 전체 지도와 학습 경로
 2. 런타임 상태 입력과 ThreadSafe 갱신: ASC tag, movement, pawn init, `BlueprintThreadSafeUpdateAnimation`
@@ -26,7 +28,12 @@ Lyra 애니메이션 학습 문서는 폴더명이나 asset type 기준이 아�
 11. Notify, context effects, weapon mesh animation
 12. 테스트, 디버깅, 확장 레시피
 
-핵심은 `Rifle`, `Pistol`, `Unarmed`, `Shotgun`을 각각 최상위 섹션으로 만들지 않는 것이다. 이들은 기능 분류라기보다 같은 linked layer 체계 안의 변형이다. 최상위 섹션은 "선택 규칙", "포즈 생성", "액션 합성", "보정", "검증"처럼 시스템 역할로 나누는 편이 학습 효율이 높다.
+설계 의도와 트레이드오프 (섹션 13–섹션 14) — "왜 이렇게 만들었고 무엇을 포기했는가":
+
+13. AnimBP / ALI 책임 분담과 설계 트레이드오프 — 7종 (`ABP_Mannequin_Base`, `ABP_ItemAnimLayersBase`, 무기별 layer, `ABP_Weap_*`, `ABP_*_PostProcess`, `ABP_*_Retarget`, `ALI_ItemAnimLayers`) 의 책임 분리와 그 비용/이득
+14. Invisible Mesh + Copy Pose + Cosmetic Layer 아키텍처 — `SKM_*_Invis` 의 driving mesh 역할, `ABP_Mannequin_CopyPose` 의 "Copy Pose From Mesh" 기반 cosmetic mesh 동기화, `B_Manny`/`B_Quinn` 의 design-intent comment 가 직접 설명하는 분리 이유
+
+핵심은 `Rifle`, `Pistol`, `Unarmed`, `Shotgun`을 각각 최상위 섹션으로 만들지 않는 것이다. 이들은 기능 분류라기보다 같은 linked layer 체계 안의 변형이다. 최상위 섹션은 "선택 규칙", "포즈 생성", "액션 합성", "보정", "검증"처럼 시스템 역할로 나누는 편이 학습 효율이 높다. 마찬가지로 섹션 13·섹션 14 는 "왜 이 구조인가" 를 별도 묶음으로 두어 메커니즘 학습의 동선을 흐리지 않는다.
 
 ## 조사 근거
 
@@ -76,7 +83,7 @@ Lyra 애니메이션 학습 문서는 폴더명이나 asset type 기준이 아�
 
 post process와 retarget 분석까지 포함해 `Content/Characters/Heroes/Mannequin/Rig` 및 `Content/Characters/Heroes/Mannequin_UE4/Animations`를 더하면 `ABP_`는 19개가 된다. 이 3개 증가는 `ABP_Manny_PostProcess`, `ABP_Quinn_PostProcess`, `ABP_UE4_Mannequin_Retarget`처럼 final pose 보정·호환성 쪽에 속하므로 핵심 locomotion prefix 표와 섞지 않는다.
 
-`MF_` 접두어 주의 (집계 혼동 방지): `MF_`는 애니메이션 폴더에서 Quinn(feminine) 시퀀스를 뜻하지만 **Material Function**의 접두어이기도 하다. 2026-05-22 파일시스템 전수 검증 결과, 핵심 animation 폴더(`Mannequin/Animations` + `Weapons/{Pistol,Rifle,Shotgun}/Animations`)의 `MF_` 애니메이션은 **129개**다 — 하위폴더 합계 `Actions 2 + AimOffsets 15 + Locomotion(Pistol 35 + Rifle 38 + Shotgun 1 + Unarmed 38) = 129`, Weapons 하위 0. 프로젝트 전체 `MF_*.uasset`는 **181개**이며, 나머지 52개는 Material Function이다(`Effects/MaterialFunctions` 35, `UI` 하위 Materials 14, `Mannequin/Materials/Functions` 3 — 129 + 52 = 181). 위 표의 `MF_` 129는 애니메이션 자산만 집계한 검증값이다. 파일명 접두어만으로 전체를 세면 181이 나오므로 범위를 먼저 고정해야 한다(이 수치는 130이 아니다 — 130은 파일시스템 근거가 없다).
+`MF_` 접두어 주의 (집계 혼동 방지): `MF_`는 애니메이션 폴더에서 Quinn(feminine) 시퀀스를 뜻하지만 **Material Function**의 접두어이기도 하다. 2026-05-22 파일시스템 전수 검증 결과, 핵심 animation 폴더(`Mannequin/Animations` + `Weapons/{Pistol,Rifle,Shotgun}/Animations`)의 `MF_` 애니메이션은 **129개**다 - 하위폴더 합계 `Actions 2 + AimOffsets 15 + Locomotion(Pistol 35 + Rifle 38 + Shotgun 1 + Unarmed 38) = 129`, Weapons 하위 0. 프로젝트 전체 `MF_*.uasset`는 **181개**이며, 나머지 52개는 Material Function이다(`Effects/MaterialFunctions` 35, `UI` 하위 Materials 14, `Mannequin/Materials/Functions` 3 - 129 + 52 = 181). 위 표의 `MF_` 129는 애니메이션 자산만 집계한 검증값이다. 파일명 접두어만으로 전체를 세면 181이 나오므로 범위를 먼저 고정해야 한다(이 수치는 130이 아니다 - 130은 파일시스템 근거가 없다).
 
 ### 코드 구조
 
@@ -140,6 +147,17 @@ Lyra에서 어떤 animation layer를 사용할지 결정하는 부분과, 그 la
 
 ShooterTests는 crouch, pistol jog, Quinn/Manny jog, melee montage, network replication까지 확인한다. 학습 문서의 마지막 부록으로만 두기보다 각 기능 섹션 끝에 "검증 포인트"를 붙이고, 별도 테스트 섹션에서 전체 구조를 정리하는 방식이 좋다.
 
+### 6. 설계 의도와 트레이드오프는 별도 묶음으로 둔다
+
+섹션 1–섹션 12 는 "이 시스템이 무엇이고 어떻게 동작하는가" 를 다룬다. 같은 페이지 안에서 "왜 이렇게 만들었는가" 를 같이 다루려고 하면 본문이 두 가지 톤으로 갈라지고, 메커니즘 학습 동선이 흐려진다.
+
+대신 섹션 13 (AnimBP·ALI 책임 분담), 섹션 14 (Invisible Mesh + Copy Pose 아키텍처) 같은 **설계 의도 전용 섹션** 을 후반부에 묶어, 학습자가 메커니즘을 충분히 본 뒤 "왜 이 분배인가, 무엇을 포기했는가" 를 한 번에 본다. 두 섹션 모두 새 사실보다는 **이미 검증된 사실 위에 인과·trade-off 추론을 얹는 성격** 이므로, `note-design` 박스와 `comparison-section` (단일 mesh vs invisible+visible 같은 대비) 를 주된 표현 수단으로 쓴다.
+
+이 묶음은 다음 두 가지 함정을 피한다.
+
+- "기능 페이지마다 설계 의도 박스를 길게 다는" 분산 — 페이지 길이가 늘고 핵심이 묻힌다.
+- "설계 의도 페이지" 가 새 사실을 정의 — HTML 사양상 금지. 두 섹션 모두 섹션 1–섹션 12 의 사실을 인용만 하고, 트레이드오프는 인용된 사실에서 도출된 추론으로 적는다.
+
 ## 권장 문서 구조
 
 ### 0. 전체 지도와 학습 경로
@@ -172,7 +190,7 @@ ShooterTests는 crouch, pistol jog, Quinn/Manny jog, melee montage, network repl
 - ASC 초기화가 AnimInstance에 어떻게 연결되는가?
 - movement mode와 crouch tag는 언제 바뀌는가?
 - 왜 Event Graph가 비어 있고 모든 per-frame 로직이 `BlueprintThreadSafeUpdateAnimation`에 있는가?
-- thread-safe 함수는 game object 데이터에 직접 접근할 수 없다 — Property Access는 이 제약을 어떻게 푸는가?
+- thread-safe 함수는 game object 데이터에 직접 접근할 수 없다 - Property Access는 이 제약을 어떻게 푸는가?
 
 ThreadSafe 갱신 구조 (Monolith 검증):
 
@@ -181,7 +199,7 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 - `ABP_Mannequin_Base`의 `BlueprintThreadSafeUpdateAnimation` 호출 순서(검증): `UpdateLocationData → UpdateRotationData → UpdateVelocityData → UpdateAccelerationData → UpdateWallDetectionHeuristic → UpdateCharacterStateData → UpdateBlendWeightData → UpdateRootYawOffset → UpdateAimingData → UpdateJumpFallData`, 마지막에 `IsFirstUpdate`를 false로 설정한다.
 - `ABP_ItemAnimLayersBase`도 같은 패턴이나, 먼저 main ABP 참조가 유효한지 Branch로 확인한 뒤 `Update Blend Weight Data → UpdateJumpFallData → UpdateSkelControlData`를 호출한다. main ABP(`ABP_Mannequin_Base`)의 데이터는 `GetMainAnimBPThreadSafe`로 thread-safe하게 읽어 온다.
 - **Property Access**: thread-safe 함수는 다른 스레드가 game object를 동시에 수정할 수 있어 직접 접근이 금지된다. `K2Node_PropertyAccess` 노드가 안전한 시점에 데이터를 복사해 온다(`ABP_Mannequin_Base`에 13개). `AnimBP Tour #2` 주석이 이 이유를 그래프 안에서 직접 설명한다.
-- 상태·레이어별 갱신은 **Anim Node Function**(state/linked layer 노드의 `On Update`·`On Become Relevant`·`On Initial Update` 콜백)으로 분산되며, 이 역시 thread-safe하게 실행된다 — 구체 사례는 섹션 3·4에서 다룬다.
+- 상태·레이어별 갱신은 **Anim Node Function**(state/linked layer 노드의 `On Update`·`On Become Relevant`·`On Initial Update` 콜백)으로 분산되며, 이 역시 thread-safe하게 실행된다 - 구체 사례는 섹션 3·4에서 다룬다.
 
 주요 대상:
 
@@ -202,7 +220,7 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 
 - ABP variable watch에서 tag binding 변수가 기대값으로 바뀌는지 확인한다.
 - 점프/낙하 문제는 `GroundDistance`, movement mode, velocity를 함께 본다.
-- thread-safe 규칙 위반(함수에서 game object 직접 접근)은 컴파일 경고로 드러난다 — Property Access 노드로 교체한다.
+- thread-safe 규칙 위반(함수에서 game object 직접 접근)은 컴파일 경고로 드러난다 - Property Access 노드로 교체한다.
 
 참고 온라인 문서: Animation in Lyra의 "Blueprint ThreadSafe Update Animation" 섹션, Animation Optimization, How to Get Animation Variables(아래 "공식 온라인 대조 출처" 표 참조).
 
@@ -486,8 +504,8 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 주요 대상:
 
 - `FShooterTestsAnimationTestHelper::FindAnimationAsset`, `IsAnimationPlaying` (`ShooterTestsAnimationTestHelper.h`)
-- `InputCrouchAnimationTest`, `WeaponMeleeAnimationTest` — `ShooterTestsActorAnimationTests.cpp` (`ACTOR_ANIMATION_TEST` 매크로)
-- `InputAnimationTest` — `ShooterTestsActorNetworkTests.cpp` (`ACTOR_ANIMATION_NETWORK_TEST` 매크로, 클라이언트/서버 애니메이션 복제 검증)
+- `InputCrouchAnimationTest`, `WeaponMeleeAnimationTest` - `ShooterTestsActorAnimationTests.cpp` (`ACTOR_ANIMATION_TEST` 매크로)
+- `InputAnimationTest` - `ShooterTestsActorNetworkTests.cpp` (`ACTOR_ANIMATION_NETWORK_TEST` 매크로, 클라이언트/서버 애니메이션 복제 검증)
 
 권장 구성:
 
@@ -499,7 +517,106 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 
 작성 우선순위: 상
 
-## 세부 학습 항목 — 기능 키워드 검증 매핑
+### 13. AnimBP / ALI 책임 분담과 설계 트레이드오프
+
+역할: 섹션 1–섹션 12 에서 본 7종 BP / interface 가 왜 한 거대한 ABP 가 아니라 각자의 책임으로 쪼개져 있는지를 설계 의도와 비용·이득 관점에서 종합한다. **메커니즘 학습이 끝난 독자가 한 번 더 읽으면 "다음에 만들 시스템도 이렇게 쪼개는 게 맞는가" 를 판단할 수 있게 한다.**
+
+핵심 질문:
+
+- `ABP_Mannequin_Base` 가 직접 들고 있지 않은 책임은 무엇이고, 왜 떨어뜨렸는가? (sequence, distance matching, hand IK alpha, weapon fire animation)
+- `ABP_ItemAnimLayersBase` 가 `Mannequin_Base` 의 일부가 아니라 별도 BP 인 이유는? (무기 교체 단위 = layer ABP 교체)
+- `ALI_ItemAnimLayers` 라는 14-함수 interface 의 비용·이득은? (직접 함수 호출이나 child BP 방식과의 비교)
+- 무기 mesh ABP (`ABP_Weap_*`) 가 캐릭터 ABP 와 분리된 이유는? (다른 skeleton, fire/reload 가 캐릭터 montage 와 동기되지만 평가는 독립)
+- post-process ABP (`ABP_Manny_PostProcess`, `ABP_Quinn_PostProcess`) 가 별도인 이유는? (mesh 마다 한 번씩, main pose 와 무관한 보정)
+- retarget ABP (`ABP_Mannequin_Retarget`, `ABP_UE4_Mannequin_Retarget`) 가 별도인 이유는? (UE4 skeleton 호환)
+- 이 분배의 **비용** (BP 간 호출/캐스팅, 변수 동기화, 학습 부담, 코드 검색 어려움) 과 **이득** (무기 추가의 격리, cosmetic 교체의 격리, 멀티스레드 갱신, 디버깅 격리) 의 trade-off 는?
+
+주요 대상:
+
+- `ABP_Mannequin_Base` — state machine, slot, additive, root rotation, Control Rig 호출
+- `ABP_ItemAnimLayersBase` — sequence variable, distance matching, stride/orientation warping, hand IK alpha, 14함수 구현
+- 무기별 layer ABP (`ABP_{Unarmed,Pistol,Rifle,Shotgun}AnimLayers ±_Feminine`) — sequence 세트만
+- `ABP_Weap_{Pistol,Rifle,Shotgun}` — weapon mesh self-animation (별도 skeleton)
+- `ABP_Manny_PostProcess`, `ABP_Quinn_PostProcess` — mesh 별 final-pose 보정
+- `ABP_Mannequin_Retarget`, `ABP_UE4_Mannequin_Retarget` — UE4 skeleton 호환
+- `ALI_ItemAnimLayers` — 14함수 interface
+
+> **섹션 13 의 책임군은 정확히 7개** 다. `ABP_Mannequin_CopyPose` 는 invisible↔visible mesh 동기화 전용이라 섹션 13 의 핵심 책임군에서 제외하고 [섹션 14 (Invisible Mesh + Copy Pose 아키텍처)](#14-invisible-mesh--copy-pose--cosmetic-layer-아키텍처) 에서 단독 설명한다. 섹션 13 의 책임 지도에서는 cross-link 만 둔다.
+
+권장 구성 (HTML 산출 시):
+
+- structure: 7개 BP / interface 의 책임 지도 (`structure-grid` 7장)
+- comparison: 책임 / 입력 변수 / 출력 pose / 교체 단위 / 평가 frequency 비교 표 (`comparison-section`)
+- decision: "새 기능을 추가할 때 어디에 두는가" 의사결정 표 (`decision-section`)
+- note-design: 각 분리의 비용과 이득 (`note-design` 박스로 트레이드오프 한 가지씩)
+- (선택) flow: pose 한 frame 이 7종 BP 를 거치는 평가 순서 (※ flow gate 통과 시에만)
+
+작성 우선순위: 중 — 섹션 1–섹션 12 학습이 끝난 독자를 위한 종합 페이지. 새 시스템 (UI 등) 을 분석할 때도 이 페이지의 분배 패턴이 참고가 된다.
+
+검증 포인트:
+
+- 7종 BP / interface 의 존재·parent class·기본 구성은 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 모두 ✅ 로 있다.
+- "트레이드오프" 자체는 fact 가 아니라 설계 추론이므로 본문에서 `note-design` 으로 명시한다.
+- 호출 횟수·평가 frequency 같은 정량적 비용은 측정하지 않은 한 추정으로만 적는다 (등급 ◐).
+
+### 14. Invisible Mesh + Copy Pose + Cosmetic Layer 아키텍처
+
+역할: 라이라가 왜 "invisible driving mesh + visible cosmetic mesh + Copy Pose ABP" 의 **3단 구성** 으로 캐릭터를 만들었는지를 설계 의도와 trade-off 관점에서 설명한다. **`B_Manny` / `B_Quinn` 의 BP 안 comment 가 이 설계 의도를 직접 적어둔 1차 자료다** — 후속 HTML 페이지는 그 comment 를 인용한다.
+
+핵심 질문:
+
+- 왜 `SKM_Manny` 가 직접 visible body mesh 가 아니라, 별도 `SKM_Manny_Invis` 가 캐릭터의 메인 mesh 인가?
+- visible mesh (`SKM_Manny`) 는 어디에 attach 되고, 어떻게 invisible mesh 의 pose 를 따라가는가?
+- `ABP_Mannequin_CopyPose` 의 역할과 "Copy Pose From Mesh" 노드는 어떻게 동작하는가? (parent: `AnimInstance`, AnimGraph 3 nodes — Monolith 확인)
+- `B_Manny` / `B_Quinn` 의 BP comment 가 명시한 설계 의도는? (*"copy the pose across from the invisible 'driving' mesh component since the skeletons are directly compatible"*)
+- modular cosmetic part (head·jacket·hands 등) 가 같은 invisible mesh 의 pose 를 어떻게 공유하는가?
+- 이 3단 구성의 **비용** (mesh 1개 → N개로 늘어남에 따른 메모리·draw call·CPU pose 평가) 과 **이득** (cosmetic 교체의 격리, retarget 호환성, modular character parts 의 자유) 의 trade-off 는?
+- 단일 mesh 한 개로 합치면 무엇이 불가능해지는가?
+
+주요 대상:
+
+- `SKM_Manny_Invis`, `SKM_Quinn_Invis` — driving mesh (invisible, owner pawn 의 mesh 로 적용되어 animation 평가 주체)
+- `SKM_Manny`, `SKM_Quinn` — visible cosmetic skeletal mesh. `B_Manny` / `B_Quinn` 의 root `MeshComponent` (SkeletalMeshComponent, Monolith 확인) 가 이 mesh 를 들고, child actor 로서 owner pawn 의 mesh 에 attach 됨
+- `ABP_Mannequin_CopyPose` — parent `AnimInstance`, AnimGraph 3 노드 (`Output Pose ← Copy Pose From Mesh`, `SourceMeshComponent` 핀 미연결 → attached parent 사용). comment: *"copy the pose from the parent mesh component that our mesh component is attached to"*
+- `B_Manny`, `B_Quinn` — cosmetic BP (단일 root `MeshComponent` 만 갖는 actor class). BP 내부 comment 가 design intent 명시
+- `B_MannequinPawnCosmetics` — `BodyMeshes.SelectBestBodyStyle` 로 invisible driving mesh 를 owner pawn 의 main mesh 로 선택
+- `ULyraPawnComponent_CharacterParts` + `FLyraCharacterPartList` (C++) — 두 단계로 책임 분리: (1) `SpawnActorForEntry` 가 `UChildActorComponent` 생성 + `GetSceneComponentToAttachTo()` (owner mesh) 에 attach, (2) `BroadcastChanged` 가 `BodyMeshes.SelectBestBodyStyle(MergedTags)` 로 invisible mesh 선택·적용
+- `FLyraAnimBodyStyleSelectionSet` (섹션 6 에서 다룬 mesh 선택 규칙)
+
+권장 구성 (HTML 산출 시):
+
+- structure: 3단 구성도 — `SKM_*_Invis` (driving) → `ABP_Mannequin_Base` 평가 → `ABP_Mannequin_CopyPose` 로 visible mesh 동기화
+- flow: 한 frame 의 pose 흐름 — main ABP 가 invisible mesh 의 pose 결정 → visible cosmetic mesh 들이 CopyPose ABP 로 그 pose 를 복제
+- reference: `B_Manny`/`B_Quinn` 의 comment 원문 인용 + 한국어 번역
+- comparison: 단일 visible mesh 패턴 vs invisible+visible+CopyPose 패턴의 trade-off 비교
+- note-design: 메모리·draw call·pose 평가 비용 ↔ cosmetic 교체 유연성의 설계 의도
+- recipe: 새 cosmetic part 를 추가할 때의 권장 순서 — `Cosmetic.*` 태그 정의 → mesh rule 등록 → CopyPose ABP 가 적용된 cosmetic actor 생성
+
+작성 우선순위: 중 — 섹션 6 (cosmetic 선택 규칙) 을 본 독자가 이어서 보면 자연스럽다. **섹션 13 보다 섹션 14 를 먼저 만든다** — 섹션 14 는 섹션 6 의 "왜 `SKM_*_Invis` 가 선택되는가" 학습 공백과 바로 이어지므로 학습 도움이 즉시 크다. 섹션 13 은 여러 페이지를 종합하는 후반 설계 페이지라 섹션 14 가 자리잡은 뒤에 만드는 편이 자연스럽다.
+
+quote 사용 가이드 (섹션 14 HTML 작성 시):
+
+- `reference-section` 블록에 "확인 위치: `B_Manny`, `B_Quinn` Blueprint 내부 comment" 표기.
+- 원문은 **핵심 구절만 짧게** 인용 (예: *"copy the pose across from the invisible 'driving' mesh component since the skeletons are directly compatible"*).
+- 바로 아래에 한국어 해석을 한 줄로 둔다 — "visible mesh 는 invisible driving mesh 와 skeleton 호환성이 있어서 pose 를 복제한다" 정도.
+- comment 전문은 검증 원장 ([`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md)) 에 두고, HTML 은 학습에 필요한 일부만 노출한다.
+
+검증 포인트:
+
+- `ABP_Mannequin_CopyPose` 의 parent class·AnimGraph 노드 수·"Copy Pose From Mesh" 노드 포함은 Monolith 로 ✅ 확인됨.
+- `B_Manny`/`B_Quinn` 의 design-intent comment 는 Monolith FTS search 로 ✅ 확인됨 (`B_Manny`, `B_Quinn` 둘 다 같은 comment 보유).
+- 4개 mesh (`SKM_Manny`, `SKM_Manny_Invis`, `SKM_Quinn`, `SKM_Quinn_Invis`) 존재는 파일 시스템으로 ✅ 확인됨.
+- ◐ **HTML 과 원장 간 재검수 필요** — 다음 사실들은 현재 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 ✅ 로 추가되었고 HTML 페이지도 이를 인용해 작성됨 (2026-05-24 보강). 이후 원장이 더 갱신되면 HTML 표현과 일치 여부를 재검수:
+  - `ABP_Mannequin_CopyPose` 의 "Copy Pose From Mesh" 노드 입력 핀 미연결 + comment 인용 — 원장 ✅, HTML §14 인용 ✅
+  - `B_Manny` / `B_Quinn` 의 단일 root `MeshComponent` (SkeletalMeshComponent) — 원장 ✅, HTML §14 인용 ✅
+  - `B_Manny` / `B_Quinn` 의 design-intent comment 전문 — 원장 ✅, HTML §14 핵심 구절 인용 ✅
+- ◐ **계속 partial 로 유지할 항목** — 본 시점에 직접 확인 안 된 사실:
+  - `ABP_Quinn_PostProcess` 의 AnimGraph 내부 노드 enumeration (`ABP_Manny_PostProcess` 와 동일 패턴 추정만)
+  - modular cosmetic part (head·jacket·hands 같은 추가 actor) 의 정확한 socket / attach 지점
+  - `Use Attached Parent` 가 Copy Pose 노드의 정확한 Epic 공식 옵션 라벨인지 (버전별 라벨 차이 가능)
+- ◐ "단일 mesh vs 3단 구성" 비용 비교는 정량 측정이 없으므로 정성 추론 (`note-design`) 으로 표기 — 본 시점 그대로 유지.
+
+## 세부 학습 항목 - 기능 키워드 검증 매핑
 
 각 섹션이 다룰 **개별 기능 단위**를 키워드로 조사해, Epic 공식 문서(2026-05-22 열람)와 Monolith 에디터 조회로 교차 검증했다. 후속 학습 문서는 아래 항목을 다루되, 검증 등급을 유지해야 한다. `✅`는 로컬 프로젝트 사실로 써도 되고, `◐`/`△`는 학습 항목이나 확인 과제로 남겨야 한다.
 
@@ -516,14 +633,14 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 
 검증 범례: **✅** Monolith 또는 로컬 소스로 직접 확인 · **◐** 공식 문서와 로컬 간접 단서로 확인했으나 노드 단위는 에디터 확인 필요 · **△** 공식 UE 일반 개념 또는 학습 후보이며 Lyra 로컬 사용 범위는 추가 확인 필요
 
-### 섹션 1·2 — `ABP_Mannequin_Base` 런타임 데이터 & pose graph
+### 섹션 1·2 - `ABP_Mannequin_Base` 런타임 데이터 & pose graph
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| ThreadSafe Update Animation | `BlueprintThreadSafeUpdateAnimation` — `ABP_Mannequin_Base`는 `Update*Data` 함수 10개를 순차 호출(`UpdateLocationData`→…→`UpdateJumpFallData`), `ABP_ItemAnimLayersBase`는 main ABP 유효성 Branch 후 3개 호출. ABP 간 병렬 실행으로 Game Thread 부하 감소 | ✅ + Epic 문서 |
+| ThreadSafe Update Animation | `BlueprintThreadSafeUpdateAnimation` - `ABP_Mannequin_Base`는 `Update*Data` 함수 10개를 순차 호출(`UpdateLocationData`→…→`UpdateJumpFallData`), `ABP_ItemAnimLayersBase`는 main ABP 유효성 Branch 후 3개 호출. ABP 간 병렬 실행으로 Game Thread 부하 감소 | ✅ + Epic 문서 |
 | Event Graph 미사용 (Game Thread 회피) | `ABP_Mannequin_Base`의 `EventGraph`는 안내 주석 1개뿐(`AnimBP Tour #1`); 두 ABP 모두 `has_tick=false` | ✅ |
 | Property access | `ABP_Mannequin_Base` thread-safe 함수의 `K2Node_PropertyAccess` 13개(`BlueprintThreadSafeUpdateAnimation`·`UpdateVelocityData`·`UpdateCharacterStateData` 등); `AnimBP Tour #2` 주석이 사용 이유를 직접 설명 | ✅ + Epic 문서 |
-| Apply additive | `AnimGraphNode_ApplyAdditive` ×2 (`AnimGraph`) | ✅ |
+| Apply additive | `AnimGraphNode_ApplyAdditive` 2개 (`AnimGraph`) | ✅ |
 | Inertialize blending / Dynamic sequence with blend inertialization | `AnimGraphNode_Inertialization` (`AnimGraph`) | ✅ + Epic 문서 |
 | Blend poses | `Blend Poses by Bool/Enum` 계열 일반 개념. Lyra layer 그래프 내부에서의 구체 사용 위치는 에디터 확인 필요 | △ |
 | Blend options | state transition의 `blend_mode`·`cross_fade_duration`은 확인. Blend Profile/Mask는 공식 문서 일반 개념으로 별도 확인 필요 | ◐ |
@@ -533,7 +650,7 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 
 > 반영 사항: 섹션 1("런타임 상태 입력")의 "주요 대상"에 `BlueprintThreadSafeUpdateAnimation`와 그 하위 함수(`UpdateVelocityData`·`UpdateAccelerationData`·`SelectCardinalDirectionFromAngle`)를 포함했다. ABP 변수의 상당수가 이 thread-safe 함수에서 계산되므로, 원시 입력(C++)과 ABP 내부 데이터 처리를 같은 섹션에서 다룬다. 위 키워드 표는 그래서 섹션 1·2를 함께 묶었다.
 
-### 섹션 3 — `LocomotionSM`
+### 섹션 3 - `LocomotionSM`
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
@@ -543,18 +660,18 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 | Pivot state with dot product | `PivotSources→Pivot` rule: `LocalVelocity2D · LocalAcceleration2D < 0` (속도와 가속이 반대) | ✅ |
 | Sync groups / Sync markers / Sync animations | `SyncGroupNameToRequireValidMarkersRule` (Start→Cycle rule) | ◐ transition rule만 확인; sync 노드는 layer 그래프 |
 
-### 섹션 4·5 — Linked Anim Layer 인터페이스 & 무기별 animation set
+### 섹션 4·5 - Linked Anim Layer 인터페이스 & 무기별 animation set
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
 | Animation layers / Animation layer interfaces | `ALI_ItemAnimLayers` 인터페이스 14함수 | ✅ + Epic 문서 |
-| Link anim class | base ABP `AnimGraph`의 `AnimGraphNode_LinkedAnimLayer` ×4 | ✅ + Epic 문서(Animation Blueprint Linking) |
+| Link anim class | base ABP `AnimGraph`의 `AnimGraphNode_LinkedAnimLayer` 4개 | ✅ + Epic 문서(Animation Blueprint Linking) |
 | Layer interfaces for cycle | `FullBody_CycleState` 인터페이스 함수 (LocomotionSM `Cycle` state가 호출) | ✅ |
-| Base animation blueprint in layer blueprint | `GetMainAnimBPThreadSafe` 그래프 — layer가 main ABP 데이터 접근 | ✅ + Epic 문서 |
+| Base animation blueprint in layer blueprint | `GetMainAnimBPThreadSafe` 그래프 - layer가 main ABP 데이터 접근 | ✅ + Epic 문서 |
 | Animation blueprint childs | `ABP_ShotgunAnimLayers`(parent `ABP_RifleAnimLayers_C`, data-only) 등 무기별 child layer | ✅ + Epic 문서(Child Animation Blueprint) |
 | Select animation for cycle / with directions / with structs | `AnimStruct_CardinalDirections` struct + `Jog_Cardinals`·`Walk_Cardinals` 등 12개 변수; `UpdateCycleAnim`·`GetDesiredPivotSequence` | ✅ |
 
-### 섹션 9 — Warping / Distance Matching / Turn In Place
+### 섹션 9 - Warping / Distance Matching / Turn In Place
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
@@ -574,16 +691,45 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 | Root yaw offset | `RootYawOffset`·`RootYawOffsetMode` 변수, `UpdateRootYawOffset` 그래프 | ✅ + Epic 문서 |
 | Turn in place | `SetupTurnInPlaceAnim`·`UpdateTurnInPlaceAnim`·`SelectTurnInPlaceAnimation` 그래프; `TurnInPlace_Left/Right` 변수 | ✅ + Epic 문서 |
 
-### 섹션 10 — IK / Control Rig / Foot placement
+### 섹션 10 - IK / Control Rig / Foot placement
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
 | Foot placement | `ShouldEnableFootPlacement` 그래프 (`ABP_ItemAnimLayersBase`) | ✅ |
 | Disable foot placement when jumping | `ShouldEnableFootPlacement`가 curve/property 조건으로 foot placement 여부를 반환한다. jump/fall별 정확한 분기 의도는 에디터에서 그래프 주석과 입력 pin 확인 필요 | ◐ |
 
-### 검증 한계 — anim layer 그래프
+### 검증 한계 - anim layer 그래프
 
 `ABP_ItemAnimLayersBase`의 **anim layer 그래프**(`FullBody_CycleState` 등 `ALI_ItemAnimLayers` 인터페이스 구현)는 현재 Monolith 액션이 완전하게 열거하지 않는다. layer BP의 최상위 `AnimGraph`는 `Output Pose` 1개만 노출되고, 실제 pose 노드는 layer 그래프 안에 있다. 따라서 **Stride/Orientation Warping pose 노드, Blend Poses 노드, sequence player의 sync group 설정** 등 layer 그래프 내부는 에디터에서 직접 확인해야 한다. 위 표의 ◐/△ 항목이 이 한계에 해당한다.
+
+### 섹션 13 - AnimBP / ALI 책임 분담과 설계 트레이드오프
+
+| 학습 키워드 | Lyra 구현 앵커 | 검증 |
+|-------------|----------------|------|
+| 7종 BP/interface 의 책임 분리 | `ABP_Mannequin_Base`, `ABP_ItemAnimLayersBase`, 무기별 layer ABP (8개), `ABP_Weap_{Pistol,Rifle,Shotgun}`, `ABP_Manny_PostProcess` + `ABP_Quinn_PostProcess`, `ABP_Mannequin_Retarget` + `ABP_UE4_Mannequin_Retarget`, `ALI_ItemAnimLayers` (14함수) | ✅ 모두 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 명시 |
+| 무기 교체 단위 | weapon instance CDO 의 `EquippedAnimSet` → layer ABP 교체 | ✅ |
+| 14-함수 interface 의 호출 위치 | `ABP_Mannequin_Base.AnimGraph` 의 `LinkedAnimLayer` 4 + `LocomotionSM` state 10 = 14 | ✅ |
+| 무기 mesh ABP 분리 이유 | `SK_Pistol_Skeleton`·`SK_Rifle_Skeleton`·`SK_Shotgun_Skeleton` 별도 → 캐릭터 skeleton 과 분리 평가 | ✅ |
+| post-process ABP 분리 이유 | mesh 별로 한 번 평가, main pose 와 무관한 보정 — 디자인 추론 | ◐ 추론 (note-design) |
+| retarget ABP 분리 이유 | `ABP_UE4_Mannequin_Retarget` 은 UE4 skeleton 호환을 위한 별도 ABP | ✅ 파일 존재 + 분리 의도는 ◐ 추론 |
+| 분배의 비용 (호출/캐스팅·변수 동기화·학습 부담) | 코드/원장에 명시된 사실 없음 — 설계 추론 | ◐ note-design |
+| 분배의 이득 (무기/cosmetic 격리·멀티스레드·디버깅 격리) | thread-safe update + linked layer 의 격리는 ✅, 그 외는 추론 | 혼합 |
+
+### 섹션 14 - Invisible Mesh + Copy Pose + Cosmetic Layer 아키텍처
+
+| 학습 키워드 | Lyra 구현 앵커 | 검증 |
+|-------------|----------------|------|
+| Invisible driving mesh | `SKM_Manny_Invis`, `SKM_Quinn_Invis` (`/Game/Characters/Heroes/Mannequin/Meshes/`); `B_MannequinPawnCosmetics` 의 `BodyMeshes` rule 이 invisible mesh 를 캐릭터 main mesh 로 적용 | ✅ 원장 + CDO |
+| Visible cosmetic mesh | `SKM_Manny`, `SKM_Quinn` 파일 존재 | ✅ 파일 시스템 |
+| Copy Pose ABP | `ABP_Mannequin_CopyPose` — parent `AnimInstance`, AnimGraph 3 nodes, "Copy Pose From Mesh" 노드 포함 | ✅ Monolith |
+| `B_Manny`/`B_Quinn` design-intent comment | *"The mesh component has the ABP_Mannequin_CopyPose anim BP, which will just copy the pose across from the invisible 'driving' mesh component since the skeletons are directly compatible. If you change..."* — Monolith FTS search 로 두 BP 모두에서 확인 | ✅ |
+| Cosmetic component | `B_MannequinPawnCosmetics` (BP) + `ULyraPawnComponent_CharacterParts` (C++) | ✅ 원장 |
+| Cosmetic part actor spawn / attach | `FLyraCharacterPartList::SpawnActorForEntry` — `UChildActorComponent` 생성 후 owner pawn 의 `GetSceneComponentToAttachTo()` (Character 면 mesh, 아니면 root) 에 attach | ✅ C++ 직접 |
+| Body mesh selection · 적용 | `ULyraPawnComponent_CharacterParts::BroadcastChanged` — `BodyMeshes.SelectBestBodyStyle(MergedTags)` 로 invisible driving mesh 선택 → `SetSkeletalMesh(..., true)` + (있으면) `ForcedPhysicsAsset` 적용 → delegate broadcast | ✅ 원장 (code-analysis) |
+| Copy Pose From Mesh 노드 입력 핀 (source mesh 지정) | 노드 존재 ✅, 정확한 핀 구성 ◐ | ◐ Monolith `get_graph_data` 추가 조회 |
+| Visible mesh 가 child component 인지 child actor 인지 | 미확인 | ◐ Monolith CDO 조회 (`B_Manny` / `B_Quinn` components) |
+| Modular cosmetic part (head/jacket/hands) 의 mesh attach 방식 | character part 시스템이 존재함은 ✅, 구체 attach 위치는 ◐ | ◐ Monolith 추가 조회 |
+| 단일 mesh vs 3단 구성 비용 | 정량 측정 없음 | ◐ note-design 추론 |
 
 ### 키워드 검토 결과
 
@@ -591,6 +737,8 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 - 현재 목록에서 명백히 프로젝트와 무관한 키워드는 발견하지 못했다. 다만 `Blend Poses`, `Blend Profile/Mask`, `Sync group/marker`, `Orientation Warping pose node`는 Monolith의 layer graph 노출 한계 때문에 에디터 직접 확인 후 로컬 구현 사실로 승격해야 한다.
 - 섹션 9(Warping/Distance Matching/Turn In Place)에 키워드가 가장 몰린다. 10개 문서 구성에서 `warping-ik`(섹션 9+10)가 가장 두꺼워지므로, 이 문서는 작성 중 분량을 주시하고 필요하면 `distance-warping-turn-in-place.md`와 `ik-postprocess-retarget.md`로 분리한다.
 - 이 키워드 목록에는 섹션 8(Aiming/ADS) 항목이 거의 없다. aiming은 별도 조사가 필요하다(`Update Blend Weight Data`, `AimOffsetBlendWeight`, `HipFireUpperBodyOverrideWeight`, `FullBody_Aiming`, `AO_MM_*`, `AO_MF_*` 등).
+- 섹션 13(AnimBP/ALI 책임 분담)·섹션 14(Invisible Mesh + Copy Pose 아키텍처) 는 새 사실이 아니라 섹션 1–섹션 12 의 사실을 종합해 추론·trade-off 로 표현하는 성격이다. 표의 "분배의 비용", "단일 mesh vs 3단 구성 비용" 같은 항목은 정량 측정이 없으므로 본문에서 `note-design` 으로만 표기하고 ✅ 로 승격하지 않는다.
+- 섹션 14 의 ◐ 항목 (Copy Pose 노드 입력 핀, visible mesh 의 component 종류, modular part attach) 은 HTML 작성 전에 Monolith CDO 조회 → 원장 보강 → HTML 인용 순서로 진행한다. HTML 에서 새 사실을 정의하지 않는다.
 
 ## 기존 분석 문서와의 관계
 
@@ -598,8 +746,8 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 
 | 문서군 | 역할 | 사실의 출처 여부 |
 |--------|------|-------------------|
-| `lyra-animation-blueprint-analysis.md`, `lyra-animation-code-analysis.md` | **검증 원장(verified fact ledger)** — Monolith·C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
-| 후속 10개 학습 문서 | **기능별 학습 안내서** — 검증 원장의 사실을 데이터 흐름 순서로 재배열하고 실습·디버깅·확장 레시피를 더함 | 아니오. 원장을 인용 |
+| `lyra-animation-blueprint-analysis.md`, `lyra-animation-code-analysis.md` | **검증 원장(verified fact ledger)** - Monolith·C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
+| 후속 학습 문서 (메커니즘 섹션 1–섹션 12 + 설계 의도 섹션 13–섹션 14) | **기능별 학습 안내서 + 설계 의도/트레이드오프 종합** - 검증 원장의 사실을 데이터 흐름 순서로 재배열하고 실습·디버깅·확장 레시피를 더함. 섹션 13·섹션 14 는 원장 사실 위에 추론·trade-off 를 얹음 | 아니오. 원장을 인용 |
 | `lyra-animation-references.md` | 개념 학습용 공식 문서 링크 | 아니오. 외부 개념 |
 
 운영 규칙:
@@ -651,6 +799,19 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 5. 테스트, 디버깅, 확장 레시피
 
 목표는 새 weapon, 새 character variant, 새 sequence를 넣을 때 어떤 asset과 CDO 값을 수정해야 하는지 아는 것이다.
+
+### 설계 의도·아키텍처를 이해하려는 학습자 (메커니즘 학습 완료 후)
+
+섹션 1–섹션 12 의 메커니즘 학습이 끝났다고 가정한 경로. "이 시스템을 왜 이렇게 만들었는가, 우리 프로젝트에서 이 분배 패턴을 차용해도 되는가" 를 판단할 수 있게 한다.
+
+1. 섹션 14 — Invisible Mesh + Copy Pose + Cosmetic Layer 아키텍처 (먼저 mesh 측 3단 구성의 의도를 본다 — 섹션 6 의 `SKM_*_Invis` 선택 결과를 구조적으로 설명하므로 학습 공백 메우기가 즉시 됨)
+2. 섹션 13 — AnimBP / ALI 책임 분담과 설계 트레이드오프 (그 다음 여러 ABP / ALI 의 책임 분산을 종합으로 본다 — 후반 종합 페이지라 §14 가 자리잡은 뒤가 자연스러움)
+3. (선택) 섹션 6 — 장비·cosmetic 선택 규칙을 한 번 더 읽으면 섹션 14 의 mesh 선택 흐름과 자연스럽게 연결된다.
+4. (선택) 섹션 10 — IK / Control Rig / post process / retarget 을 섹션 13 의 분배 관점으로 다시 읽으면 post-process / retarget ABP 가 왜 분리됐는지 더 또렷해진다.
+
+순서 근거: 섹션 14 는 섹션 6 의 mesh 선택 결과를 구조적으로 설명하고, 섹션 13 은 여러 ABP / ALI 의 책임 분산을 종합한다. 학습자는 먼저 "왜 invisible mesh 가 나오는지" 를 이해한 뒤 전체 설계 trade-off 를 보는 편이 자연스럽다. HTML 작성 순서·인덱스 카드 순서 (11 → 12) 와 일치.
+
+목표는 라이라의 분배·격리 패턴을 자기 프로젝트에 차용할 때 무엇을 같이 가져가고 무엇을 단순화할지 판단할 수 있게 되는 것이다.
 
 ## 각 섹션의 표준 템플릿
 
@@ -712,11 +873,84 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 - 섹션 7(montage 액션)은 transient action 재생이고, 섹션 8(aiming/ADS)은 지속적인 aim offset·additive blend이므로 분리한다. `AimOffsets` 폴더가 98개 asset을 갖고 `ABP_ItemAnimLayersBase`의 `Update Blend Weight Data`가 별도 핵심 그래프라는 점도 분리 근거다.
 - 섹션 9(distance matching·warping)와 10(IK·Control Rig·post process)은 final pose 보정층이라 `warping-ik` 한 문서에 둔다.
 - 섹션 11(notify·context effect·weapon mesh)과 12(테스트·레시피)는 pose 외부 흐름과 검증이라 `effects-tests-recipes` 한 문서에 둔다.
-- 반대로 `LocomotionSM`(state 결정)과 `ABP_ItemAnimLayersBase`(state별 재생), weapon layer 선택(CDO/tag)과 layer 내부 로직(pose 생성)은 **합치지 않는다** — 학습자가 "왜 선택됐는가"와 "어떻게 재생되는가"를 구분해야 하기 때문이다.
+- 반대로 `LocomotionSM`(state 결정)과 `ABP_ItemAnimLayersBase`(state별 재생), weapon layer 선택(CDO/tag)과 layer 내부 로직(pose 생성)은 **합치지 않는다** - 학습자가 "왜 선택됐는가"와 "어떻게 재생되는가"를 구분해야 하기 때문이다.
 - `Manny`/`Quinn`은 독립 문서가 아니라 `selection-rules`와 `linked-layers`의 변형 비교 안에서 다룬다.
 
-**작성 순서:** 1~5번을 먼저 만든다(중심 구조 — 이것만 읽어도 "캐릭터가 왜 이 애니메이션을 재생하는지" 설명 가능). 6~10번은 확장·디버깅용 기능별 참고서로 이어 만든다.
+**작성 순서:** 1~5번을 먼저 만든다(중심 구조 - 이것만 읽어도 "캐릭터가 왜 이 애니메이션을 재생하는지" 설명 가능). 6~10번은 확장·디버깅용 기능별 참고서로 이어 만든다.
 
 **분리 시점:** 한 문서가 지나치게 커지면 그때 분리한다. 분리 1순위 후보는 `retarget-postprocess`(섹션 10 일부), `contextual-interactions`(`Interactions/Bench` 28개 에셋 기반 별도 확장), `asset-authoring-checklist`(확장 레시피)다. `aiming-additives`는 이미 별도 문서로 시작한다.
 
 **폴더 구조:** 현재 `docs/`는 flat 구조다. 학습 문서가 10개를 넘어 커지면 `docs/animation/` 하위 폴더로 옮기고 번호 접두어(`00-overview.md`, `01-runtime-state.md` …)를 붙여 읽는 순서를 강제한다. Lyra 애니메이션은 개념 의존성이 강하다.
+
+## HTML 산출물 대응 표
+
+본 계획의 **메커니즘 학습 12개 섹션 (섹션 1–섹션 12) 은 `dynamic-html/pages/` 의 10개 학습 페이지로 구현 완료** 되었고, **설계 의도 2개 섹션 (섹션 13–섹션 14) 도 2개 학습 페이지로 구현 완료** 되었다 (총 12 페이지).
+
+### 페이지별 학습 블록 구성
+
+페이지 성격에 따라 사용하는 블록 종류와 목차명을 분기한다. 자세한 사양은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "학습 블록 7종" 과 "flow gate" 참조.
+
+**구현 완료 (메커니즘 학습)** — 10페이지:
+
+| HTML 페이지 | 포함 섹션 | 목차명 | 사용 학습 블록 |
+|-------------|----------|--------|---------------|
+| `lyra-animation-overview.html` | 0 | 학습 목차 | structure(runtime map) + reference(하위 페이지 경로 카드) + flow(전체 학습 진입 1개) |
+| `lyra-animation-runtime-state.html` | 1 | 흐름 목차 | flow 3개~5 (ASC→AnimInstance→ThreadSafe 갱신 인과) |
+| `lyra-animation-base-abp.html` | 2 | 학습 목차 | structure(pose graph stack) + reference(slot 위치 map) + flow(필요한 곳만 1~2개) |
+| `lyra-animation-locomotion-sm.html` | 3 | 흐름 목차 | flow 5개 (상태 머신 전이 자체가 흐름) |
+| `lyra-animation-linked-layers.html` | 4, 5 | 학습 목차 | reference(14함수 인터페이스) + structure(상속 관계) + comparison(무기별 차이) + flow(layer 교체 1개) |
+| `lyra-animation-selection-rules.html` | 6 | 학습 목차 | flow(장비 변경 1개) + decision(SelectBestLayer 우선순위) + reference(bEquipped CDO) + decision(body style rule) |
+| `lyra-animation-actions-montage.html` | 7 | 흐름 목차 | flow 3개~5 (ability→montage→slot 인과) |
+| `lyra-animation-aiming-additives.html` | 8 | 흐름 목차 | flow 3개~5 (aim data 갱신·additive 합성이 frame pipeline) |
+| `lyra-animation-warping-ik.html` | 9, 10 | 학습 목차 | flow(Distance Matching 1개) + structure(correction stack) + reference(보정 기능 카드) + comparison(post process / retarget) |
+| `lyra-animation-effects-tests-recipes.html` | 11, 12 | 학습 목차 | flow(Notify→Context Effect 1개) + structure(Weapon Mesh ABP arch) + verification(ShooterTests 매트릭스) + recipe(새 무기/cosmetic/sequence 체크리스트) |
+
+**구현 완료 (설계 의도와 트레이드오프)** — 2페이지 (HTML 생성됨):
+
+| HTML 페이지 | 포함 섹션 | 목차명 | 사용 학습 블록 | 선행 학습 |
+|-------------|----------|--------|---------------|-----------|
+| `lyra-animation-invisible-copy-pose.html` | 14 | 학습 목차 | structure(3단 구성도) + flow(1개 — pose 복제 흐름) + reference(`B_Manny`/`B_Quinn` comment 인용 + 자산 경로) + comparison(단일 mesh vs 3단 trade-off) + recipe(새 cosmetic part 추가) + note-design N개 | `selection-rules`, `base-abp`, `linked-layers` |
+| `lyra-animation-animbp-ali-tradeoffs.html` | 13 | 학습 목차 | structure(7개 책임군 지도) + comparison(책임/입력/출력/교체 단위/평가 frequency) + decision(새 기능 어디에 둘 것인가) + verification(사실 vs 추론 등급 표) + note-design N개 | `base-abp`, `linked-layers`, `selection-rules`, `warping-ik` |
+
+작성 순서 기록: `lyra-animation-invisible-copy-pose.html` 을 먼저 작성. `selection-rules` 페이지가 `SKM_*_Invis` 를 mesh rule 결과로만 보여주는 학습 공백과 이어져 즉시 가치가 크기 때문. `lyra-animation-animbp-ali-tradeoffs.html` 은 여러 메커니즘 페이지를 종합하는 후반 설계 페이지라 섹션 14 가 자리잡은 뒤에 작성.
+
+**흐름 유지 4개 페이지** (`runtime-state`, `locomotion-sm`, `actions-montage`, `aiming-additives`): 모든 블록이 실제 런타임 인과 흐름이라 `flow-section` 만으로 구성한다. 목차명은 `흐름 목차`.
+
+**혼합 8개 페이지** (`overview`, `base-abp`, `linked-layers`, `selection-rules`, `warping-ik`, `effects-tests-recipes`, `invisible-copy-pose`, `animbp-ali-tradeoffs`): 정보 형태가 흐름·구조·결정·참조·비교·레시피·검증이 섞여 있어 학습 블록 7종을 조합한다. 목차명은 `학습 목차`.
+
+### 검증 등급 유지 항목 (HTML 에서 `partial` 또는 `unverified` 로 표시)
+
+| HTML 페이지 | 등급 유지 항목 |
+|-------------|---------------|
+| `lyra-animation-locomotion-sm.html` | alias 5개 (`PivotSources`·`JumpSources`·`JumpFallInterruptSources`·`IdleAlias`·`CycleAlias`) membership 미확인 → `partial` |
+| `lyra-animation-warping-ik.html` | Pose Warping 노드 적용 (layer 그래프 미노출), Orientation Warping 적용 위치, `ShouldEnableFootPlacement` 의 jump/fall 분기, Control Rig 세부 보정 부위 → 모두 `partial` |
+| `lyra-animation-invisible-copy-pose.html` | (1) `B_Manny`/`B_Quinn` 의 단일 root `MeshComponent` 와 `MeshComponent` 가 `ABP_Mannequin_CopyPose` 를 사용한다는 사실: 원장에 ✅. (2) modular cosmetic part (head·jacket·hands 같은 추가 actor) 의 정확한 socket / attach 지점은 별도 Monolith 조회 전까지 `partial`. (3) 단일 mesh 대비 메모리·draw call·CPU 비용 비교는 정량 측정이 없으므로 `note-design` 으로만 표기 (배지 승격 금지). (4) `Use Attached Parent` 가 Copy Pose 노드의 정확한 옵션 이름인지는 Epic 공식 문서로 확인하되, 라이라 자산이 그 옵션을 명시적으로 설정했는지는 `partial`. **페이지에 적용 완료** — `data-validation="partial"` + 검증 한계 note. |
+| `lyra-animation-animbp-ali-tradeoffs.html` | (1) 7개 책임군의 존재·parent class·기본 구성은 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 모두 ✅. (2) "분배의 비용/이득" — 호출/캐스팅 횟수, 평가 frequency, post-process 분리 의도, retarget 분리 의도는 모두 **설계 추론** 이므로 `note-design` 으로만 표기하고 ✅ 로 승격하지 않는다. (3) "왜 무기 mesh ABP 가 분리되는가" 같은 의도 설명은 코드에 직접 적혀 있지 않으므로 `partial` 유지. **페이지에 적용 완료** — 사실/추론 분리 verification-section 표 보유. |
+| 그 외 페이지 | 별도 유지 항목 없음 (모두 `verified` 가능) |
+
+**규칙:** HTML 페이지의 `data-validation` 과 배지(✓/◐/△) 는 위 표의 "등급 유지 항목" 을 마크다운 원장과 같은 등급으로 표시해야 한다. HTML 에서 임의로 `verified` 로 승격하지 않는다. 자세한 규칙은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "검증 등급 처리 규칙" 절 참조.
+
+**일관성 갱신 순서:** 새 사실이 확인되면 (예: 에디터에서 alias membership 확정) 마크다운 원장(`lyra-animation-blueprint-analysis.md`·`lyra-animation-code-analysis.md`) → 본 계획의 위 표 → HTML 페이지 순으로 갱신한다. 역방향 금지.
+
+### 페이지별 chapter-brief 4칸 (표준 골격)
+
+모든 학습 페이지는 상단에 `chapter-brief` 4칸 (이 챕터의 질문 / 먼저 알아둘 것 / 선행 학습 / 보충 자료) 을 둔다. 페이지마다 다음 골격을 따른다.
+
+| HTML 페이지 | 이 챕터의 질문 (핵심) | 선행 학습 (내부 페이지) |
+|-------------|---------------------|----------------------|
+| `lyra-animation-overview.html` | 라이라 애니메이션의 5가지 큰 시스템은 무엇인가? 캐릭터가 화면에 나타나기까지 어떤 인과를 거치는가? | (없음 - 진입 페이지) |
+| `lyra-animation-runtime-state.html` | ABP 변수는 어디서 오는가? GAS 태그가 어떻게 미러링되는가? 왜 ThreadSafe 갱신을 쓰는가? | overview |
+| `lyra-animation-base-abp.html` | AnimGraph 의 노드 구성은 어떻게 되는가? cached pose 2개는 왜 필요한가? | runtime-state |
+| `lyra-animation-locomotion-sm.html` | LocomotionSM 의 state 는 어떻게 전이되는가? alias·conduit 가 왜 필요한가? | base-abp |
+| `lyra-animation-linked-layers.html` | base 가 무기별 layer 를 어떻게 바꿔 끼우는가? ALI 14함수는 어디와 대응되는가? | base-abp · locomotion-sm |
+| `lyra-animation-selection-rules.html` | 어떤 cosmetic tag 가 어떤 layer / mesh 를 선택하는가? | linked-layers |
+| `lyra-animation-actions-montage.html` | Ability 가 montage 를 어떻게 slot 에 합성하는가? | base-abp |
+| `lyra-animation-aiming-additives.html` | aim offset / ADS 가 frame pipeline 의 어디서 계산되는가? | runtime-state · linked-layers |
+| `lyra-animation-warping-ik.html` | 보정 스택의 7단계는 무엇이고 책임이 어떻게 나뉘는가? Distance Matching 은 어떻게 동작하는가? | linked-layers |
+| `lyra-animation-effects-tests-recipes.html` | Notify → Context Effect 가 어떤 데이터로 동작하는가? 새 무기 추가 절차는? | linked-layers · selection-rules · actions-montage |
+| `lyra-animation-invisible-copy-pose.html` | `SKM_*_Invis` 가 왜 invisible 인가? visible cosmetic mesh 는 어떻게 pose 를 따라가는가? `ABP_Mannequin_CopyPose` 와 `B_Manny`/`B_Quinn` 의 comment 가 직접 설명하는 의도는? 한 mesh 로 합치면 무엇이 안 되는가? | selection-rules |
+| `lyra-animation-animbp-ali-tradeoffs.html` | 7개 책임군은 각각 무엇을 책임지는가? 무기 추가는 어디서 멈추는가? cosmetic 교체는 어디서 멈추는가? post-process / retarget 이 별도인 이유는? 이 분배의 비용은? | base-abp · linked-layers · selection-rules · warping-ik |
+
+> **표의 "선행 학습" 칸은 간략 페이지명만 적었으나, 실제 HTML 의 `chapter-brief` 에는 각 항목 뒤에 em dash (`—`) + "왜 선행인가" 한 줄 이유를 함께 적는다.** 정당성을 한 줄로 못 적는 항목은 prerequisite 이 아니므로 제거한다. 자세한 규칙은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "선행 학습 정당성" 검사 항목.
+
+자세한 4칸 작성 규칙은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "챕터 브리프 - `.chapter-brief`" 절 참조.

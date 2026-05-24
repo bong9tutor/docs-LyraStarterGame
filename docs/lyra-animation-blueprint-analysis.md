@@ -105,16 +105,16 @@ Monolith `project_query get_stats`와 `find_by_type` 기준 주요 애니메이�
 
 | State | 호출하는 linked layer 함수 | 추가 노드 |
 |-------|----------------------------|-----------|
-| `Idle` | `FullBody_IdleState` | — |
+| `Idle` | `FullBody_IdleState` | - |
 | `Start` | `FullBody_StartState` | rifle lean blend space additive |
 | `Cycle` | `FullBody_CycleState` | rifle lean blend space additive |
-| `Stop` | `FullBody_StopState` | — |
+| `Stop` | `FullBody_StopState` | - |
 | `Pivot` | `FullBody_PivotState` | rifle lean blend space additive |
-| `JumpStart` | `FullBody_JumpStartState` | — |
-| `JumpStartLoop` | `FullBody_JumpStartLoopState` | — |
-| `JumpApex` | `FullBody_JumpApexState` | — |
-| `FallLoop` | `FullBody_FallLoopState` | — |
-| `FallLand` | `FullBody_FallLandState` | — |
+| `JumpStart` | `FullBody_JumpStartState` | - |
+| `JumpStartLoop` | `FullBody_JumpStartLoopState` | - |
+| `JumpApex` | `FullBody_JumpApexState` | - |
+| `FallLoop` | `FullBody_FallLoopState` | - |
+| `FallLand` | `FullBody_FallLandState` | - |
 
 > Monolith `get_state_info`로 확인한 `Cycle` state의 내부 노드는 `ALI_ItemAnimLayers - FullBody_CycleState` (Linked Anim Layer) → `BS_MM_Rifle_Jog_Leans` (BlendSpace Player) → `Apply Additive` → `Output Animation Pose` 4개다. `Start`/`Pivot`도 같은 구조로 lean blend space를 additive로 더한다. base graph가 전역 yaw/lean 보정을 제공하고, 무기별 full-body 동작은 linked layer가 제공하기 때문이다.
 
@@ -122,10 +122,10 @@ Monolith `project_query get_stats`와 `find_by_type` 기준 주요 애니메이�
 
 `LocomotionSM`의 transition 그래프는 10개 정식 state만으로 그려지지 않는다. **conduit**과 **state alias**가 분기·그룹화를 담당한다. 이는 라이라 애니메이션 공식 문서가 "State Aliases"를 별도 주제로 다루는 핵심 기법이며, 여기서 빼면 점프/피벗 흐름을 추적할 수 없다.
 
-- **conduit** — 포즈를 갖지 않는 분기 전용 노드. Monolith transition 데이터에서 `to_type":"conduit"` / `from_type":"conduit"`로 확인된다.
-  - `JumpSelector` — `IsJumping`이면 `JumpStart`, `IsFalling`이면 `JumpApex`로 분기.
-  - `EndInAir` — 착지 후 `HasAcceleration`이면 `CycleAlias`, 아니면 `IdleAlias`로 분기.
-- **state alias** — 여러 source state를 하나로 묶어, alias에서 그린 단일 transition이 묶인 모든 state에 적용되게 하는 참조. 정식 state 목록(10개)에도 없고 conduit도 아니므로 alias로 판별된다. transition endpoint로 다음 5개가 확인된다.
+- **conduit** - 포즈를 갖지 않는 분기 전용 노드. Monolith transition 데이터에서 `to_type":"conduit"` / `from_type":"conduit"`로 확인된다.
+  - `JumpSelector` - `IsJumping`이면 `JumpStart`, `IsFalling`이면 `JumpApex`로 분기.
+  - `EndInAir` - 착지 후 `HasAcceleration`이면 `CycleAlias`, 아니면 `IdleAlias`로 분기.
+- **state alias** - 여러 source state를 하나로 묶어, alias에서 그린 단일 transition이 묶인 모든 state에 적용되게 하는 참조. 정식 state 목록(10개)에도 없고 conduit도 아니므로 alias로 판별된다. transition endpoint로 다음 5개가 확인된다.
   - `PivotSources` → `Pivot` : 이동 계열 state들을 묶어 피벗 진입 조건을 한 번만 정의.
   - `JumpSources` → `JumpSelector` : 점프 가능한 지상 state들을 묶음.
   - `JumpFallInterruptSources` → `EndInAir` : 점프/낙하 중 지면에 닿으면 즉시 탈출하는 묶음.
@@ -217,7 +217,7 @@ base ABP와 무기별 linked layer ABP를 잇는 계약(interface)이다. `get_f
 
 ## 무기별 linked layer ABP
 
-이 layer ABP들은 모두 `/Game/Characters/Heroes/Mannequin/Animations/Locomotion/` 아래 무기별 폴더(`Unarmed/`, `Pistol/`, `Rifle/`, `Shotgun/`)에 위치한다. 각 ABP의 전체 경로는 `.../Locomotion/<무기>/<ABP 이름>` 형식이다 — 예: `.../Locomotion/Pistol/ABP_PistolAnimLayers`, `.../Locomotion/Pistol/ABP_PistolAnimLayers_Feminine`, `.../Locomotion/Shotgun/ABP_ShotgunAnimLayers`.
+이 layer ABP들은 모두 `/Game/Characters/Heroes/Mannequin/Animations/Locomotion/` 아래 무기별 폴더(`Unarmed/`, `Pistol/`, `Rifle/`, `Shotgun/`)에 위치한다. 각 ABP의 전체 경로는 `.../Locomotion/<무기>/<ABP 이름>` 형식이다 - 예: `.../Locomotion/Pistol/ABP_PistolAnimLayers`, `.../Locomotion/Pistol/ABP_PistolAnimLayers_Feminine`, `.../Locomotion/Shotgun/ABP_ShotgunAnimLayers`.
 
 | ABP | Parent | 참조 sequence | 참조 blend/aim offset | 메모 |
 |-----|--------|--------------:|----------------------:|------|
@@ -317,6 +317,127 @@ Base AnimGraph에 `FullBody`, `UpperBody`, `UpperBodyAdditive` slot이 존재하
 | `/Game/Weapons/Shotgun/Animations/ABP_Weap_Shotgun` | `SK_Shotgun_Skeleton` | shotgun mesh fire/reload animation |
 
 이 ABP들은 캐릭터 locomotion ABP와 별개로 무기 skeletal mesh 자체를 움직인다. 캐릭터 손 IK와 weapon mesh animation은 같은 사건에서 함께 재생될 수 있지만, skeleton과 AnimBP는 분리되어 있다.
+
+## Cosmetic mesh 동기화: `ABP_Mannequin_CopyPose` (보강 2026-05-24)
+
+경로: `/Game/Characters/Heroes/Mannequin/Animations/ABP_Mannequin_CopyPose`
+
+| 항목 | 값 |
+|------|----|
+| Parent class | `AnimInstance` (Engine, native) |
+| Graph 수 | 2 (`EventGraph`, `AnimGraph`) |
+| `has_tick` | false |
+| `variable_count` | 1 |
+| `function_count` | 1 |
+| `component_count` | 0 |
+
+### AnimGraph (Monolith `get_graph_data` 확인)
+
+총 3 노드: `Output Pose` ← `Copy Pose From Mesh` ← (comment).
+
+| 노드 | 클래스 | 역할 |
+|------|--------|------|
+| `Output Pose` | `AnimGraphNode_Root` | Result pin 이 `Copy Pose From Mesh.Pose` 로 연결 |
+| `Copy Pose From Mesh` | `AnimGraphNode_CopyPoseFromMesh` | `SourceMeshComponent` 입력 핀이 **연결되지 않음** — 실행 시 attached parent 의 mesh 가 source 로 사용된다 (Copy Pose From Mesh 노드의 `Use Attached Parent` 동작) |
+| (comment) | `EdGraphNode_Comment` | *"This will copy the pose from the parent mesh component that our mesh component is attached to"* — 라이라 저자가 직접 적은 design intent |
+
+이 ABP 는 `B_Manny` / `B_Quinn` 같은 cosmetic actor 의 `MeshComponent` 에 적용되어, 자신이 attach 된 부모 mesh (보통 invisible driving mesh) 의 pose 를 매 frame 복제한다. 별도 input pin 설정 없이 attach 만 맞으면 동작한다.
+
+## `ABP_Manny_PostProcess` · `ABP_Quinn_PostProcess` (보강 2026-05-24)
+
+경로:
+- `/Game/Characters/Heroes/Mannequin/Rig/ABP_Manny_PostProcess`
+- `/Game/Characters/Heroes/Mannequin/Rig/ABP_Quinn_PostProcess`
+
+| 항목 | 값 |
+|------|----|
+| Parent class | `AnimInstance` (Engine, native) |
+| Graph 수 | 2 (`EventGraph`, `AnimGraph`) |
+| `has_tick` | false |
+| `variable_count` | 0 |
+| `function_count` | 1 |
+| `component_count` | 0 |
+
+### Post Process ABP 의 위치
+
+엔진 표준 — Skeletal Mesh 의 detail panel `Post Process Anim Blueprint` 슬롯에 지정한다. main AnimInstance (`ABP_Mannequin_Base` 등) 가 평가된 후, 같은 frame 에서 mesh 별 1회 추가 평가된다. 두 ABP 가 분리된 이유는 Manny / Quinn skeleton 의 비례·관절 corrective 가 다르기 때문이다.
+
+### `ABP_Manny_PostProcess` AnimGraph (Monolith 확인)
+
+`Input Pose → Control Rig → Pose Driver 14개 체인 → Output Pose`. Pose Driver 는 자세 의존 corrective animation 을 driving 한다.
+
+| 분류 | 노드 | 비고 |
+|------|------|------|
+| 진입 | `AnimGraphNode_LinkedInputPose` (Input Pose) | 1개 |
+| 첫 보정 | `AnimGraphNode_ControlRig` (Control Rig) | 1개, `Alpha = 1.0` |
+| Pose Driver | `AnimGraphNode_PoseDriver` 14개 | source bone 별: `clavicle_l/r`, `upperarm_l/r`, `lowerarm_l/r`, `hand_l/r`, `thigh_l/r`, `calf_l/r`, `foot_l/r` |
+| 그룹 주석 | `EdGraphNode_Comment` 4개 | `arm_left`, `arm_right`, `leg_left`, `leg_right` |
+| Reroute | `K2Node_Knot` 2개 | 오른팔 → 왼다리 reroute |
+| 출력 | `AnimGraphNode_Root` (Output Pose) | 마지막 PoseDriver (`foot_r`) 의 Pose 가 연결 |
+
+Pose Driver 체인은 좌·우 팔 (clavicle → upperarm → lowerarm → hand) 과 좌·우 다리 (thigh → calf → foot) 순으로 순차 평가된다. 각 driver 가 source bone 의 회전에 따라 corrective shape 또는 보조 회전을 적용.
+
+`ABP_Quinn_PostProcess` 도 동일 구조 (변수·함수·컴포넌트 수치까지 일치) 로 추정 — 본 원장에서는 Quinn 측 AnimGraph 의 정확한 노드 enumeration 은 미수행 (`ABP_Manny_PostProcess` 와 동일 패턴 가정).
+
+## `ABP_Mannequin_Retarget` · `ABP_UE4_Mannequin_Retarget` (보강 2026-05-24)
+
+경로:
+- `/Game/Characters/Heroes/Mannequin/Animations/ABP_Mannequin_Retarget`
+- `/Game/Characters/Heroes/Mannequin_UE4/Animations/ABP_UE4_Mannequin_Retarget`
+
+| 항목 | 값 |
+|------|----|
+| Parent class | `AnimInstance` (Engine, native) |
+| Graph 수 | 2 (`EventGraph`, `AnimGraph`) |
+| `variable_count` | 1 (`ABP_Mannequin_Retarget`) / 0 (`ABP_UE4_Mannequin_Retarget`) |
+| `function_count` | 1 |
+
+### `ABP_Mannequin_Retarget` AnimGraph (Monolith 확인)
+
+총 3 노드: `Output Pose` ← `Retarget Pose From Mesh` ← (comment).
+
+| 노드 | 클래스 | 역할 |
+|------|--------|------|
+| `Output Pose` | `AnimGraphNode_Root` | Result pin 이 `Retarget Pose From Mesh.Pose` 로 연결 |
+| `Retarget Pose From Mesh` | `AnimGraphNode_RetargetPoseFromMesh` | 입력 핀 미연결 — attached parent mesh 의 pose 를 source 로 retarget |
+| (comment) | `EdGraphNode_Comment` | *"This will retarget the pose from the parent mesh component (source) that our mesh component is attached to. This ABP should have the skeleton for our \*target\* mesh we're displaying, not the \*source\* mesh playing the animation."* — 라이라 저자가 직접 적은 design intent |
+
+CopyPose 와 같은 attached-parent 패턴이지만 노드가 `Copy Pose From Mesh` 대신 IK Retargeter 의 `Retarget Pose From Mesh`. **source skeleton 과 target skeleton 이 호환되지 않을 때** (예: UE5 Mannequin → UE4 Mannequin) 사용한다. `IKRetargeter` 자산을 통해 source/target IK Rig 를 연결.
+
+`ABP_UE4_Mannequin_Retarget` 은 동일 패턴으로 UE4 → UE5 호환에 사용된다 (본 원장에서는 AnimGraph 노드 enumeration 미수행).
+
+## Cosmetic Blueprint: `B_Manny` · `B_Quinn` (보강 2026-05-24)
+
+경로:
+- `/Game/Characters/Cosmetics/B_Manny`
+- `/Game/Characters/Cosmetics/B_Quinn`
+
+### Component tree (Monolith `get_components` 확인)
+
+| BP | Component | Class | 역할 |
+|----|-----------|-------|------|
+| `B_Manny` | `MeshComponent` (root, scene component) | `SkeletalMeshComponent` | Quinn 의 visible cosmetic skeletal mesh component |
+| `B_Quinn` | `MeshComponent` (root, scene component) | `SkeletalMeshComponent` | Manny 의 visible cosmetic skeletal mesh component |
+
+두 BP 모두 **단일 root `MeshComponent`** 만 갖는다. 별도 child component 없음. 이 BP 는 actor class 로서 `UChildActorComponent` 의 child actor 로 spawn 된다 (아래 spawn 흐름 참고).
+
+### Spawn · attach 흐름 (C++ 측 협력)
+
+[`../Source/LyraGame/Cosmetics/LyraPawnComponent_CharacterParts.cpp`](../Source/LyraGame/Cosmetics/LyraPawnComponent_CharacterParts.cpp) 확인:
+
+1. `FLyraCharacterPartList::PostReplicatedAdd` (또는 `AddEntry`) → `SpawnActorForEntry(Entry)` 호출
+2. `SpawnActorForEntry` 가 `UChildActorComponent` 를 만들어 `Entry.SpawnedComponent` 에 저장하고, owning pawn 의 `GetSceneComponentToAttachTo()` (Character 면 mesh, 아니면 root) 에 attach
+3. spawn 직후 owner 의 `BroadcastChanged()` 호출 — `BodyMeshes.SelectBestBodyStyle(MergedTags)` 로 invisible driving mesh 를 main mesh 에 적용 + delegate 발행
+
+즉 **B_Manny/B_Quinn 의 root MeshComponent 는 owner pawn 의 mesh (invisible driving mesh) 에 attach 된다.** 이 attach 가 `ABP_Mannequin_CopyPose` 의 "attached parent" 가 되어 pose 복제가 동작한다.
+
+### Design-intent comment (라이라 저자의 원문)
+
+`B_Manny` 와 `B_Quinn` 모두 BP 내부에 다음 comment 가 적혀 있다 (Monolith FTS search 로 두 BP 에서 동일 텍스트 확인):
+
+> *"The mesh component has the ABP_Mannequin_CopyPose anim BP, which will just copy the pose across from the invisible 'driving' mesh component since the skeletons are directly compatible. If you change..."*
+
+이 comment 는 섹션 14 (Invisible Mesh + Copy Pose + Cosmetic Layer 아키텍처) 의 1차 자료다.
 
 ## 학습 순서
 

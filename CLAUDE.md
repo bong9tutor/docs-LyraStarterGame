@@ -18,6 +18,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## 작업 스타일 (사용자 선호)
+
+이 저장소에서 사용자는 **자율적·직선적 실행** 을 선호합니다. 다음 습관을 피하십시오:
+
+- **불필요한 sub-question** — 사용자가 큰 방향을 줬으면 `AskUserQuestion` 없이 의미 단위 한 묶음으로 끝까지 실행합니다. `AskUserQuestion` 은 결과가 정말 갈리는 결정 (데이터 손상 위험·길이 크게 다른 두 경로 등) 에만 씁니다. 사용자가 한 번 답한 큰 방향을 매 sub-step 에서 재확인하지 않습니다.
+- **작업의 과도한 분할** — 한 의미 단위 (예: "정책 + 인덱스 + 실제 페이지 갱신") 는 한 묶음으로 처리하고 중간 보고로 끊지 않습니다. 사용자가 "정책만" 같이 명시적으로 좁힌 turn 에서만 분할합니다.
+- **편집 1건마다 검증** — puppeteer · 테스트 · 빌드 같은 무거운 검증은 묶음 끝에 1회. 중간에는 사실 확인용 가벼운 조회 (Read · Grep · 간단한 Bash) 만 합니다.
+- **장황한 summary** — 결과 보고는 2~3 문장 (예: "X 적용, Y 통과, 다음 대기"). 표·스크린샷·체크리스트는 사용자가 명시적으로 요청할 때만 답에 포함합니다.
+- **이전 지시의 잘못된 일반화** — 사용자가 한 turn 에 "정책 먼저" 같이 좁힌 지시를 한 것은 그 turn 한정입니다. 다음 turn 의 기본값으로 일반화하지 마십시오 — 매 turn 의 명시적 지시만으로 해석합니다.
+
+위 규칙을 따르되, 정말 destructive 한 작업 (대량 삭제·force push·외부 publish·되돌리기 어려운 변경) 은 여전히 사전 확인합니다 — 이건 가드레일이지 confirmation overhead 가 아닙니다.
+
+---
+
 ## ⚙️ 블루프린트·에셋 분석: Monolith MCP 사용 (필수)
 
 > **이 프로젝트의 블루프린트/애니메이션/머티리얼/Niagara/GAS/UI 에셋 분석은 반드시 Monolith MCP 를 통해 수행합니다.**
@@ -155,18 +169,16 @@ C++ 측은 **얇은 조율 계층**이고, 실제 로코모션 로직은 블루�
 
 ---
 
-## 📁 docs/ — 참고 문서 및 분석 산출물
+## 📁 docs/ - 참고 문서 및 분석 산출물
 
-분석·학습용 참고 문서와 산출 메뉴얼은 `docs/` 폴더에 모읍니다.
+분석·학습용 참고 문서와 산출 메뉴얼은 `docs/` 폴더에 모입니다. **최신 문서 목록은 [`docs/README.md`](docs/README.md) 를 단일 인덱스로 참조**하십시오 — 공통 정책·사양 + 시스템별 그룹 (애니메이션 / CommonUI / ...) 구조입니다. 개별 문서를 본 파일에 중복으로 나열하지 않습니다.
 
-| 문서 | 내용 |
-|------|------|
-| [`docs/README.md`](docs/README.md) | `docs/` 폴더 인덱스 |
-| [`docs/lyra-project-verification.md`](docs/lyra-project-verification.md) | **프로젝트 구조와 문서 검증 맵** — 실제 설정/C++/에셋 경로 기준으로 확인한 핵심 시스템, 검증 제한, 문서 작성 체크리스트. |
-| [`docs/lyra-animation-references.md`](docs/lyra-animation-references.md) | **라이라 애니메이션 분석·학습용 공식 온라인 참고 문서 모음** — Epic 공식 문서 URL + 라이라 구현 매핑. 애니메이션 시스템을 분석하기 전에 먼저 읽으십시오. |
-| [`docs/lyra-dynamic-html-spec.md`](docs/lyra-dynamic-html-spec.md) | **다이나믹 HTML 산출물 사양** — 분석·학습 결과를 HTML 로 표현할 때의 폴더 구조(`dynamic-html/`), 기술 스택, 표준 컴포넌트, 금지 사항. `dynamic-html/` 작업을 시작·갱신하기 전에 반드시 읽으십시오. |
+작업 전 반드시 읽어야 할 핵심 정책 문서:
 
-새로 작성하는 시스템별 분석 메뉴얼도 `docs/` 에 저장하고 `docs/README.md` 목록에 등록합니다.
+- [`docs/README.md`](docs/README.md) - `docs/` 폴더의 모든 문서 한 줄 안내 (시스템별로 그룹화된 인덱스)
+- [`docs/lyra-dynamic-html-spec.md`](docs/lyra-dynamic-html-spec.md) - **다이나믹 HTML 산출물 사양**. `dynamic-html/` 작업을 시작·갱신하기 전 필독. 폴더 구조·다중 시스템 인덱스 구조·확장 절차 A/B·금지 사항·검증 등급 처리 규칙을 정의합니다.
+
+새 시스템 분석을 시작할 때는 위 사양의 "확장 절차 A" 를 따라 표준 4종 문서 (`code-analysis`, `blueprint-analysis`, `learning-section-plan`, 선택적 `references`) 를 `docs/` 에 만들고 `docs/README.md` 에 시스템 섹션을 추가합니다.
 
 ---
 
@@ -176,5 +188,18 @@ C++ 측은 **얇은 조율 계층**이고, 실제 로코모션 로직은 블루�
 1. **C++ 골격 파악** — 라이더 MCP(`search_symbol` → `get_symbol_info`)로 `Source/LyraGame/<시스템>/` 의 클래스 관계·진입점 확인.
 2. **블루프린트/데이터 계층 파악** — Monolith(`blueprint_query`·`animation_query`·`gas_query` 등)로 해당 시스템이 사용하는 `.uasset` 의 실제 구성·기본값·노드 그래프 조회.
 3. **교차 검증** — 블루프린트가 가리키는 C++ 부모/엔진 클래스를 라이더 MCP 로 확인해 동작을 확정.
-4. **문서화** — 시스템별로 "목적 → 핵심 클래스/에셋 → 데이터 흐름 → 확장 방법" 구조의 한국어 문서를 작성하여 `docs/` 에 저장하고 `docs/README.md` 목록에 등록. 전체 구조와 검증 제한은 [`docs/lyra-project-verification.md`](docs/lyra-project-verification.md), 애니메이션 분석은 [`docs/lyra-animation-references.md`](docs/lyra-animation-references.md) 를 함께 참고.
-5. **다이나믹 HTML 산출(선택)** — 분석 결과를 인터랙티브 학습 페이지로 노출할 경우 [`docs/lyra-dynamic-html-spec.md`](docs/lyra-dynamic-html-spec.md) 의 폴더 구조·기술 스택·금지 사항을 그대로 따라 `dynamic-html/` 에 산출합니다. 마크다운 검증 원장이 사실의 단일 출처이고, HTML 은 그 사실을 시각화·인터랙션 형태로 재표현한 것입니다 — 이 관계는 사양 문서에서 정의합니다.
+4. **문서화** — 시스템별로 표준 4종 문서 (`docs/lyra-<system>-code-analysis.md`, `lyra-<system>-blueprint-analysis.md`, `lyra-<system>-learning-section-plan.md`, 선택적 `lyra-<system>-references.md`) 를 작성하여 `docs/` 에 저장하고 `docs/README.md` 의 해당 시스템 그룹에 한 줄 등록. 전체 구조와 검증 제한은 [`docs/lyra-project-verification.md`](docs/lyra-project-verification.md), 시스템별 사례는 [`docs/lyra-animation-references.md`](docs/lyra-animation-references.md) (애니메이션) 와 [`docs/lyra-ui-learning-section-plan.md`](docs/lyra-ui-learning-section-plan.md) (CommonUI) 를 함께 참고.
+5. **다이나믹 HTML 산출(선택)** - 분석 결과를 학습 페이지로 노출할 경우 [`docs/lyra-dynamic-html-spec.md`](docs/lyra-dynamic-html-spec.md) 의 폴더 구조·기술 스택·금지 사항을 그대로 따라 `dynamic-html/` 에 산출합니다. 마크다운 검증 원장이 사실의 단일 출처이고, HTML 은 그 사실을 학습 동선으로 재배열한 것입니다 - 이 관계는 사양 문서에서 정의합니다. **시스템 단위로 그룹화** 합니다 - 페이지 파일명은 `lyra-<system>-<topic>.html`, 인덱스 (`dynamic-html/index.html`) 는 시스템별 `<section>` 으로 나누고, 페이지 번호는 시스템 내에서만 1부터 (글로벌 번호 금지). 새 시스템을 추가할 때는 사양의 "확장 절차 A", 기존 시스템에 페이지를 추가할 때는 "확장 절차 B" 를 따릅니다. 페이지 작성 전 **정보 형태를 먼저 분류** 하고 (flow / structure / decision / reference / comparison / recipe / verification 7종 중 선택), **flow gate 5문** 을 통과하는 블록만 `flow-section` 으로 만듭니다. 페이지 상단에는 **`chapter-brief` 4칸** (이 챕터의 질문 / 먼저 알아둘 것 / 선행 학습 / 보충 자료) 을 둡니다 - 단순 외부 링크 목록이 아닙니다.
+6. **정적 점검(선택)** - HTML 산출 후 사양의 "배포 전 체크리스트" 를 따라 내부 링크·외부 링크 속성·검증 배지 분포·**flow gate 통과 여부**·블록 종류 적합성·**chapter-brief 4칸 완성**·**색 의미 체계 준수**·금지 요소를 확인합니다. 통과하지 못한 페이지는 커밋·공유하지 않습니다.
+
+### 후속 산출물 품질 규칙 요약
+
+상세는 [`docs/lyra-dynamic-html-spec.md`](docs/lyra-dynamic-html-spec.md) 의 "다중 시스템 구조", "학습 블록 7종", "flow gate", "챕터 브리프", "색상 의미 체계", "Note 박스 4종", "검증 등급 처리 규칙", "확장 절차 A/B", "배포 전 체크리스트" 에 있으나, 작업 중 잊지 말아야 할 핵심 여섯 가지:
+
+- **"흐름" 은 모든 콘텐츠의 시각 템플릿이 아닙니다.** "학습 동선이 중요하다" 는 독자가 위→아래로 이해할 수 있는 문서 구성 원칙이지, 모든 섹션을 `흐름 N` + 단계 카드 + 화살표로 표현하라는 뜻이 아닙니다. 인터페이스 함수 목록·CDO 값·variant 비교·테스트 케이스·작업 절차는 흐름 카드로 만들지 말고 각각 reference·comparison·verification·recipe 블록으로 표현하십시오.
+- **`flow-section` 사용 전 flow gate 5문에 답하십시오.** (1) 시간/인과 순서? (2) 이전 단계가 끝나야 다음? (3) 화살표가 실제 transition/call/event/dependency? (4) 조건 배지가 실제 guard/branch? (5) 화살표 제거 시 의미 손상? **3문 이상 "아니오" 면 다른 블록 종류를 선택** 하십시오. 모든 페이지가 같은 개수의 `flow-section` 으로 채워지면 정책 포맷이 콘텐츠 판단을 압도한 신호입니다.
+- **`chapter-brief` 는 단순 링크 목록이 아닙니다.** 페이지 상단 박스는 "참고 자료" 가 아니라 학습자가 본문을 읽기 위한 준비 정보 4칸 - "이 챕터의 질문 / 먼저 알아둘 것 / 선행 학습 / 보충 자료". 본문 요약을 두지 마십시오. `page-refs` 마크업은 더 이상 사용하지 않습니다.
+- **색은 의미입니다.** `--flow-state` / `--flow-alias` / `--flow-conduit` 토큰은 `.flow-section .step` 의 좌측 막대에만 씁니다. concept-card·struct-node·checklist·note 박스가 이 색을 빌려 쓰지 않게 하십시오. 다른 의미의 박스에 flow 색을 쓰면 학습자가 색의 의미를 잃습니다. 검증 색은 badge 에만, 일반 노트는 `.note .note-info/design/warning/debug` 중 의미에 맞는 종류를 사용합니다.
+- **HTML 배지는 마크다운 원장보다 높은 검증 등급을 표시할 수 없습니다.** 원장이 `partial` 인 사실을 HTML 에서 `verified` 로 승격하지 마십시오. 본문 표현도 "적용한다" 대신 "적용 지점으로 추정", "에디터 확인 필요" 로 절제합니다.
+- **HTML 에 마크다운 원장에 없는 사실을 새로 정의하지 마십시오.** 추가가 필요하면 원장(`docs/lyra-*-analysis.md`) 을 먼저 갱신한 뒤 HTML 에 옮깁니다 - 역방향 금지.
+- **본문 특수문자는 한글로 풀어 씁니다.** `§13` → `섹션 13`, `×5` → `5개` 등. 정의된 글리프 (검증 배지 `✓`/`◐`/`△`, 흐름 화살표 `↓`, conduit `◆`) 와 타이포그래피 separator (`·`·`—`·`…`) 만 예외. 자세한 규칙은 사양의 "본문 특수문자 사용 규칙" 절.

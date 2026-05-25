@@ -3,7 +3,7 @@
 확인일: 2026-05-24  
 목적: 라이라 CommonUI 분석·학습 문서를 기능별로 어떻게 나눌지 결정하기 위한 정보 구조 설계
 
-이 문서는 검증 원장 [`lyra-ui-code-analysis.md`](lyra-ui-code-analysis.md), [`lyra-ui-blueprint-analysis.md`](lyra-ui-blueprint-analysis.md) 와 Epic 공식 CommonUI / Lyra UI 문서 ("공식 온라인 대조 출처" 절 참조) 를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 확장하기 쉬운지 정리한다. 작성 패턴은 [`lyra-animation-learning-section-plan.md`](lyra-animation-learning-section-plan.md) 와 동일하다.
+이 문서는 검증 원장 [`ui-code-analysis.md`](ui-code-analysis.md), [`ui-blueprint-analysis.md`](ui-blueprint-analysis.md) 와 Epic 공식 CommonUI / Lyra UI 문서 ("공식 온라인 대조 출처" 절 참조) 를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 확장하기 쉬운지 정리한다. 작성 패턴은 [`animation-learning-section-plan.md`](animation-learning-section-plan.md) 와 동일하다.
 
 ## 결론
 
@@ -39,8 +39,8 @@
 
 | 문서 | 강점 | 학습 목차로 부족한 점 |
 |------|------|------------------------|
-| [`lyra-ui-code-analysis.md`](lyra-ui-code-analysis.md) | 핵심 5종 C++ + UIExtension public API + UIManagerSubsystem 의 책임·런타임 흐름·디버깅 체크리스트 | 코드 책임 중심이라 "어떤 학습 순서로 읽어야 흐름이 잡히는가" 가 분리되어야 한다 |
-| [`lyra-ui-blueprint-analysis.md`](lyra-ui-blueprint-analysis.md) | 4개 HUD layout BP, 4 + 15개 UI.Layer/HUD.Slot 태그, `LAS_ShooterGame_StandardHUD` CDO (Layout 1 + Widgets 11) 의 구체 검증 | 자산 사전 성격이라 입문자 학습 동선이 약하다 |
+| [`ui-code-analysis.md`](ui-code-analysis.md) | 핵심 5종 C++ + UIExtension public API + UIManagerSubsystem 의 책임·런타임 흐름·디버깅 체크리스트 | 코드 책임 중심이라 "어떤 학습 순서로 읽어야 흐름이 잡히는가" 가 분리되어야 한다 |
+| [`ui-blueprint-analysis.md`](ui-blueprint-analysis.md) | 4개 HUD layout BP, 4 + 15개 UI.Layer/HUD.Slot 태그, `LAS_ShooterGame_StandardHUD` CDO (Layout 1 + Widgets 11) 의 구체 검증 | 자산 사전 성격이라 입문자 학습 동선이 약하다 |
 
 따라서 후속 학습 문서는 두 원장을 대체하지 않고, 두 원장의 사실을 데이터 흐름 순서로 재배열하는 안내서로 작성한다.
 
@@ -69,7 +69,7 @@
 | `CommonGame` | GameUI Manager, PrimaryGameLayout, layer 관리 | 섹션 2 |
 | `CommonUser` | 로그인/세션 (Online Subsystem 추상화) | 섹션 8 |
 | `CommonLoadingScreen` | 로딩 화면 (라이라 사용) | 섹션 8 |
-| `UIExtension` (Epic, 라이라에 포함) | tag 기반 extension point ↔ extension 매칭. 라이라에서는 `UUIExtensionSubsystem` 과 `UUIExtensionPointWidget` 을 통해 HUD slot 주입에 사용. 표면은 작으나 라이라 UI 모듈성의 핵심. 공식 Epic 문서가 빈약해 [`lyra-ui-references.md`](lyra-ui-references.md) 의 X157 노트와 로컬 헤더 (`UIExtensionSystem.h`·`UIExtensionPointWidget.h`) 가 1차 자료 | 섹션 4 |
+| `UIExtension` (Epic, 라이라에 포함) | tag 기반 extension point ↔ extension 매칭. 라이라에서는 `UUIExtensionSubsystem` 과 `UUIExtensionPointWidget` 을 통해 HUD slot 주입에 사용. 표면은 작으나 라이라 UI 모듈성의 핵심. 공식 Epic 문서가 빈약해 [`ui-references.md`](ui-references.md) 의 X157 노트와 로컬 헤더 (`UIExtensionSystem.h`·`UIExtensionPointWidget.h`) 가 1차 자료 | 섹션 4 |
 | `GameSettings` | 설정 데이터 모델 + 패널 widget | 섹션 7 |
 
 > 정확한 plugin 활성 여부와 의존성은 `.uproject` 와 각 `.uplugin` 의 `Plugins` 필드를 검증 원장에서 확인한다.
@@ -343,7 +343,7 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 ### 공식 온라인 대조 출처
 
-공식 Epic 문서·커뮤니티 자료의 정식 목록은 별도 문서 [`lyra-ui-references.md`](lyra-ui-references.md) 에 있다 — 카테고리별 분류 (공식 라이라 / CommonUI 시스템 / UI Extension / 학습 자료) + 문서 ↔ 라이라 프로젝트 매핑 표. 본 섹션 설계는 그 references 문서를 1차 참고로 둔다. HTML 페이지의 `chapter-brief` "보충 자료" 칸도 같은 references 문서의 URL 을 인용한다.
+공식 Epic 문서·커뮤니티 자료의 정식 목록은 별도 문서 [`ui-references.md`](ui-references.md) 에 있다 — 카테고리별 분류 (공식 라이라 / CommonUI 시스템 / UI Extension / 학습 자료) + 문서 ↔ 라이라 프로젝트 매핑 표. 본 섹션 설계는 그 references 문서를 1차 참고로 둔다. HTML 페이지의 `chapter-brief` "보충 자료" 칸도 같은 references 문서의 URL 을 인용한다.
 
 ### 섹션 1 - CommonUI 입력 · 활성화
 
@@ -468,7 +468,7 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 ## HTML 산출물 대응표
 
-위 8개 학습 섹션을 실제 `dynamic-html/pages/lyra-ui-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-ui-`, 시스템 내 번호 (글로벌 번호 X).
+위 8개 학습 섹션을 실제 `dynamic-html/pages/lyra-ui-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-ui-`, 시스템 내 번호 (글로벌 번호 X).
 
 | 페이지 번호 | HTML 파일 | 포함 섹션 | 목차명 | 권장 학습 블록 |
 |-------------|-----------|-----------|--------|----------------|
@@ -501,18 +501,18 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 | `lyra-ui-styles-widgets.html` | Common Style 자산·input action data table·controller data 의 라이라 CDO 는 모두 ◐ 까지 ; 라이라 측 widget 파생 클래스의 파일 존재만 ✅, BP 사용 위치는 ◐ |
 | `lyra-ui-settings.html` · `lyra-ui-frontend-common-user.html` (둘 다 보류) | HTML 미생성. 생성 전 `Source/LyraGame/Settings/` 와 `Source/LyraGame/UI/Frontend/` + Common User 인스턴스화 위치를 원장에 ✅ 로 보강 필요. 보강된 뒤에도 partial 로 유지될 항목: 각 `UGameSetting*` 값 클래스의 정확한 카테고리 매핑, `W_LyraStartup` / `W_ExperienceSelectionScreen` 의 CDO 와 세션 옵션 흐름 |
 
-**원장 보강이 우선** — 위 ◐ 항목 중 자주 인용될 사실은 HTML 생성 전에 Monolith / 라이더 MCP 로 확인해 원장 (`lyra-ui-code-analysis.md` · `lyra-ui-blueprint-analysis.md`) 에 먼저 추가하고 ✅ 로 승격한다. HTML 페이지에서 새 사실을 정의하지 않는다.
+**원장 보강이 우선** — 위 ◐ 항목 중 자주 인용될 사실은 HTML 생성 전에 Monolith / 라이더 MCP 로 확인해 원장 (`ui-code-analysis.md` · `ui-blueprint-analysis.md`) 에 먼저 추가하고 ✅ 로 승격한다. HTML 페이지에서 새 사실을 정의하지 않는다.
 
 ## 원장 범위 한계 (Settings / Frontend)
 
-현재 검증 원장 (`lyra-ui-code-analysis.md` · `lyra-ui-blueprint-analysis.md`) 의 분석 범위는 `Source/LyraGame/UI/` 중심이다. 다만 섹션 7 (Settings) 와 섹션 8 (Frontend / Common User) 의 실제 구현은 다른 폴더에 있다.
+현재 검증 원장 (`ui-code-analysis.md` · `ui-blueprint-analysis.md`) 의 분석 범위는 `Source/LyraGame/UI/` 중심이다. 다만 섹션 7 (Settings) 와 섹션 8 (Frontend / Common User) 의 실제 구현은 다른 폴더에 있다.
 
 - Settings: `Source/LyraGame/Settings/` (`LyraGameSettingRegistry.h/.cpp`, `LyraSettingsLocal.h/.cpp`, `LyraSettingsShared.h/.cpp`, `LyraGameSettingRegistry_{Audio,Gamepad,Gameplay,MouseAndKeyboard,PerfStats,Video}.cpp`)
 - Frontend / Common User: `Source/LyraGame/UI/Frontend/` + Common User 플러그인 사용 위치
 
 따라서 섹션 7·섹션 8 의 HTML 페이지를 생성하려면 **현재 원장으로는 부족** 하며, 다음 둘 중 하나가 선행돼야 한다.
 
-1. `lyra-ui-code-analysis.md` 를 "UI + Settings + Frontend" 원장으로 확장한다 (현재 문서 구조 유지에 단순).
+1. `ui-code-analysis.md` 를 "UI + Settings + Frontend" 원장으로 확장한다 (현재 문서 구조 유지에 단순).
 2. Settings / Frontend 를 별도 시스템 (`settings`, `frontend`) 으로 분리하고 새 원장 그룹을 만든다 (사양 "확장 절차 A" 따름).
 
 본 섹션 설계는 섹션 7·섹션 8 을 우선순위 "중·하" 로 두므로, 코어 (섹션 0~섹션 6) HTML 페이지 생성을 완료한 뒤 위 선택을 결정한다. 그 전에는 섹션 7·섹션 8 의 HTML 페이지를 만들지 않는다.
@@ -523,16 +523,16 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 
 | 문서군 | 역할 | 사실의 출처 여부 |
 |--------|------|-------------------|
-| [`lyra-ui-code-analysis.md`](lyra-ui-code-analysis.md), [`lyra-ui-blueprint-analysis.md`](lyra-ui-blueprint-analysis.md) | **검증 원장 (verified fact ledger)** — Monolith · C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
+| [`ui-code-analysis.md`](ui-code-analysis.md), [`ui-blueprint-analysis.md`](ui-blueprint-analysis.md) | **검증 원장 (verified fact ledger)** — Monolith · C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
 | 후속 8개 학습 문서 | **기능별 학습 안내서** — 검증 원장의 사실을 데이터 흐름 순서로 재배열하고 실습·디버깅·확장 레시피를 더함 | 아니오. 원장을 인용 |
-| [`lyra-ui-references.md`](lyra-ui-references.md) | 개념 학습용 공식 문서·커뮤니티 자료 링크 + 문서 ↔ 프로젝트 매핑 | 아니오. 외부 개념 |
+| [`ui-references.md`](ui-references.md) | 개념 학습용 공식 문서·커뮤니티 자료 링크 + 문서 ↔ 프로젝트 매핑 | 아니오. 외부 개념 |
 
 운영 규칙:
 
 - 학습 문서는 사실을 새로 조사하지 말고 검증 원장을 인용한다. 원장에 없는 사실이 필요하면 Monolith · 라이더 MCP 로 확인한 뒤 **원장에 먼저 추가** 하고 학습 문서가 그것을 인용한다.
 - 학습 문서가 원장과 어긋나는 내용을 발견하면 Monolith · 라이더 MCP 로 재확인하고 양쪽을 함께 갱신한다.
 - 두 분석 문서를 유지해야 하는 이유: 학습 문서는 흐름 위주라 "이 값이 어디서 검증됐는가" 의 추적성이 약해진다. 원장이 추적성을 담당하면 학습 문서는 가벼워진다.
-- 공식 온라인 자료의 정식 목록과 카테고리 분류는 [`lyra-ui-references.md`](lyra-ui-references.md) 에 분리되어 있다 — `lyra-animation-references.md` 와 동일한 형식. 본 섹션 설계는 그 references 문서를 1차 참고로 인용한다.
+- 공식 온라인 자료의 정식 목록과 카테고리 분류는 [`ui-references.md`](ui-references.md) 에 분리되어 있다 — `animation-references.md` 와 동일한 형식. 본 섹션 설계는 그 references 문서를 1차 참고로 인용한다.
 
 ## 독자별 학습 경로
 

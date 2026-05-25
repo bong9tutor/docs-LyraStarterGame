@@ -3,7 +3,7 @@
 확인일: 2026-05-22  
 목적: Lyra 애니메이션 분석·학습 문서를 기능별로 어떻게 나눌지 결정하기 위한 정보 구조 설계
 
-이 문서는 기존 분석 문서인 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md), [`lyra-animation-code-analysis.md`](lyra-animation-code-analysis.md), [`lyra-animation-references.md`](lyra-animation-references.md)를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 확장하기 쉬운지 정리한다.
+이 문서는 기존 분석 문서인 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md), [`animation-code-analysis.md`](animation-code-analysis.md), [`animation-references.md`](animation-references.md)를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 확장하기 쉬운지 정리한다.
 
 ## 결론
 
@@ -43,9 +43,9 @@ Lyra 애니메이션 학습 문서는 폴더명이나 asset type 기준이 아�
 
 | 문서 | 강점 | 학습 목차로 부족한 점 |
 |------|------|------------------------|
-| [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) | Monolith로 확인한 ABP, CDO, asset 구조가 구체적이다. | asset별 분석이 중심이라 학습 순서를 별도로 제시해야 한다. |
-| [`lyra-animation-code-analysis.md`](lyra-animation-code-analysis.md) | C++ 런타임 연결부를 클래스별로 설명한다. | 코드 클래스 기준이라 pose 흐름과 한 번 더 매핑해야 한다. |
-| [`lyra-animation-references.md`](lyra-animation-references.md) | 공식 문서와 개념 자료를 모아 둔다. | 로컬 프로젝트의 기능별 학습 목차는 아니다. |
+| [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md) | Monolith로 확인한 ABP, CDO, asset 구조가 구체적이다. | asset별 분석이 중심이라 학습 순서를 별도로 제시해야 한다. |
+| [`animation-code-analysis.md`](animation-code-analysis.md) | C++ 런타임 연결부를 클래스별로 설명한다. | 코드 클래스 기준이라 pose 흐름과 한 번 더 매핑해야 한다. |
+| [`animation-references.md`](animation-references.md) | 공식 문서와 개념 자료를 모아 둔다. | 로컬 프로젝트의 기능별 학습 목차는 아니다. |
 
 따라서 후속 학습 문서는 기존 문서를 대체하지 말고, 기존 문서의 사실을 기능 흐름으로 재배열하는 안내서 역할을 해야 한다.
 
@@ -171,7 +171,7 @@ ShooterTests는 crouch, pistol jog, Quinn/Manny jog, melee montage, network repl
 - `ULyraAnimInstance`는 ASC tag와 ground distance를 ABP에 공급한다.
 - `ULyraWeaponInstance`와 cosmetic tag가 linked layer class를 고른다.
 - montage, notify, weapon mesh ABP는 locomotion 위에 얹히는 보조 흐름이다.
-- 개념(Linked Anim Layers, Distance Matching, Pose Warping 등)은 [`lyra-animation-references.md`](lyra-animation-references.md)의 공식 문서로, 검증된 로컬 구현 사실은 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md)·[`lyra-animation-code-analysis.md`](lyra-animation-code-analysis.md)로 학습한다.
+- 개념(Linked Anim Layers, Distance Matching, Pose Warping 등)은 [`animation-references.md`](animation-references.md)의 공식 문서로, 검증된 로컬 구현 사실은 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md)·[`animation-code-analysis.md`](animation-code-analysis.md)로 학습한다.
 
 포함하면 좋은 그림:
 
@@ -555,7 +555,7 @@ ThreadSafe 갱신 구조 (Monolith 검증):
 
 검증 포인트:
 
-- 7종 BP / interface 의 존재·parent class·기본 구성은 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 모두 ✅ 로 있다.
+- 7종 BP / interface 의 존재·parent class·기본 구성은 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md) 에 모두 ✅ 로 있다.
 - "트레이드오프" 자체는 fact 가 아니라 설계 추론이므로 본문에서 `note-design` 으로 명시한다.
 - 호출 횟수·평가 frequency 같은 정량적 비용은 측정하지 않은 한 추정으로만 적는다 (등급 ◐).
 
@@ -599,14 +599,14 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 - `reference-section` 블록에 "확인 위치: `B_Manny`, `B_Quinn` Blueprint 내부 comment" 표기.
 - 원문은 **핵심 구절만 짧게** 인용 (예: *"copy the pose across from the invisible 'driving' mesh component since the skeletons are directly compatible"*).
 - 바로 아래에 한국어 해석을 한 줄로 둔다 — "visible mesh 는 invisible driving mesh 와 skeleton 호환성이 있어서 pose 를 복제한다" 정도.
-- comment 전문은 검증 원장 ([`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md)) 에 두고, HTML 은 학습에 필요한 일부만 노출한다.
+- comment 전문은 검증 원장 ([`animation-blueprint-analysis.md`](animation-blueprint-analysis.md)) 에 두고, HTML 은 학습에 필요한 일부만 노출한다.
 
 검증 포인트:
 
 - `ABP_Mannequin_CopyPose` 의 parent class·AnimGraph 노드 수·"Copy Pose From Mesh" 노드 포함은 Monolith 로 ✅ 확인됨.
 - `B_Manny`/`B_Quinn` 의 design-intent comment 는 Monolith FTS search 로 ✅ 확인됨 (`B_Manny`, `B_Quinn` 둘 다 같은 comment 보유).
 - 4개 mesh (`SKM_Manny`, `SKM_Manny_Invis`, `SKM_Quinn`, `SKM_Quinn_Invis`) 존재는 파일 시스템으로 ✅ 확인됨.
-- ◐ **HTML 과 원장 간 재검수 필요** — 다음 사실들은 현재 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 ✅ 로 추가되었고 HTML 페이지도 이를 인용해 작성됨 (2026-05-24 보강). 이후 원장이 더 갱신되면 HTML 표현과 일치 여부를 재검수:
+- ◐ **HTML 과 원장 간 재검수 필요** — 다음 사실들은 현재 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md) 에 ✅ 로 추가되었고 HTML 페이지도 이를 인용해 작성됨 (2026-05-24 보강). 이후 원장이 더 갱신되면 HTML 표현과 일치 여부를 재검수:
   - `ABP_Mannequin_CopyPose` 의 "Copy Pose From Mesh" 노드 입력 핀 미연결 + comment 인용 — 원장 ✅, HTML §14 인용 ✅
   - `B_Manny` / `B_Quinn` 의 단일 root `MeshComponent` (SkeletalMeshComponent) — 원장 ✅, HTML §14 인용 ✅
   - `B_Manny` / `B_Quinn` 의 design-intent comment 전문 — 원장 ✅, HTML §14 핵심 구절 인용 ✅
@@ -706,7 +706,7 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| 7종 BP/interface 의 책임 분리 | `ABP_Mannequin_Base`, `ABP_ItemAnimLayersBase`, 무기별 layer ABP (8개), `ABP_Weap_{Pistol,Rifle,Shotgun}`, `ABP_Manny_PostProcess` + `ABP_Quinn_PostProcess`, `ABP_Mannequin_Retarget` + `ABP_UE4_Mannequin_Retarget`, `ALI_ItemAnimLayers` (14함수) | ✅ 모두 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 명시 |
+| 7종 BP/interface 의 책임 분리 | `ABP_Mannequin_Base`, `ABP_ItemAnimLayersBase`, 무기별 layer ABP (8개), `ABP_Weap_{Pistol,Rifle,Shotgun}`, `ABP_Manny_PostProcess` + `ABP_Quinn_PostProcess`, `ABP_Mannequin_Retarget` + `ABP_UE4_Mannequin_Retarget`, `ALI_ItemAnimLayers` (14함수) | ✅ 모두 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md) 에 명시 |
 | 무기 교체 단위 | weapon instance CDO 의 `EquippedAnimSet` → layer ABP 교체 | ✅ |
 | 14-함수 interface 의 호출 위치 | `ABP_Mannequin_Base.AnimGraph` 의 `LinkedAnimLayer` 4 + `LocomotionSM` state 10 = 14 | ✅ |
 | 무기 mesh ABP 분리 이유 | `SK_Pistol_Skeleton`·`SK_Rifle_Skeleton`·`SK_Shotgun_Skeleton` 별도 → 캐릭터 skeleton 과 분리 평가 | ✅ |
@@ -746,9 +746,9 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 
 | 문서군 | 역할 | 사실의 출처 여부 |
 |--------|------|-------------------|
-| `lyra-animation-blueprint-analysis.md`, `lyra-animation-code-analysis.md` | **검증 원장(verified fact ledger)** - Monolith·C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
+| `animation-blueprint-analysis.md`, `animation-code-analysis.md` | **검증 원장(verified fact ledger)** - Monolith·C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
 | 후속 학습 문서 (메커니즘 섹션 1–섹션 12 + 설계 의도 섹션 13–섹션 14) | **기능별 학습 안내서 + 설계 의도/트레이드오프 종합** - 검증 원장의 사실을 데이터 흐름 순서로 재배열하고 실습·디버깅·확장 레시피를 더함. 섹션 13·섹션 14 는 원장 사실 위에 추론·trade-off 를 얹음 | 아니오. 원장을 인용 |
-| `lyra-animation-references.md` | 개념 학습용 공식 문서 링크 | 아니오. 외부 개념 |
+| `animation-references.md` | 개념 학습용 공식 문서 링크 | 아니오. 외부 개념 |
 
 운영 규칙:
 
@@ -856,16 +856,16 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 
 | 순서 | 문서 | 포함 섹션 | 우선순위 | 핵심 산출물 |
 |-----:|------|-----------|----------|-------------|
-| 1 | `lyra-animation-overview.md` | 0 | 최상 | 큰 흐름도, 핵심 asset path 지도, 용어표 |
-| 2 | `lyra-animation-runtime-state.md` | 1 | 최상 | ASC tag↔ABP 변수 표, movement state 표, ThreadSafe 갱신 호출 순서 다이어그램 |
-| 3 | `lyra-animation-base-abp.md` | 2 | 최상 | pose graph 블록 다이어그램, slot 위치 표 |
-| 4 | `lyra-animation-locomotion-sm.md` | 3 | 최상 | state/transition 표, alias·conduit 포함 jump-fall 흐름도 |
-| 5 | `lyra-animation-linked-layers.md` | 4, 5 | 최상 | ALI 인터페이스 14함수 매핑, 무기별 layer 비교표 |
-| 6 | `lyra-animation-selection-rules.md` | 6 | 최상 | weapon instance CDO 표, cosmetic body mesh rule 표 |
-| 7 | `lyra-animation-actions-montage.md` | 7 | 상 | montage slot 표, action montage sample 표, ability/equipment 트리거 흐름 |
-| 8 | `lyra-animation-aiming-additives.md` | 8 | 상 | aim offset 목록, ADS/hipfire blend weight 변수 표, `Update Blend Weight Data` 흐름 |
-| 9 | `lyra-animation-warping-ik.md` | 9, 10 | 상 | curve 체크리스트, 보정 기능별 graph 목록 |
-| 10 | `lyra-animation-effects-tests-recipes.md` | 11, 12 | 상 | notify→context effect 흐름, 새 weapon/body/montage 추가 레시피 |
+| 1 | `animation-overview.md` | 0 | 최상 | 큰 흐름도, 핵심 asset path 지도, 용어표 |
+| 2 | `animation-runtime-state.md` | 1 | 최상 | ASC tag↔ABP 변수 표, movement state 표, ThreadSafe 갱신 호출 순서 다이어그램 |
+| 3 | `animation-base-abp.md` | 2 | 최상 | pose graph 블록 다이어그램, slot 위치 표 |
+| 4 | `animation-locomotion-sm.md` | 3 | 최상 | state/transition 표, alias·conduit 포함 jump-fall 흐름도 |
+| 5 | `animation-linked-layers.md` | 4, 5 | 최상 | ALI 인터페이스 14함수 매핑, 무기별 layer 비교표 |
+| 6 | `animation-selection-rules.md` | 6 | 최상 | weapon instance CDO 표, cosmetic body mesh rule 표 |
+| 7 | `animation-actions-montage.md` | 7 | 상 | montage slot 표, action montage sample 표, ability/equipment 트리거 흐름 |
+| 8 | `animation-aiming-additives.md` | 8 | 상 | aim offset 목록, ADS/hipfire blend weight 변수 표, `Update Blend Weight Data` 흐름 |
+| 9 | `animation-warping-ik.md` | 9, 10 | 상 | curve 체크리스트, 보정 기능별 graph 목록 |
+| 10 | `animation-effects-tests-recipes.md` | 11, 12 | 상 | notify→context effect 흐름, 새 weapon/body/montage 추가 레시피 |
 
 **섹션 12개 → 문서 10개 묶음 근거** (같은 흐름·관심사는 합치고, 결정과 재생은 나눈다):
 
@@ -880,7 +880,7 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 
 **분리 시점:** 한 문서가 지나치게 커지면 그때 분리한다. 분리 1순위 후보는 `retarget-postprocess`(섹션 10 일부), `contextual-interactions`(`Interactions/Bench` 28개 에셋 기반 별도 확장), `asset-authoring-checklist`(확장 레시피)다. `aiming-additives`는 이미 별도 문서로 시작한다.
 
-**폴더 구조:** 현재 `docs/`는 flat 구조다. 학습 문서가 10개를 넘어 커지면 `docs/animation/` 하위 폴더로 옮기고 번호 접두어(`00-overview.md`, `01-runtime-state.md` …)를 붙여 읽는 순서를 강제한다. Lyra 애니메이션은 개념 의존성이 강하다.
+**폴더 구조:** 현재 `docs/`는 flat 구조다. 학습 문서가 더 커지면 `docs/animation/` 하위 폴더로 옮기고 번호 접두어(`00-overview.md`, `01-runtime-state.md` …)를 붙여 읽는 순서를 강제하는 방안을 고려한다. Lyra 애니메이션은 개념 의존성이 강하다.
 
 ## HTML 산출물 대응 표
 
@@ -888,7 +888,7 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 
 ### 페이지별 학습 블록 구성
 
-페이지 성격에 따라 사용하는 블록 종류와 목차명을 분기한다. 자세한 사양은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "학습 블록 7종" 과 "flow gate" 참조.
+페이지 성격에 따라 사용하는 블록 종류와 목차명을 분기한다. 자세한 사양은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "학습 블록 7종" 과 "flow gate" 참조.
 
 **구현 완료 (메커니즘 학습)** — 10페이지:
 
@@ -925,12 +925,12 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 | `lyra-animation-locomotion-sm.html` | alias 5개 (`PivotSources`·`JumpSources`·`JumpFallInterruptSources`·`IdleAlias`·`CycleAlias`) membership 미확인 → `partial` |
 | `lyra-animation-warping-ik.html` | Pose Warping 노드 적용 (layer 그래프 미노출), Orientation Warping 적용 위치, `ShouldEnableFootPlacement` 의 jump/fall 분기, Control Rig 세부 보정 부위 → 모두 `partial` |
 | `lyra-animation-invisible-copy-pose.html` | (1) `B_Manny`/`B_Quinn` 의 단일 root `MeshComponent` 와 `MeshComponent` 가 `ABP_Mannequin_CopyPose` 를 사용한다는 사실: 원장에 ✅. (2) modular cosmetic part (head·jacket·hands 같은 추가 actor) 의 정확한 socket / attach 지점은 별도 Monolith 조회 전까지 `partial`. (3) 단일 mesh 대비 메모리·draw call·CPU 비용 비교는 정량 측정이 없으므로 `note-design` 으로만 표기 (배지 승격 금지). (4) `Use Attached Parent` 가 Copy Pose 노드의 정확한 옵션 이름인지는 Epic 공식 문서로 확인하되, 라이라 자산이 그 옵션을 명시적으로 설정했는지는 `partial`. **페이지에 적용 완료** — `data-validation="partial"` + 검증 한계 note. |
-| `lyra-animation-animbp-ali-tradeoffs.html` | (1) 7개 책임군의 존재·parent class·기본 구성은 [`lyra-animation-blueprint-analysis.md`](lyra-animation-blueprint-analysis.md) 에 모두 ✅. (2) "분배의 비용/이득" — 호출/캐스팅 횟수, 평가 frequency, post-process 분리 의도, retarget 분리 의도는 모두 **설계 추론** 이므로 `note-design` 으로만 표기하고 ✅ 로 승격하지 않는다. (3) "왜 무기 mesh ABP 가 분리되는가" 같은 의도 설명은 코드에 직접 적혀 있지 않으므로 `partial` 유지. **페이지에 적용 완료** — 사실/추론 분리 verification-section 표 보유. |
+| `lyra-animation-animbp-ali-tradeoffs.html` | (1) 7개 책임군의 존재·parent class·기본 구성은 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md) 에 모두 ✅. (2) "분배의 비용/이득" — 호출/캐스팅 횟수, 평가 frequency, post-process 분리 의도, retarget 분리 의도는 모두 **설계 추론** 이므로 `note-design` 으로만 표기하고 ✅ 로 승격하지 않는다. (3) "왜 무기 mesh ABP 가 분리되는가" 같은 의도 설명은 코드에 직접 적혀 있지 않으므로 `partial` 유지. **페이지에 적용 완료** — 사실/추론 분리 verification-section 표 보유. |
 | 그 외 페이지 | 별도 유지 항목 없음 (모두 `verified` 가능) |
 
-**규칙:** HTML 페이지의 `data-validation` 과 배지(✓/◐/△) 는 위 표의 "등급 유지 항목" 을 마크다운 원장과 같은 등급으로 표시해야 한다. HTML 에서 임의로 `verified` 로 승격하지 않는다. 자세한 규칙은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "검증 등급 처리 규칙" 절 참조.
+**규칙:** HTML 페이지의 `data-validation` 과 배지(✓/◐/△) 는 위 표의 "등급 유지 항목" 을 마크다운 원장과 같은 등급으로 표시해야 한다. HTML 에서 임의로 `verified` 로 승격하지 않는다. 자세한 규칙은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "검증 등급 처리 규칙" 절 참조.
 
-**일관성 갱신 순서:** 새 사실이 확인되면 (예: 에디터에서 alias membership 확정) 마크다운 원장(`lyra-animation-blueprint-analysis.md`·`lyra-animation-code-analysis.md`) → 본 계획의 위 표 → HTML 페이지 순으로 갱신한다. 역방향 금지.
+**일관성 갱신 순서:** 새 사실이 확인되면 (예: 에디터에서 alias membership 확정) 마크다운 원장(`animation-blueprint-analysis.md`·`animation-code-analysis.md`) → 본 계획의 위 표 → HTML 페이지 순으로 갱신한다. 역방향 금지.
 
 ### 페이지별 chapter-brief 4칸 (표준 골격)
 
@@ -951,6 +951,6 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 | `lyra-animation-invisible-copy-pose.html` | `SKM_*_Invis` 가 왜 invisible 인가? visible cosmetic mesh 는 어떻게 pose 를 따라가는가? `ABP_Mannequin_CopyPose` 와 `B_Manny`/`B_Quinn` 의 comment 가 직접 설명하는 의도는? 한 mesh 로 합치면 무엇이 안 되는가? | selection-rules |
 | `lyra-animation-animbp-ali-tradeoffs.html` | 7개 책임군은 각각 무엇을 책임지는가? 무기 추가는 어디서 멈추는가? cosmetic 교체는 어디서 멈추는가? post-process / retarget 이 별도인 이유는? 이 분배의 비용은? | base-abp · linked-layers · selection-rules · warping-ik |
 
-> **표의 "선행 학습" 칸은 간략 페이지명만 적었으나, 실제 HTML 의 `chapter-brief` 에는 각 항목 뒤에 em dash (`—`) + "왜 선행인가" 한 줄 이유를 함께 적는다.** 정당성을 한 줄로 못 적는 항목은 prerequisite 이 아니므로 제거한다. 자세한 규칙은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "선행 학습 정당성" 검사 항목.
+> **표의 "선행 학습" 칸은 간략 페이지명만 적었으나, 실제 HTML 의 `chapter-brief` 에는 각 항목 뒤에 em dash (`—`) + "왜 선행인가" 한 줄 이유를 함께 적는다.** 정당성을 한 줄로 못 적는 항목은 prerequisite 이 아니므로 제거한다. 자세한 규칙은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "선행 학습 정당성" 검사 항목.
 
-자세한 4칸 작성 규칙은 [`lyra-dynamic-html-spec.md`](lyra-dynamic-html-spec.md) 의 "챕터 브리프 - `.chapter-brief`" 절 참조.
+자세한 4칸 작성 규칙은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "챕터 브리프 - `.chapter-brief`" 절 참조.

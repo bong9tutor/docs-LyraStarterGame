@@ -1,15 +1,15 @@
-# Lyra 분석·학습 - 다이나믹 HTML 문서 사양
+# 분석·학습 다이나믹 HTML 문서 사양
 
 > 결정일: 2026-05-23
-> 갱신일: 2026-05-24 (다중 시스템 인덱스 구조 + `lyra-<system>-<topic>.html` 파일명 접두어 + 확장 절차 A/B 분리 + UI 시스템 편입 + `.flow-index` 잔존 정리 + "HTML 전역 컴포넌트" 명칭 분리)
-> 목적: 라이라 분석·학습 결과를 다이나믹 HTML 로 표현할 때 모든 작업이 같은 규칙을 따르도록 한다.
-> 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/lyra-*.md`) 자체에는 적용되지 않는다.
+> 갱신일: 2026-05-25 (라이라 종속 문서 분리 → `docs/` 구조 + `<project>-<system>-<topic>.html` 파일명 패턴으로 일반화)
+> 목적: Unreal Engine 프로젝트의 분석·학습 결과를 다이나믹 HTML 로 표현할 때 모든 작업이 같은 규칙을 따르도록 한다. 모든 UE 프로젝트 분석에 재사용 가능하며, 이 저장소의 라이라는 현재 등록된 사례.
+> 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/*.md`) 자체에는 적용되지 않는다.
 
 ## 역할 분담 (가장 중요)
 
 | 종류 | 위치 | 역할 |
 |------|------|------|
-| 마크다운 검증 원장 | `docs/lyra-*.md` | **사실의 단일 출처**. 노드 사전·전이 표·CDO 값 등 사전식 자료. |
+| 마크다운 검증 원장 | `docs/*.md` | **사실의 단일 출처**. 노드 사전·전이 표·CDO 값 등 사전식 자료. |
 | 다이나믹 HTML | `dynamic-html/` | **학습 동선 가이드**. 마크다운 원장의 사실을 학습자가 이해하기 쉬운 순서로 재배열한다 - 정보 형태에 맞춰 흐름·구조·결정·참조·비교·레시피·검증 블록을 조합한다. |
 
 두 산출물은 **목적이 다르며 같은 정보를 반복하지 않는다**.
@@ -39,15 +39,17 @@
 | 빌드 도구 | 없음 |
 | CDN 의존 | 없음 |
 | 외부 이미지 파일 | 추가하지 않음 |
-| **레이아웃** | **단일 컬럼** - 사이드바·햄버거·drawer 없음. 흐름 목차는 본문 안 인덱스 카드 |
-| **헤더** | **static** (sticky 아님). 스크롤 다운 시 자연스럽게 사라져 모바일 화면 면적 최대 |
+| **레이아웃** | **3단 레이아웃** (데스크탑 ≥1280px): 좌측 사이트 사이드바 + 본문 (max-width 760px 유지) + 우측 페이지 내 TOC. 태블릿 (800-1279px) 은 사이드바 + 본문 2단. 모바일 (<800px) 은 본문 단일 컬럼 + 햄버거 drawer 사이드바. 사이드바·TOC·이전/다음 페이저는 `js/app.js` 가 페이지 메타데이터 기반으로 동적 생성. |
+| **헤더** | **sticky** (모든 viewport). 좌측에 햄버거 토글 (모바일만 표시), 가운데 제목·검증일·홈 nav, 우측에 다크모드 토글 |
 | **콘텐츠 정렬** | 가운데 정렬 - `max-width: 760px; margin: 0 auto;` |
 | **모서리 처리** | **모든 박스 네모** (`border-radius: 0`). 배지·카드·다이얼로그 등 어떤 컴포넌트도 둥근 모서리 사용 안 함 |
 | 주 대상 환경 | 모바일 우선 (데스크탑 호환) |
 
-### 모바일 패턴 조사 요약
+### 레이아웃 결정 — 단일 컬럼 → 3단 레이아웃 (2026-05-25 갱신)
 
-개발 문서 사이트 다수(MDN·Stripe·Tailwind·GitHub Docs 등)는 모바일에서 **sticky 헤더 + 햄버거 drawer** 패턴을 쓴다. 다만 본 사이트는 검색·단축키 없이 흐름 5개만 다루는 단순 학습 문서이고 사이드바 항목도 5줄에 불과하다. 이 규모에서는 **Medium · Substack · 일반 학습 블로그 글이 채용하는 단일 컬럼 + 본문 안 목차 패턴**이 더 어울린다 - 햄버거 토글 인터랙션이 사라지고 모바일 화면 면적이 더 확보된다.
+초기 사양 (2026-05-23) 은 "검색·단축키 없이 흐름 5개만 다루는 단순 학습 문서" 라는 전제에서 Medium · Substack 풍 **단일 컬럼 + 본문 안 목차** 를 선택했다. 그러나 라이라 분석 페이지가 19개 (애니메이션 12 + UI 7) 로 증가하면서 이 전제가 무너졌다 — 페이지 간 이동이 잦아지고, 학습자가 "지금 어디 있고 다음에 어디로 가야 하는가" 를 본문 안 목차 한 칸만으로 잡기 어려워졌다.
+
+따라서 결정을 갱신한다 — 데스크탑 (≥1280px) 은 언리얼 공식 문서 사이트 (`dev.epicgames.com/documentation`) · MDN · Stripe 등이 채택한 **3단 레이아웃** (사이트 사이드바 + 본문 + 페이지 TOC) 으로 가고, 모바일 (<800px) 은 햄버거 drawer 사이드바로 폴백한다. 본문 컬럼은 그대로 `max-width: 760px` 가운데 정렬을 유지해 가독성을 보존한다.
 
 ### 시각 디자인 영감 - Linear Docs
 
@@ -67,19 +69,23 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 ## 결과물 폴더 구조
 
 ```text
-LyraStarterGame/
-├── docs/                            # 마크다운 검증 원장 (사실의 단일 출처)
-│   ├── lyra-<system>-code-analysis.md
-│   ├── lyra-<system>-blueprint-analysis.md
-│   ├── lyra-<system>-learning-section-plan.md
-│   ├── (선택) lyra-<system>-references.md
-│   └── ...
+<프로젝트 루트>/
+├── docs/                            # 분석·학습 문서 (한 레포 = 한 프로젝트 평면 구조)
+│   ├── README.md                    # 인덱스 (공통 / 이 프로젝트 그룹으로 구분)
+│   ├── analysis-tools.md            # (공통) 도구 정책 — 다른 UE 프로젝트 레포로 카피 가능
+│   ├── documentation-workflow.md    # (공통) 작업 절차
+│   ├── dynamic-html-spec.md         # (공통) 본 사양
+│   ├── architecture-overview.md     # (이 프로젝트) 시스템 아키텍처 산문
+│   ├── project-verification.md      # (이 프로젝트) 검증 표 + 환경·MCP 설정
+│   ├── <system>-code-analysis.md    # (이 프로젝트) 예: animation-code-analysis.md
+│   ├── <system>-blueprint-analysis.md
+│   ├── <system>-learning-section-plan.md
+│   └── (선택) <system>-references.md
 └── dynamic-html/                    # 다이나믹 HTML 학습 가이드
     ├── index.html                   # 진입점 — 시스템별 섹션으로 그룹화
     ├── pages/
-    │   ├── lyra-animation-...html   # 시스템 1: 애니메이션
-    │   ├── lyra-ui-...html          # 시스템 2: CommonUI
-    │   └── lyra-<system>-...html    # 시스템 N: ...
+    │   ├── <project>-<system>-...html   # 예: lyra-animation-overview.html, lyra-ui-overview.html
+    │   └── ...
     ├── js/
     │   └── app.js                   # 다크모드·nav 마커 (전역 공통)
     └── css/
@@ -87,21 +93,21 @@ LyraStarterGame/
 ```
 
 원칙:
-- **시스템 = 디렉터리 아니라 파일명 접두어** (`lyra-<system>-<topic>.html`). `pages/` 안은 평면이고 분리는 파일명으로만 한다 — 시스템별 폴더는 만들지 않는다. 사용자가 `file://` 로 열 때 경로가 짧고 cross-link 가 단순해진다.
+- **한 레포 = 한 프로젝트.** `docs/` 안에 공통 문서와 이 프로젝트 종속 문서가 평면으로 함께 있고, README 인덱스로 그룹을 구분한다. 다른 UE 프로젝트를 분석할 때는 별도 레포에서 공통 3종을 카피해 시작.
+- **시스템 = 디렉터리 아니라 파일명 접두어** (`<project>-<system>-<topic>.html`). `pages/` 안은 평면이고 분리는 파일명으로만 한다 — 시스템별 폴더는 만들지 않는다. 사용자가 `file://` 로 열 때 경로가 짧고 cross-link 가 단순해진다. 원장 (`docs/`) 도 파일명 접두어 규칙 (`<system>-<doctype>.md`) 을 따르되, 단일 프로젝트 레포라 파일명에 프로젝트 접두어는 두지 않는다.
 - 자산 (CSS/JS) 은 전역 공통 1세트. 시스템별로 분기하지 않는다.
-- 원장 (`docs/`) 도 같은 접두어 규칙 (`lyra-<system>-<doctype>.md`) 을 따른다.
 
 ## 다중 시스템 구조
 
-학습 페이지는 **시스템 단위로 그룹화** 한다. 시스템은 라이라의 큰 기능 축 (애니메이션, CommonUI, GAS, Experience, Equipment, ...) 단위이고, 하나의 시스템 = 하나의 학습 트랙 = 하나의 검증 원장 묶음에 대응한다.
+학습 페이지는 **시스템 단위로 그룹화** 한다. 시스템은 프로젝트의 큰 기능 축 (이 저장소의 라이라 경우: 애니메이션, CommonUI, GAS, Experience, Equipment, ...) 단위이고, 하나의 시스템 = 하나의 학습 트랙 = 하나의 검증 원장 묶음에 대응한다.
 
 ### 시스템 정의
 
 | 항목 | 규칙 |
 |------|------|
 | 식별자 (slug) | `animation`, `ui`, `gas`, `experience` 등 영문 소문자 단어 (kebab 이 자연스러우면 OK — `game-features` 등) |
-| 원장 접두어 | `docs/lyra-<system>-` |
-| HTML 페이지 접두어 | `dynamic-html/pages/lyra-<system>-` |
+| 원장 위치 | `docs/<system>-` |
+| HTML 페이지 접두어 | `dynamic-html/pages/<project>-<system>-` |
 | 인덱스 섹션 | `dynamic-html/index.html` 의 한 `<section>` |
 | 페이지 번호 | **시스템 내에서만 1부터 매김**. 글로벌 번호 금지 (시스템이 추가되면 충돌). |
 
@@ -109,13 +115,15 @@ LyraStarterGame/
 
 진입점은 시스템별 `<section>` 으로 분리하고, 각 섹션 안에 카드 그리드 (`.entry-list`) 를 둔다. 페이지 번호는 카드 제목 안 (`1. ...` — 마침표 + 공백, "본문 특수문자 사용 규칙" 의 번호 ↔ 제목 구분자 절 참조) 에만 적되, 그 번호는 **해당 시스템 안의 순서** 다.
 
+다음 마크업은 일반 패턴이고, `href` 값은 이 저장소의 라이라 사례 (`<project>` = `lyra`) 다. 새 프로젝트는 같은 자리에 자기 프로젝트 접두어를 둔다 — `pages/<project>-<system>-overview.html`.
+
 ```html
 <main class="content">
   <section>
     <h2>시스템 1 이름 (예: 애니메이션)</h2>
     <p class="muted">시스템 한 줄 설명 (선택)</p>
     <ul class="entry-list">
-      <li><a href="pages/lyra-animation-overview.html">
+      <li><a href="pages/lyra-animation-overview.html"><!-- 예시: <project>=lyra -->
         <h3>1. ...</h3><p>...</p>
       </a></li>
       ...
@@ -125,7 +133,7 @@ LyraStarterGame/
   <section>
     <h2>시스템 2 이름 (예: CommonUI)</h2>
     <ul class="entry-list">
-      <li><a href="pages/lyra-ui-overview.html">
+      <li><a href="pages/lyra-ui-overview.html"><!-- 예시: <project>=lyra -->
         <h3>1. ...</h3><p>...</p>
       </a></li>
       ...
@@ -141,9 +149,9 @@ LyraStarterGame/
 
 ### 시스템별 overview 페이지 권장
 
-각 시스템의 첫 페이지 (예: `lyra-<system>-overview.html`) 는 **그 시스템의 학습 지도** 역할을 한다. 다른 학습 페이지가 "선행 학습" 으로 참조할 수 있는 진입점.
+각 시스템의 첫 페이지 (예: `<project>-<system>-overview.html`) 는 **그 시스템의 학습 지도** 역할을 한다. 다른 학습 페이지가 "선행 학습" 으로 참조할 수 있는 진입점.
 
-- 파일명 패턴: `lyra-<system>-overview.html`
+- 파일명 패턴: `<project>-<system>-overview.html`
 - 인덱스 카드 번호: `1`
 - 블록 구성: 보통 structure + flow + comparison + reference (mixed, "학습 목차" 사용)
 - chapter-brief 의 "선행 학습" 칸은 빈다 (또는 `(없음 — 이 페이지가 시작점)` 표기)
@@ -156,10 +164,10 @@ LyraStarterGame/
 |------|------------------------|------|
 | `chapter-brief` 의 "선행 학습" | **다른 시스템의 overview 페이지만** 허용 | 깊은 페이지로 바로 보내면 학습 부담. overview 만 가리킨다. |
 | `chapter-brief` 의 "보충 자료" | 외부 (Epic 등) 만 | 다른 시스템 페이지는 "선행 학습" 으로. |
-| 본문 블록 안 | 인용으로만 OK | `<a href="lyra-<other>-...html">` 자유 사용. 단 본문 흐름이 그 페이지에 강하게 의존하면 "선행 학습" 으로 옮겨라. |
+| 본문 블록 안 | 인용으로만 OK | `<a href="<project>-<other>-...html">` 자유 사용. 단 본문 흐름이 그 페이지에 강하게 의존하면 "선행 학습" 으로 옮겨라. |
 | 블록 안 `<code>` 식별자 | 텍스트로만 | 다른 시스템에 정의된 클래스·태그를 본문에서 인용할 때 링크 불필요. |
 
-원장 (`docs/lyra-*.md`) 사이 cross-reference 는 자유다 — 검증 추적성 목적.
+원장 (`docs/*.md`) 사이 cross-reference 는 자유다 — 검증 추적성 목적.
 
 ## HTML 페이지 표준 구조
 
@@ -233,8 +241,11 @@ LyraStarterGame/
 - 한국어 본문, 영문 식별자
 - `verified-at` 은 본문에 직접 적는다. **학습 페이지(`pages/*.html`)에만 적용**하며 진입점(`index.html`)은 사실 콘텐츠가 없는 페이지 목록 인덱스이므로 생략한다.
 - `<main class="content">` 는 `max-width: 760px` + `margin: 0 auto` 로 가운데 정렬
-- **사이드바·햄버거·backdrop·다이얼로그 없음**. 학습 목차는 본문 안 `.learn-index` 카드로
-- 헤더는 static - 콘텐츠와 함께 스크롤됨
+- **좌측 사이트 사이드바** (`<aside class="sidebar" id="sidebar">`) — `js/app.js` 가 페이지 메타데이터 기반으로 시스템·페이지 트리 동적 생성. 현재 페이지는 `aria-current="page"` 로 강조. 모바일에서는 햄버거 drawer.
+- **우측 페이지 TOC** (`<aside class="page-toc" id="page-toc">`) — `js/app.js` 가 본문 학습 블록 헤더 (`section > .block-head h2` · `.flow-head h2` · `.learn-index > h2`) 를 추출해 동적 생성 + scrollspy 로 현재 보이는 블록 강조. 태블릿 이하에서는 숨김 (본문 안 `.learn-index` 가 대체).
+- **이전 / 다음 페이저** (`<nav class="page-pager">`) — `js/app.js` 가 같은 시스템 내 순서로 본문 끝에 자동 삽입.
+- 헤더는 sticky — 좌측 햄버거 (모바일) + 가운데 제목·검증일·홈 nav + 우측 다크모드 토글.
+- 모달 다이얼로그·backdrop 같은 무거운 인터랙션은 두지 않음. 모바일 햄버거의 backdrop 만 예외.
 
 ### 목차명 분기
 
@@ -554,7 +565,7 @@ LyraStarterGame/
 - "먼저 알아둘 것" 은 이 페이지 안에서 **반복 설명하지 않을 전제** 만 둔다.
 - "선행 학습" 은 **내부 학습 페이지 링크만** - 검증 원장·정책 문서·README 같은 내부 문서는 노출 금지.
 - "선행 학습" **항목마다 "왜 선행인가" 한 줄 이유** 를 링크 뒤에 em dash (`—`) 로 붙여 적는다. 이유 없이 페이지 링크만 나열하지 않는다. 이유는 "본 페이지의 어떤 사실/개념이 그 선행 페이지의 어떤 사실/개념에 의존하는가" 를 한 문장으로 풀어 적는다. 정당성을 한 줄로 못 적는 prerequisite 은 해당 페이지의 선행 학습이 아니므로 **제거** 한다.
-- "보충 자료" 는 외부 공식/학습 자료만 - URL 은 `docs/lyra-*-references.md` 와 일치시킨다. 외부 링크는 `target="_blank"` + `rel="noopener"` 보안 속성.
+- "보충 자료" 는 외부 공식/학습 자료만 - URL 은 `docs/<system>-references.md` 와 일치시킨다. 외부 링크는 `target="_blank"` + `rel="noopener"` 보안 속성.
 - 박스에서 본문 내용을 요약하지 않는다 - 본문을 읽기 위해 필요한 준비만.
 - 색상은 중립 배경. `flow-*` 색 사용 금지 (아래 색상 정책 참조).
 
@@ -664,7 +675,7 @@ LyraStarterGame/
 | `◆` | `.step[data-type="conduit"] .step-name::before` (CSS `content`) | conduit 노드 미니 아이콘 |
 | `🌓` | `.theme-toggle` 버튼 자체 | 컴포넌트 그래픽 (예외 — 이모지지만 컴포넌트 정체성) |
 
-위 5종 외 다른 이모지 (`✅`·`❌`·`⚠️` 등) 는 본문·배지에 사용하지 않는다. OS 의존 색이 라이라 다크 토큰과 어긋난다.
+위 5종 외 다른 이모지 (`✅`·`❌`·`⚠️` 등) 는 본문·배지에 사용하지 않는다. OS 의존 색이 사이트 다크 토큰과 어긋난다.
 
 #### 본문에서 한글로 풀어 쓰는 기호
 
@@ -705,12 +716,12 @@ LyraStarterGame/
 
 - **HTML 배지는 마크다운 검증 원장의 등급보다 높은 값을 표시할 수 없다.** 원장이 `partial` 인 사실을 HTML 에서 `verified` 로 승격하지 않는다. 반대 방향(원장 `verified` → HTML `partial`) 은 보수적 표기이므로 허용.
 - **본문 표현도 등급에 맞춘다.** `partial` 항목은 "적용한다" 같은 확정형이 아니라 "적용 지점으로 추정", "에디터 확인 필요" 같은 보수 표현을 사용한다.
-- **등급 변경 순서**: 원장(`docs/lyra-*-analysis.md`) → 사양·계획 문서 → HTML 페이지 순. 역방향 금지.
+- **등급 변경 순서**: 원장(`docs/<system>-*-analysis.md`) → 사양·계획 문서 → HTML 페이지 순. 역방향 금지.
 - **새 사실 추가 금지**: 원장에 없는 사실을 HTML 에 새로 정의하지 않는다. 추가가 필요하면 원장을 먼저 갱신한 뒤 HTML 에 옮긴다.
 
 ## HTML 전역 컴포넌트
 
-학습 페이지에 두는 컴포넌트는 다음 한 가지로 한정. (제목의 "HTML 전역" 은 라이라 CommonUI 시스템 (`ui`) 과의 용어 충돌을 피하기 위한 것 — 여기서 다루는 컴포넌트는 HTML 사이트 자체의 UI 다.)
+학습 페이지에 두는 컴포넌트는 다음 한 가지로 한정. (제목의 "HTML 전역" 은 분석 대상 시스템의 UI 명칭과의 용어 충돌을 피하기 위한 것 — 이 저장소의 라이라 경우 CommonUI 시스템 (`ui`) — 여기서 다루는 컴포넌트는 HTML 사이트 자체의 UI 다.)
 
 ### 다크모드 토글
 
@@ -720,11 +731,8 @@ LyraStarterGame/
 
 ## 사용하지 않는 컴포넌트
 
-- ❌ **좌측 사이드바** - 단일 컬럼. 학습 목차는 본문 안 `.learn-index` 카드에 통합
-- ❌ **햄버거 메뉴 / drawer / backdrop** - 사이드바가 없으므로 토글도 없음
-- ❌ **sticky 헤더** - `static`. 스크롤하면 함께 위로 사라짐
-- ❌ **사이드바 검색**
-- ❌ **키보드 단축키**
+- ❌ **사이드바 검색** — 페이지 19개 규모에서는 사이드바 트리 한 번에 다 보임. 검색은 페이지 100개 이상일 때 도입 검토.
+- ❌ **키보드 단축키** — 모바일 우선이라 단축키 학습 부담을 강요하지 않음.
 - ❌ **모달 다이얼로그 (`<dialog>`)**
 - ❌ **헤더 도움말 버튼**
 - ❌ **툴팁 (`data-tooltip`)**
@@ -746,7 +754,7 @@ LyraStarterGame/
 - ❌ **시각 규약 본문 설명** ("검증 등급의 의미" 류) - 배지 시각 (`✓` 녹 / `◐` 황 / `△` 회) 만으로 자명
 - ❌ **외부 자료 위치 안내** ("사실 사전이 필요할 때" 류) - 외부 학습 자료가 필요하면 페이지 상단 챕터 브리프(`.chapter-brief`) 의 "보충 자료" 칸에 두고, 검증 원장 같은 내부 문서는 학습 페이지에 노출하지 않는다
 
-이런 메타 정보는 본 사양 문서, `docs/README.md`, `docs/lyra-*-references.md` 에 두고 **HTML 학습 페이지에서는 반복하지 않는다**. 학습자가 처음 페이지에 들어왔을 때 메타 안내를 거치지 않고 곧장 학습 본문 (학습 목차 → 필요한 학습 블록) 으로 들어가는 동선을 우선한다.
+이런 메타 정보는 본 사양 문서, `docs/README.md`, `docs/<system>-references.md` 에 두고 **HTML 학습 페이지에서는 반복하지 않는다**. 학습자가 처음 페이지에 들어왔을 때 메타 안내를 거치지 않고 곧장 학습 본문 (학습 목차 → 필요한 학습 블록) 으로 들어가는 동선을 우선한다.
 
 ## 금지 사항
 
@@ -760,7 +768,6 @@ LyraStarterGame/
 - ❌ 마크다운 원장에 없는 사실을 HTML 에서 새로 정의 - 원장 먼저 갱신
 - ❌ 마크다운 원장의 사실 사전·전체 노드 목록·전이 표를 HTML 에 반복
 - ❌ 호버 기반 UI (툴팁·hover-only) - 모바일에서 잘 동작 안 함
-- ❌ 고정 위치 요소 (sticky 헤더·fixed 사이드바·overlay drawer) - 모바일 화면 면적을 줄이고 학습 흐름을 방해
 - ❌ **`flow-section` 남용** - 인터페이스 함수 목록·CDO 값·variant 비교·작업 절차·테스트 케이스를 `flow-section` 으로 만들지 말 것. 학습 블록 7종에서 정보 형태에 맞는 종류를 선택한다.
 - ❌ **모든 페이지가 같은 개수의 `flow-section` 으로 채워지는 균일성** - 정책 포맷이 콘텐츠 판단을 압도한 신호. 페이지마다 정보 형태에 맞춰 블록 구성이 달라져야 정상.
 
@@ -776,20 +783,20 @@ LyraStarterGame/
 
 1. **시스템 식별자 결정** — `<system>` slug 를 정한다 (예: `gas`, `experience`, `equipment`). 영문 소문자 단어, 필요 시 하이픈.
 2. **검증 원장 작성** — 다음 마크다운 문서를 `docs/` 에 둔다.
-   - `docs/lyra-<system>-code-analysis.md` (필수)
-   - `docs/lyra-<system>-blueprint-analysis.md` (블루프린트/CDO 가 있는 시스템이면 필수)
-   - `docs/lyra-<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
-   - `docs/lyra-<system>-references.md` (선택 — 공식 문서 링크가 많을 때)
+   - `docs/<system>-code-analysis.md` (필수)
+   - `docs/<system>-blueprint-analysis.md` (블루프린트/CDO 가 있는 시스템이면 필수)
+   - `docs/<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
+   - `docs/<system>-references.md` (선택 — 공식 문서 링크가 많을 때)
 3. **`docs/README.md` 에 시스템 섹션 추가** — 공통 정책 / 시스템별 그룹 구조 안에 새 시스템 표를 추가.
 4. **`dynamic-html/index.html` 에 시스템 섹션 추가** — 새 `<section>` 을 시스템 학습 우선순위 위치에 삽입. 페이지가 없으면 `<p class="muted">(준비 중)</p>`.
 5. (이 시점에 시스템 골격 완성 — 페이지는 B 절차로 하나씩 추가)
 
 ### B. 기존 시스템에 새 페이지 추가 (일상 작업)
 
-1. **원장 사실 확보** — 페이지가 인용할 사실이 모두 검증 원장 (`docs/lyra-<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
+1. **원장 사실 확보** — 페이지가 인용할 사실이 모두 검증 원장 (`docs/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
 2. **정보 형태 분류** — 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
 3. **flow gate 통과 확인** — `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
-4. **페이지 파일 작성** — `dynamic-html/pages/lyra-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" 표준에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `lyra-<system>-overview.html` 로 둔다.
+4. **페이지 파일 작성** — `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" 표준에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다.
 5. **`dynamic-html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** — 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
 6. **시스템 간 cross-link 추가** (해당 시 only) — 다른 시스템의 overview 페이지를 chapter-brief 의 "선행 학습" 으로 등록할 만하면 추가. 다른 시스템 깊은 페이지로의 직접 링크는 본문 블록 안에서만.
 7. 본 사양 또는 `docs/README.md` 에 변경 필요가 있으면 함께 갱신한다.
@@ -799,7 +806,7 @@ LyraStarterGame/
 
 새 페이지를 추가하거나 기존 페이지를 갱신한 뒤 다음을 모두 확인한다. 한 항목이라도 실패하면 원인을 해결한 뒤 다시 검사한다.
 
-- **내부 링크** - 모든 로컬 `href` 가 존재하는 파일을 가리키는가. `pages/` 안의 cross-link 도 표준 파일명(`lyra-<system>-...html`) 인가.
+- **내부 링크** - 모든 로컬 `href` 가 존재하는 파일을 가리키는가. `pages/` 안의 cross-link 도 표준 파일명(`<project>-<system>-...html`) 인가.
 - **외부 링크 보안 속성** - 모든 외부 `<a>` 가 `target="_blank"` + `rel="noopener"` 를 함께 가지는가.
 - **검증 등급 일관성** - 페이지의 `data-validation` 과 배지 글리프(✓/◐/△) 가 마크다운 원장의 등급보다 높지 않은가. 본문 표현이 등급에 맞는가.
 - **표준 구조** - 학습 페이지(`pages/*.html`)는 `verified-at`(헤더), `chapter-brief` (4칸), `learn-index`(또는 흐름·항목 목차), **학습 블록 3~6개**(flow 만이 아니어도 됨) 를 모두 갖는가. 진입점(`index.html`)은 `verified-at`·`chapter-brief` 생략.
@@ -812,11 +819,11 @@ LyraStarterGame/
 - **특수문자 사용** - `§`·`¶`·`※`·`×N` 같은 의미 전달 기호가 본문에 남아 있지 않은가. 검증 배지·흐름 화살표·conduit 미니 아이콘은 정의된 위치에만 사용했는가.
 - **번호 ↔ 제목 구분자** - 목록 항목 (`.entry-list h3`, `.learn-index ol li a` 등) 의 번호와 제목 사이가 **마침표 (`.`) + 공백** 인가. `·` 가 번호 구분자로 쓰여 같은 줄에서 제목 내 병렬과 충돌하지 않는가.
 - **메타 콘텐츠 없음** - "이 사이트는 무엇인가", "이 페이지를 읽는 법", "사실 사전이 필요할 때" 류가 추가되지 않았는가.
-- **금지 요소 없음** - 외부 CDN/이미지, `fetch()`, 인라인 JSON `<script type="application/json">`, sticky/fixed 레이아웃, `<dialog>` , `data-tooltip`, 키보드 단축키, 햄버거 메뉴 등이 사양 위반으로 들어가지 않았는가.
+- **금지 요소 없음** - 외부 CDN/이미지, `fetch()`, 인라인 JSON `<script type="application/json">`, `<dialog>`, `data-tooltip`, 키보드 단축키, 사이드바 검색 등이 사양 위반으로 들어가지 않았는가. (sticky 헤더·fixed 사이드바·모바일 햄버거 drawer 는 본 사양의 표준 — 금지 대상 아님.)
 - **chapter-brief 규칙** - "선행 학습" 에 검증 원장·정책 문서 링크가 들어가지 않았는가. "보충 자료" 가 외부 학습 자료만 노출하는가. 시스템 간 cross-link 는 "선행 학습" 칸의 다른 시스템 **overview 페이지만** 허용한다.
 - **선행 학습 정당성** - "선행 학습" 항목마다 em dash (`—`) 와 함께 "왜 선행인가" 한 줄 이유가 붙어 있는가. 이유 없이 페이지 링크만 있는 항목은 없는가. 본 페이지 콘텐츠와 직접 의존이 없는 prerequisite (예: 큰 그림만 보여주는 overview 가 디테일 페이지의 prereq 로 들어감) 은 제거됐는가.
 - **새 사실 없음** - HTML 에 마크다운 원장에 없는 사실이 새로 등장하지 않았는가.
-- **다중 시스템 인덱스 구조** - `dynamic-html/index.html` 이 시스템별 `<section>` 으로 그룹화되어 있는가. 페이지 번호는 시스템 내 순서이고 글로벌 번호가 아닌가. 파일명이 `lyra-<system>-<topic>.html` 패턴인가.
+- **다중 시스템 인덱스 구조** - `dynamic-html/index.html` 이 시스템별 `<section>` 으로 그룹화되어 있는가. 페이지 번호는 시스템 내 순서이고 글로벌 번호가 아닌가. 파일명이 `<project>-<system>-<topic>.html` 패턴인가.
 
 ## 의도적으로 정의하지 않은 것
 

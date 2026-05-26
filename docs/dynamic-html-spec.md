@@ -1,7 +1,7 @@
 # 분석·학습 다이나믹 HTML 문서 사양
 
 > 결정일: 2026-05-23
-> 갱신일: 2026-05-25 (라이라 종속 문서 분리 → `docs/` 구조 + `<project>-<system>-<topic>.html` 파일명 패턴으로 일반화)
+> 갱신일: 2026-05-26 (학습 블록 표 4종에 `.table-wrap` 래퍼 의무화 — 본문 컬럼 760px 폭에서 5~6컬럼·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만드는 문제 차단)
 > 목적: Unreal Engine 프로젝트의 분석·학습 결과를 다이나믹 HTML 로 표현할 때 모든 작업이 같은 규칙을 따르도록 한다. 모든 UE 프로젝트 분석에 재사용 가능하며, 이 저장소의 라이라는 현재 등록된 사례.
 > 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/*.md`) 자체에는 적용되지 않는다.
 
@@ -388,15 +388,17 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
     <p class="block-desc">cosmetic 태그 우선순위에 따라 layer class 가 선택된다.</p>
   </header>
 
-  <table class="decision-table">
-    <thead>
-      <tr><th>우선순위</th><th>조건 (RequiredTags)</th><th>결과 (Layer Class)</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>1</td><td><code>Cosmetic.Feminine</code></td><td><code>ABP_RifleAnimLayers_Feminine</code></td></tr>
-      <tr><td>2</td><td>(없음)</td><td><code>ABP_RifleAnimLayers</code> (default)</td></tr>
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="decision-table">
+      <thead>
+        <tr><th>우선순위</th><th>조건 (RequiredTags)</th><th>결과 (Layer Class)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><code>Cosmetic.Feminine</code></td><td><code>ABP_RifleAnimLayers_Feminine</code></td></tr>
+        <tr><td>2</td><td>(없음)</td><td><code>ABP_RifleAnimLayers</code> (default)</td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 ```
 
@@ -422,7 +424,9 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
   </ul>
 
   <!-- 긴 항목·여러 컬럼은 reference-table -->
-  <table class="reference-table">...</table>
+  <div class="table-wrap">
+    <table class="reference-table">...</table>
+  </div>
 </section>
 ```
 
@@ -439,15 +443,17 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
     <h2>무기별 layer 차이</h2>
   </header>
 
-  <table class="comparison-table">
-    <thead>
-      <tr><th>무기</th><th>parent</th><th>override 함수</th><th>default sequence set</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Rifle</td><td>ABP_ItemAnimLayersBase</td><td>4</td><td>Rifle_DefaultAnims</td></tr>
-      ...
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="comparison-table">
+      <thead>
+        <tr><th>무기</th><th>parent</th><th>override 함수</th><th>default sequence set</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Rifle</td><td>ABP_ItemAnimLayersBase</td><td>4</td><td>Rifle_DefaultAnims</td></tr>
+        ...
+      </tbody>
+    </table>
+  </div>
 </section>
 ```
 
@@ -488,23 +494,69 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
     <h2>ShooterTests 매트릭스</h2>
   </header>
 
-  <table class="verification-table">
-    <thead>
-      <tr><th>테스트</th><th>입력</th><th>기대 결과</th><th>검증 대상</th><th>자동화</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>InputCrouchAnimationTest</code></td>
-        <td>Crouch 입력</td>
-        <td>Crouch 애니메이션 재생</td>
-        <td>FullBody_CycleState</td>
-        <td>✓</td>
-      </tr>
-      ...
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="verification-table">
+      <thead>
+        <tr><th>테스트</th><th>입력</th><th>기대 결과</th><th>검증 대상</th><th>자동화</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>InputCrouchAnimationTest</code></td>
+          <td>Crouch 입력</td>
+          <td>Crouch 애니메이션 재생</td>
+          <td>FullBody_CycleState</td>
+          <td>✓</td>
+        </tr>
+        ...
+      </tbody>
+    </table>
+  </div>
 </section>
 ```
+
+### 표 마크업 표준 (모든 표 공통)
+
+학습 블록 4종 (`decision-section` · `comparison-section` · `reference-section` · `verification-section`) 이 사용하는 `<table>` 은 **반드시 `.table-wrap` 으로 감싼다**. 본문 컬럼은 `max-width: 760px` 인데 표는 5~6컬럼·긴 Unreal 경로·GameplayTag·C++ 식별자 셀을 자주 가져 가로 폭이 컬럼을 넘는다 — 래퍼 없이 두면 표 자체가 본문 → 레이아웃 → `body` 방향으로 넓어져 페이지 전체에 가로 스크롤이 생기고 3단 레이아웃 정렬이 깨진다.
+
+**표준 마크업:**
+
+```html
+<div class="table-wrap">
+  <table class="reference-table">
+    ...
+  </table>
+</div>
+```
+
+**원칙:**
+
+- `.table-wrap` 이 **수평 overflow 의 유일한 소유자** 다. 표가 넓어지면 래퍼 내부에서만 스크롤이 생기고, 페이지 전체 레이아웃에는 영향이 없다.
+- 기존 `.decision-table` / `.comparison-table` / `.verification-table` / `.reference-table` class 는 그대로 둔다. 래퍼는 추가 계층일 뿐 표 클래스를 대체하지 않는다.
+- 표 셀과 셀 안 `<code>` 는 `overflow-wrap: anywhere` 로 긴 토큰만 줄바꿈한다. 산문 본문에는 적용되지 않으므로 한글/영문 가독성에 영향 없다.
+- `word-break: break-all` 을 전역 적용하지 않는다 — 한국어 산문 가독성이 심하게 떨어진다.
+- `body` · `html` 에 `overflow-x: hidden` 으로 깨짐을 숨기지 않는다 — 내용이 잘릴 뿐 근본 해결이 아니다.
+- `.content` 의 `max-width` 를 키우는 방식 (760px → 900px 등) 은 보조책일 뿐이고 모바일·5~6컬럼 표 문제는 그대로 남는다.
+
+**표 폭 설계 가이드 (콘텐츠 단계):**
+
+CSS 만으로 해결하지 말아야 하는 표도 있다. 작성 단계에서 다음 기준으로 미리 분기한다.
+
+| 조건 | 권장 표현 |
+|------|-----------|
+| 4컬럼 이하, 짧은 값 중심 | 일반 표 + 래퍼 |
+| 5~6컬럼, 코드/경로 값 중심 | 표 + 래퍼 + 로컬 수평 스크롤 허용 |
+| 6컬럼 이상, 설명문이 긴 셀 다수 | 표를 2개로 분리하거나 `reference-section` 의 `.ref-list` 카드로 전환 |
+| 단순 key/value 사전 | 2컬럼 표 또는 `.ref-list` 로 전환 |
+
+**검증 (브라우저 콘솔):**
+
+페이지를 열고 다음을 확인한다. `true` 가 아니면 어떤 표가 본문을 밀어내고 있다 — 그 표의 컬럼 수·셀 콘텐츠를 위 가이드대로 재설계한다.
+
+```js
+document.documentElement.scrollWidth <= document.documentElement.clientWidth
+```
+
+단, `.table-wrap` 내부의 `scrollWidth > clientWidth` (즉, 래퍼 내부 가로 스크롤) 는 정상이다.
 
 ### 챕터 브리프 - `.chapter-brief`
 
@@ -770,6 +822,8 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 - ❌ 호버 기반 UI (툴팁·hover-only) - 모바일에서 잘 동작 안 함
 - ❌ **`flow-section` 남용** - 인터페이스 함수 목록·CDO 값·variant 비교·작업 절차·테스트 케이스를 `flow-section` 으로 만들지 말 것. 학습 블록 7종에서 정보 형태에 맞는 종류를 선택한다.
 - ❌ **모든 페이지가 같은 개수의 `flow-section` 으로 채워지는 균일성** - 정책 포맷이 콘텐츠 판단을 압도한 신호. 페이지마다 정보 형태에 맞춰 블록 구성이 달라져야 정상.
+- ❌ **`.table-wrap` 없이 본문에 직접 둔 `<table>`** - 5~6컬럼 표·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만든다. "표 마크업 표준" 절 참고.
+- ❌ **레이아웃 깨짐 대응으로 `body { overflow-x: hidden }` / 전역 `word-break: break-all` / 표 폰트 극단 축소** - 증상을 숨기거나 가독성을 망가뜨릴 뿐 근본 해결이 아니다. 표 래퍼 + 셀 줄바꿈 + 컬럼 분할로 해결.
 
 예외가 필요하면 본 사양을 먼저 수정한 뒤 반영한다.
 
@@ -796,7 +850,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 1. **원장 사실 확보** — 페이지가 인용할 사실이 모두 검증 원장 (`docs/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
 2. **정보 형태 분류** — 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
 3. **flow gate 통과 확인** — `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
-4. **페이지 파일 작성** — `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" 표준에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다.
+4. **페이지 파일 작성** — `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent — 이미 래핑된 표는 skip).
 5. **`dynamic-html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** — 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
 6. **시스템 간 cross-link 추가** (해당 시 only) — 다른 시스템의 overview 페이지를 chapter-brief 의 "선행 학습" 으로 등록할 만하면 추가. 다른 시스템 깊은 페이지로의 직접 링크는 본문 블록 안에서만.
 7. 본 사양 또는 `docs/README.md` 에 변경 필요가 있으면 함께 갱신한다.
@@ -810,6 +864,8 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 - **외부 링크 보안 속성** - 모든 외부 `<a>` 가 `target="_blank"` + `rel="noopener"` 를 함께 가지는가.
 - **검증 등급 일관성** - 페이지의 `data-validation` 과 배지 글리프(✓/◐/△) 가 마크다운 원장의 등급보다 높지 않은가. 본문 표현이 등급에 맞는가.
 - **표준 구조** - 학습 페이지(`pages/*.html`)는 `verified-at`(헤더), `chapter-brief` (4칸), `learn-index`(또는 흐름·항목 목차), **학습 블록 3~6개**(flow 만이 아니어도 됨) 를 모두 갖는가. 진입점(`index.html`)은 `verified-at`·`chapter-brief` 생략.
+- **표 래퍼 의무화** - 모든 `<table class="...">` (decision/comparison/reference/verification) 의 직속 부모가 `<div class="table-wrap">` 인가. 래퍼 없이 본문에 직접 둔 표가 한 개라도 있으면 배포 불가. 정적 검사 — `pages/*.html` 의 `<table` 직전 줄이 모두 `class="table-wrap"` 을 포함하는지 확인 (idempotent 한 일괄 래핑은 `tools/wrap-tables.cjs` 로 가능).
+- **뷰포트 가로 overflow 없음** - 데스크탑 (1280px) · 태블릿 (768px) · 모바일 (375px) 세 뷰포트에서 페이지 전체에 가로 스크롤이 생기지 않는가. 브라우저 콘솔에서 `document.documentElement.scrollWidth <= document.documentElement.clientWidth` 가 `true` 인가. `.table-wrap` 내부 로컬 가로 스크롤은 허용 (`true` 판정과 무관). 표가 본문을 밀어내면 컬럼 수·셀 콘텐츠를 사양의 "표 폭 설계 가이드" 대로 재설계한다.
 - **chapter-brief 4칸 완성** - "이 챕터의 질문" 과 "먼저 알아둘 것" 은 필수, "선행 학습" 과 "보충 자료" 는 페이지 성격에 맞게. `page-refs` 마크업이 남아 있지 않은가.
 - **flow gate 통과** - 모든 `flow-section` 이 위 5문에 3문 이상 "예" 답이 가능한가. 단순 목록·variant 비교·작업 절차·테스트 케이스가 `flow-section` 으로 잘못 표현돼 있지 않은가.
 - **블록 종류 적합성** - 인터페이스/CDO/slot 같은 사전식 자료는 `reference-section`, variant 차이는 `comparison-section`, 작업 절차는 `recipe-section`, 테스트 매트릭스는 `verification-section`, 선택 규칙은 `decision-section`, 책임 관계는 `structure-section` 으로 분리됐는가.

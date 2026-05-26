@@ -34,7 +34,7 @@ Claude 작업 정책 (이 레포에서 Claude 가 어떻게 행동할지) 은 �
 
 ## `project/` - 시스템별 검증 원장 (HTML 의 단일 출처)
 
-각 시스템마다 표준 4종 (코드 분석 · 블루프린트 분석 · 학습 섹션 설계 · 참고 자료). `common/dynamic-html-spec.md` 가 정한 절차로 만들어진 **분석 결과** 이고, 동시에 `dynamic-html/pages/lyra-<system>-*.html` 학습 페이지의 **사실 단일 출처** 입니다.
+각 시스템마다 표준 4종 (코드 분석 · 블루프린트 분석 · 학습 섹션 설계 · 참고 자료). `common/dynamic-html-spec.md` 가 정한 절차로 만들어진 **분석 결과** 이고, 동시에 `html/pages/lyra-<system>-*.html` 학습 페이지의 **사실 단일 출처** 입니다.
 
 ### 애니메이션 (`animation`)
 
@@ -88,7 +88,7 @@ Claude 작업 정책 (이 레포에서 Claude 가 어떻게 행동할지) 은 �
 2. 시스템 폴더는 만들지 않는다 - `project/` 안에 평면으로, 파일명 접두어 `<system>-` 로만 구분.
 3. **표준 4종 문서** 를 `project/` 에 작성한다 - `project/<system>-code-analysis.md`, `project/<system>-blueprint-analysis.md`, `project/<system>-learning-section-plan.md`, (선택) `project/<system>-references.md`. 5단계 절차·품질 규칙은 [`common/documentation-workflow.md`](common/documentation-workflow.md) 참고.
 4. 본 인덱스의 "시스템별 검증 원장" 절 안에 새 `### <시스템 이름> (<system>)` 절을 추가한다 - 시스템 우선순위에 맞는 위치에 (알파벳 순서 같은 기계적 정렬 금지).
-5. (HTML 산출 시) `dynamic-html/index.html` 에도 같은 시스템의 새 `<section>` 을 추가한다 - 사양 [`common/dynamic-html-spec.md`](common/dynamic-html-spec.md) 의 "다중 시스템 구조" 참고.
+5. (HTML 산출 시) `html/index.html` 에도 같은 시스템의 새 `<section>` 을 추가한다 - 사양 [`common/dynamic-html-spec.md`](common/dynamic-html-spec.md) 의 "다중 시스템 구조" 참고.
 
 ## 다른 UE 프로젝트 분석을 시작할 때
 

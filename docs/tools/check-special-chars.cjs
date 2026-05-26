@@ -1,6 +1,6 @@
 // Static checker for special-char policy (docs/common/dynamic-html-spec.md "본문 특수문자 사용 규칙").
 //
-// Scans CLAUDE.md + docs/**/*.md + dynamic-html/**/*.html body text for policy violations.
+// Scans CLAUDE.md + docs/**/*.md + html/**/*.html body text for policy violations.
 // Two severity levels:
 //   - FAIL: glyph in BANNED set (em dash · en dash · ✅ · ❌ · ⚠️ · ★ · ①~⑨ etc.) → exit 1
 //   - WARN: glyph in WARN set (· · → · ← · ↔ · …) — count only, allowed in narrow roles
@@ -116,8 +116,8 @@ function listTargets() {
   // docs/**/*.md
   const docs = path.join(root, "docs");
   if (fs.existsSync(docs)) walk(docs, [".md"], out, new Set(["node_modules"]));
-  // dynamic-html/**/*.{html}
-  const dyn = path.join(root, "dynamic-html");
+  // html/**/*.{html}
+  const dyn = path.join(root, "html");
   if (fs.existsSync(dyn)) walk(dyn, [".html"], out, new Set(["node_modules"]));
   return out;
 }

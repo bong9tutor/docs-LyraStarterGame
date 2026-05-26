@@ -1,4 +1,4 @@
-// Headless Chrome verification of dynamic-html/ site.
+// Headless Chrome verification of html/ site.
 // Spawns Chrome via puppeteer-core (system Chrome). Drives file:// URLs through
 // three viewports (375/768/1280), checks:
 //   - document.documentElement.scrollWidth <= clientWidth (no global horizontal overflow)
@@ -14,7 +14,7 @@ const path = require("node:path");
 const puppeteer = require("puppeteer-core");
 
 const repo = path.resolve(__dirname, "..", "..");  // docs/tools/ → repo root
-const dynRoot = path.join(repo, "dynamic-html");
+const dynRoot = path.join(repo, "html");
 const shotsDir = path.join(repo, "docs", "tools", "verify-shots");
 fs.mkdirSync(shotsDir, { recursive: true });
 

@@ -3,14 +3,14 @@
 > 결정일: 2026-05-23
 > 갱신일: 2026-05-26 (학습 블록 표 4종에 `.table-wrap` 래퍼 의무화 - 본문 컬럼 760px 폭에서 5~6컬럼·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만드는 문제 차단)
 > 목적: Unreal Engine 프로젝트의 분석·학습 결과를 다이나믹 HTML 로 표현할 때 모든 작업이 같은 규칙을 따르도록 한다. 모든 UE 프로젝트 분석에 재사용 가능하며, 이 저장소의 라이라는 현재 등록된 사례.
-> 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/project/*.md`) 자체에는 적용되지 않는다.
+> 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`html/`). 마크다운 검증 원장 (`docs/project/*.md`) 자체에는 적용되지 않는다.
 
 ## 역할 분담 (가장 중요)
 
 | 종류 | 위치 | 역할 |
 |------|------|------|
 | 마크다운 검증 원장 | `docs/project/*.md` | **사실의 단일 출처**. 노드 사전·전이 표·CDO 값 등 사전식 자료. |
-| 다이나믹 HTML | `dynamic-html/` | **학습 동선 가이드**. 마크다운 원장의 사실을 학습자가 이해하기 쉬운 순서로 재배열한다 - 정보 형태에 맞춰 흐름·구조·결정·참조·비교·레시피·검증 블록을 조합한다. |
+| 다이나믹 HTML | `html/` | **학습 동선 가이드**. 마크다운 원장의 사실을 학습자가 이해하기 쉬운 순서로 재배열한다 - 정보 형태에 맞춰 흐름·구조·결정·참조·비교·레시피·검증 블록을 조합한다. |
 
 두 산출물은 **목적이 다르며 같은 정보를 반복하지 않는다**.
 
@@ -84,7 +84,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 │       ├── <system>-blueprint-analysis.md
 │       ├── <system>-learning-section-plan.md
 │       └── (선택) <system>-references.md
-└── dynamic-html/                              # 다이나믹 HTML 학습 가이드
+└── html/                              # 다이나믹 HTML 학습 가이드
     ├── index.html                             # 진입점 — 시스템별 섹션으로 그룹화
     ├── pages/
     │   ├── <project>-<system>-...html         # 예: lyra-animation-overview.html, lyra-ui-overview.html
@@ -110,11 +110,11 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 |------|------|
 | 식별자 (slug) | `animation`, `ui`, `gas`, `experience` 등 영문 소문자 단어 (kebab 이 자연스러우면 OK - `game-features` 등) |
 | 원장 위치 | `docs/project/<system>-` |
-| HTML 페이지 접두어 | `dynamic-html/pages/<project>-<system>-` |
-| 인덱스 섹션 | `dynamic-html/index.html` 의 한 `<section>` |
+| HTML 페이지 접두어 | `html/pages/<project>-<system>-` |
+| 인덱스 섹션 | `html/index.html` 의 한 `<section>` |
 | 페이지 번호 | **시스템 내에서만 1부터 매김**. 글로벌 번호 금지 (시스템이 추가되면 충돌). |
 
-### 인덱스 페이지 구조 (`dynamic-html/index.html`)
+### 인덱스 페이지 구조 (`html/index.html`)
 
 진입점은 시스템별 `<section>` 으로 분리하고, 각 섹션 안에 카드 그리드 (`.entry-list`) 를 둔다. 페이지 번호는 카드 제목 안 (`1. ...` - 마침표 + 공백, "본문 특수문자 사용 규칙" 의 번호 ↔ 제목 구분자 절 참조) 에만 적되, 그 번호는 **해당 시스템 안의 순서** 다.
 
@@ -803,7 +803,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 #### 정적 검사 (배포 차단)
 
-`docs/tools/check-special-chars.cjs` 가 `CLAUDE.md` · `docs/**/*.md` · `dynamic-html/**/*.html` 본문에서 위 "금지 글리프" 발견 시 exit 1. "경고 글리프" 는 카운트만 출력. 위 화이트리스트 외 모든 BMP 외 글리프 (이모지 등) 도 FAIL. 작성 후 매번 실행 필수.
+`docs/tools/check-special-chars.cjs` 가 `CLAUDE.md` · `docs/**/*.md` · `html/**/*.html` 본문에서 위 "금지 글리프" 발견 시 exit 1. "경고 글리프" 는 카운트만 출력. 위 화이트리스트 외 모든 BMP 외 글리프 (이모지 등) 도 FAIL. 작성 후 매번 실행 필수.
 
 ### 검증 등급 처리 규칙
 
@@ -840,7 +840,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 ## 메타 콘텐츠 최소화 원칙
 
-학습 페이지에는 **학습 본문과 직접 연결된 콘텐츠만** 둔다. 다음은 학습 동선을 끊으므로 학습 페이지(`dynamic-html/pages/*.html`)·진입점(`dynamic-html/index.html`)에 두지 않는다.
+학습 페이지에는 **학습 본문과 직접 연결된 콘텐츠만** 둔다. 다음은 학습 동선을 끊으므로 학습 페이지(`html/pages/*.html`)·진입점(`html/index.html`)에 두지 않는다.
 
 - 불가 **사이트 자체 소개** ("이 사이트는 무엇인가" 류) - 헤더 제목으로 자명
 - 불가 **페이지 사용법 안내** ("이 페이지를 읽는 법" 류) - 단계 카드의 좌측 색 막대·종류 라벨로 자명
@@ -883,7 +883,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
  - `docs/project/<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
  - `docs/project/<system>-references.md` (선택 - 공식 문서 링크가 많을 때)
 3. **`docs/README.md` 에 시스템 섹션 추가** - 공통 정책 / 시스템별 그룹 구조 안에 새 시스템 표를 추가.
-4. **`dynamic-html/index.html` 에 시스템 섹션 추가** - 새 `<section>` 을 시스템 학습 우선순위 위치에 삽입. 페이지가 없으면 `<p class="muted">(준비 중)</p>`.
+4. **`html/index.html` 에 시스템 섹션 추가** - 새 `<section>` 을 시스템 학습 우선순위 위치에 삽입. 페이지가 없으면 `<p class="muted">(준비 중)</p>`.
 5. (이 시점에 시스템 골격 완성 - 페이지는 B 절차로 하나씩 추가)
 
 ### B. 기존 시스템에 새 페이지 추가 (일상 작업)
@@ -891,8 +891,8 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 1. **원장 사실 확보** - 페이지가 인용할 사실이 모두 검증 원장 (`docs/project/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
 2. **정보 형태 분류** - 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
 3. **flow gate 통과 확인** - `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
-4. **페이지 파일 작성** - `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node docs/tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent - 이미 래핑된 표는 skip).
-5. **`dynamic-html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** - 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
+4. **페이지 파일 작성** - `html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node docs/tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent - 이미 래핑된 표는 skip).
+5. **`html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** - 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
 6. **시스템 간 cross-link 추가** (해당 시 only) - 다른 시스템의 overview 페이지를 chapter-brief 의 "선행 학습" 으로 등록할 만하면 추가. 다른 시스템 깊은 페이지로의 직접 링크는 본문 블록 안에서만.
 7. 본 사양 또는 `docs/README.md` 에 변경 필요가 있으면 함께 갱신한다.
 8. **정적 검사** 를 수행한다 (아래 "배포 전 체크리스트" 참조). 통과하지 못한 페이지는 배포·커밋하지 않는다.
@@ -920,7 +920,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 - **chapter-brief 규칙** - "선행 학습" 에 검증 원장·정책 문서 링크가 들어가지 않았는가. "보충 자료" 가 외부 학습 자료만 노출하는가. 시스템 간 cross-link 는 "선행 학습" 칸의 다른 시스템 **overview 페이지만** 허용한다.
 - **선행 학습 정당성** - "선행 학습" 항목마다 em dash (`—`) 와 함께 "왜 선행인가" 한 줄 이유가 붙어 있는가. 이유 없이 페이지 링크만 있는 항목은 없는가. 본 페이지 콘텐츠와 직접 의존이 없는 prerequisite (예: 큰 그림만 보여주는 overview 가 디테일 페이지의 prereq 로 들어감) 은 제거됐는가.
 - **새 사실 없음** - HTML 에 마크다운 원장에 없는 사실이 새로 등장하지 않았는가.
-- **다중 시스템 인덱스 구조** - `dynamic-html/index.html` 이 시스템별 `<section>` 으로 그룹화되어 있는가. 페이지 번호는 시스템 내 순서이고 글로벌 번호가 아닌가. 파일명이 `<project>-<system>-<topic>.html` 패턴인가.
+- **다중 시스템 인덱스 구조** - `html/index.html` 이 시스템별 `<section>` 으로 그룹화되어 있는가. 페이지 번호는 시스템 내 순서이고 글로벌 번호가 아닌가. 파일명이 `<project>-<system>-<topic>.html` 패턴인가.
 
 ## 의도적으로 정의하지 않은 것
 

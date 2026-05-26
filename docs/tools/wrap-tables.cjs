@@ -1,9 +1,9 @@
-// One-shot: wrap every <table class="..."> in dynamic-html/pages/*.html with <div class="table-wrap">.
+// One-shot: wrap every <table class="..."> in html/pages/*.html with <div class="table-wrap">.
 // Idempotent — skips tables whose immediate previous non-blank line is already a .table-wrap opener.
 const fs = require("node:fs");
 const path = require("node:path");
 
-const pagesDir = path.resolve(__dirname, "..", "..", "dynamic-html", "pages");  // docs/tools/ → repo root
+const pagesDir = path.resolve(__dirname, "..", "..", "html", "pages");  // docs/tools/ → repo root
 const files = fs.readdirSync(pagesDir).filter((f) => f.endsWith(".html"));
 
 let totalWrapped = 0;

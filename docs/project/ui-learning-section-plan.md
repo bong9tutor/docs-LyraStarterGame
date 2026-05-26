@@ -468,7 +468,7 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 ## HTML 산출물 대응표
 
-위 8개 학습 섹션을 실제 `dynamic-html/pages/lyra-ui-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 - 파일명 접두어 `lyra-ui-`, 시스템 내 번호 (글로벌 번호 X).
+위 8개 학습 섹션을 실제 `html/pages/lyra-ui-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 - 파일명 접두어 `lyra-ui-`, 시스템 내 번호 (글로벌 번호 X).
 
 | 페이지 번호 | HTML 파일 | 포함 섹션 | 목차명 | 권장 학습 블록 |
 |-------------|-----------|-----------|--------|----------------|

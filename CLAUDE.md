@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **시스템별 검증 원장 (HTML 의 단일 출처)** | [`docs/project/`](docs/project/) - `<system>-code-analysis.md` · `<system>-blueprint-analysis.md` · `<system>-learning-section-plan.md` · (선택) `<system>-references.md` | A 정책으로 만든 분석 결과. HTML 학습 페이지가 인용. 정책 아닌 입력. |
 | **공통 보조 도구** | [`docs/tools/`](docs/tools/) - `check-doc-links.cjs` (md 링크) · `check-special-chars.cjs` (특수문자 화이트리스트) · `wrap-tables.cjs` (표 래퍼 일괄 보정) · `verify-html.cjs` (헤드리스 브라우저 검증) | A 정책이 안내하는 검사·보정 스크립트. `docs/common/` 와 함께 카피해 재사용. `docs/tools/node_modules/` 와 `verify-shots/` 는 gitignore. |
 
-> **한 줄 규칙:** 정책은 `docs/common/`, 사실은 `docs/project/`, 학습 표현은 `dynamic-html/`, 작업 습관은 `CLAUDE.md` 에 둔다. 어느 방향으로도 섞지 않는다.
+> **한 줄 규칙:** 정책은 `docs/common/`, 사실은 `docs/project/`, 학습 표현은 `html/`, 작업 습관은 `CLAUDE.md` 에 둔다. 어느 방향으로도 섞지 않는다.
 
 ---
 

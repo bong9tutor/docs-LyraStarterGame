@@ -2,7 +2,7 @@
 //
 // Two passes:
 //   (1) Markdown link target check — `[label](path.md)` in .md files must resolve.
-//   (2) Stale-path sweep — non-md sources (HTML/CSS/JS in dynamic-html/, scripts in tools/)
+//   (2) Stale-path sweep — non-md sources (HTML/CSS/JS in html/, scripts in tools/)
 //       must not reference the pre-restructure flat doc paths
 //       (`docs/<analysis-tools|documentation-workflow|dynamic-html-spec|architecture-overview|project-verification>.md`
 //        or `docs/<animation|ui|asset-loading|gas>-*.md`). The new homes are docs/common/ and docs/project/.
@@ -62,7 +62,7 @@ const legacyRe = new RegExp(
 // Allow new-home paths explicitly (anything under docs/common/ or docs/project/ is fine because the regex
 // requires "docs/X.md" with X starting with one of the legacy basenames/prefixes — common/ and project/ won't match).
 const nonMdSrc = [
-  ...listFiles("dynamic-html", [".html", ".css", ".js"]).map((r) => `dynamic-html/${r}`),
+  ...listFiles("html", [".html", ".css", ".js"]).map((r) => `html/${r}`),
   ...listFiles("docs/tools", [".cjs", ".js"]).map((r) => `docs/tools/${r}`).filter((p) => !p.includes("node_modules")),
 ];
 let stale = 0, scanned = 0;

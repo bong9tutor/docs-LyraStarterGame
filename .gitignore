@@ -38,3 +38,6 @@ Plugins/*
 Platforms/*
 Config/*
 Source/*
+
+# 분석·학습 보조 도구 (HTML 산출물 읽기에 불필요 — 정책 검사·검증·일괄 보정 스크립트만 들어 있음)
+tools/

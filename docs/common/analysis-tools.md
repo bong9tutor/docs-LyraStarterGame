@@ -1,7 +1,7 @@
-# Unreal Engine 프로젝트 분석 도구 정책 — Monolith MCP 와 라이더(JetBrains) MCP
+# Unreal Engine 프로젝트 분석 도구 정책 - Monolith MCP 와 라이더(JetBrains) MCP
 
 > 이 문서는 Unreal Engine 프로젝트의 블루프린트·에셋·C++ 소스를 분석할 때 어떤 도구를 어떤 순서로 사용하는지 정의합니다. 모든 UE 프로젝트 분석에 재사용 가능합니다.
-> `docs/` 는 [`common/`](.) (재사용 가능 정책 — 본 문서 포함 3종) 과 `../project/` (해당 프로젝트 종속 — 컨텍스트 + 시스템별 검증 원장) 두 하위 폴더로 분리돼 있습니다. 다른 UE 프로젝트 분석은 별도 레포에서 본 `common/` 폴더를 통째 카피해 시작합니다. 본 정책 본문은 **프로젝트 무관 placeholder** (`<프로젝트 핵심 심볼>` · `<프로젝트 루트 절대 경로>` 등) 로 작성됐고, "예시 (라이라)" 라벨이 붙은 문장만 본 레포 사례입니다 — 새 레포에서는 예시 문장만 그 프로젝트 사례로 교체하면 됩니다.
+> `docs/` 는 [`common/`](.) (재사용 가능 정책 - 본 문서 포함 3종) 과 `../project/` (해당 프로젝트 종속 - 컨텍스트 + 시스템별 검증 원장) 두 하위 폴더로 분리돼 있습니다. 다른 UE 프로젝트 분석은 별도 레포에서 본 `common/` 폴더를 통째 카피해 시작합니다. 본 정책 본문은 **프로젝트 무관 placeholder** (`<프로젝트 핵심 심볼>` · `<프로젝트 루트 절대 경로>` 등) 로 작성됐고, "예시 (라이라)" 라벨이 붙은 문장만 본 레포 사례입니다 - 새 레포에서는 예시 문장만 그 프로젝트 사례로 교체하면 됩니다.
 > CLAUDE.md 는 매 turn 적용되는 행동 규칙과 작업 유형별 문서 인덱스만 두고, **분석 도구의 사용 규칙·전제 조건·워크플로우는 이 문서가 단일 출처** 입니다.
 
 ## 한 줄 요약
@@ -17,7 +17,7 @@
 
 ---
 
-## ⚙️ Monolith MCP (블루프린트·에셋 분석)
+## Monolith MCP (블루프린트·에셋 분석)
 
 > **이 프로젝트의 블루프린트/애니메이션/머티리얼/Niagara/GAS/UI 에셋 분석은 반드시 Monolith MCP 를 통해 수행합니다.**
 
@@ -26,17 +26,17 @@
 
 ### 전제 조건
 
-- **Unreal 에디터가 실행 중이어야 Monolith MCP 가 응답합니다** (기본 HTTP 서버 포트 `9316`). 에디터가 꺼져 있으면 `monolith_*` 툴은 "Unreal Editor not running" 오류를 반환합니다 — 이 경우 사용자에게 에디터 실행을 요청하십시오.
+- **Unreal 에디터가 실행 중이어야 Monolith MCP 가 응답합니다** (기본 HTTP 서버 포트 `9316`). 에디터가 꺼져 있으면 `monolith_*` 툴은 "Unreal Editor not running" 오류를 반환합니다 - 이 경우 사용자에게 에디터 실행을 요청하십시오.
 - 프로젝트별 등록 위치 (`.mcp.json`), Monolith 플러그인 설치 경로 (`Plugins/Monolith/`), 활성화된 서버 목록 (`.claude/settings.local.json`) 같은 환경 설정은 프로젝트마다 다르므로 해당 프로젝트의 `project-verification.md` 의 "환경·MCP 설정" 절을 참고하십시오. **예시 (라이라):** [`../project/project-verification.md`](../project/project-verification.md).
 
 ### 핵심 네임스페이스 (각 네임스페이스는 단일 `*_query(action, params)` 툴)
 
 | 툴 | 용도 |
 |----|------|
-| `monolith_discover` | 사용 가능한 네임스페이스/액션 목록 — **분석 시작 시 항상 먼저 호출** |
+| `monolith_discover` | 사용 가능한 네임스페이스/액션 목록 - **분석 시작 시 항상 먼저 호출** |
 | `monolith_status` | 서버 상태·인덱스 상태 확인 |
 | `blueprint_query` | 블루프린트 그래프/변수/컴포넌트/함수/노드, CDO 프로퍼티, 데이터 테이블·구조체·열거형 |
-| `animation_query` | ABP 상태 머신/전이, 몽타주, 블렌드 스페이스, 스켈레톤, IK Rig — **애니메이션 분석의 핵심** |
+| `animation_query` | ABP 상태 머신/전이, 몽타주, 블렌드 스페이스, 스켈레톤, IK Rig - **애니메이션 분석의 핵심** |
 | `gas_query` | Gameplay Ability / Effect / AttributeSet / 태그 / 큐 |
 | `material_query` · `niagara_query` · `ui_query` · `audio_query` | 머티리얼·VFX·UMG·사운드 에셋 |
 | `project_query` | 프로젝트 전체 에셋 FTS5 검색, 참조 추적, 게임플레이 태그 검색 |
@@ -54,7 +54,7 @@
 
 ---
 
-## 🧩 라이더(JetBrains) MCP (C++ 소스 분석)
+## 라이더(JetBrains) MCP (C++ 소스 분석)
 
 > **이 프로젝트의 C++ 소스 코드 분석은 라이더(JetBrains) MCP 를 우선 사용합니다.** Monolith 가 블루프린트·에셋을 담당하면, 라이더 MCP 는 C++ 코드를 담당합니다.
 
@@ -64,7 +64,7 @@ Rider 는 C++ 를 **의미론적으로 인덱싱**하므로, 텍스트 검색(`G
 ### 연결 조건 및 확인
 
 - MCP 서버 네임스페이스: `jetbrains` (`mcp__jetbrains__*` 툴). 실제 사용 가능 여부는 현재 Claude/Rider 세션 상태에 따라 달라집니다.
-- **전제 조건: Rider IDE 가 이 프로젝트를 연 상태로 실행 중이어야 합니다.** 꺼져 있으면 `jetbrains` 툴이 응답하지 않습니다 — 이 경우 사용자에게 Rider 실행을 요청하십시오.
+- **전제 조건: Rider IDE 가 이 프로젝트를 연 상태로 실행 중이어야 합니다.** 꺼져 있으면 `jetbrains` 툴이 응답하지 않습니다 - 이 경우 사용자에게 Rider 실행을 요청하십시오.
 - 분석 시작 시 `get_all_open_file_paths` 또는 `search_symbol("<프로젝트 핵심 심볼>")` 같은 가벼운 호출로 연결 상태와 C++ 심볼 인덱스를 확인하십시오. `<프로젝트 핵심 심볼>` 은 그 프로젝트의 진입 클래스 (Experience Definition · GameMode · 주요 GAS Ability Set 등) 가 좋습니다. **예시 (라이라):** `search_symbol("LyraExperienceDefinition")`.
 - 모든 `jetbrains` 툴 호출 시 `projectPath` 에 분석 중인 프로젝트의 절대 경로 (`<프로젝트 루트 절대 경로>`) 를 전달하십시오 (모호한 호출 감소). **예시 (라이라):** `D:\Projects\Sample\LyraStarterGame`.
 

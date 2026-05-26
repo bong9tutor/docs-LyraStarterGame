@@ -1,7 +1,7 @@
 # Lyra 애니메이션 블루프린트 분석
 
-확인일: 2026-05-22  
-분석 도구: 실행 중인 Unreal Editor + Monolith MCP HTTP endpoint `localhost:9316`  
+확인일: 2026-05-22 
+분석 도구: 실행 중인 Unreal Editor + Monolith MCP HTTP endpoint `localhost:9316` 
 분석 범위: 캐릭터 AnimBlueprint, linked animation layer, weapon instance Blueprint CDO, cosmetic Blueprint CDO, 주요 animation asset 샘플
 
 ## 핵심 요약
@@ -123,13 +123,13 @@ Monolith `project_query get_stats`와 `find_by_type` 기준 주요 애니메이�
 `LocomotionSM`의 transition 그래프는 10개 정식 state만으로 그려지지 않는다. **conduit**과 **state alias**가 분기·그룹화를 담당한다. 이는 라이라 애니메이션 공식 문서가 "State Aliases"를 별도 주제로 다루는 핵심 기법이며, 여기서 빼면 점프/피벗 흐름을 추적할 수 없다.
 
 - **conduit** - 포즈를 갖지 않는 분기 전용 노드. Monolith transition 데이터에서 `to_type":"conduit"` / `from_type":"conduit"`로 확인된다.
-  - `JumpSelector` - `IsJumping`이면 `JumpStart`, `IsFalling`이면 `JumpApex`로 분기.
-  - `EndInAir` - 착지 후 `HasAcceleration`이면 `CycleAlias`, 아니면 `IdleAlias`로 분기.
+ - `JumpSelector` - `IsJumping`이면 `JumpStart`, `IsFalling`이면 `JumpApex`로 분기.
+ - `EndInAir` - 착지 후 `HasAcceleration`이면 `CycleAlias`, 아니면 `IdleAlias`로 분기.
 - **state alias** - 여러 source state를 하나로 묶어, alias에서 그린 단일 transition이 묶인 모든 state에 적용되게 하는 참조. 정식 state 목록(10개)에도 없고 conduit도 아니므로 alias로 판별된다. transition endpoint로 다음 5개가 확인된다.
-  - `PivotSources` → `Pivot` : 이동 계열 state들을 묶어 피벗 진입 조건을 한 번만 정의.
-  - `JumpSources` → `JumpSelector` : 점프 가능한 지상 state들을 묶음.
-  - `JumpFallInterruptSources` → `EndInAir` : 점프/낙하 중 지면에 닿으면 즉시 탈출하는 묶음.
-  - `IdleAlias`, `CycleAlias` : `EndInAir`가 착지 후 복귀할 목적지(`Idle`/`Cycle`의 alias).
+ - `PivotSources` → `Pivot` : 이동 계열 state들을 묶어 피벗 진입 조건을 한 번만 정의.
+ - `JumpSources` → `JumpSelector` : 점프 가능한 지상 state들을 묶음.
+ - `JumpFallInterruptSources` → `EndInAir` : 점프/낙하 중 지면에 닿으면 즉시 탈출하는 묶음.
+ - `IdleAlias`, `CycleAlias` : `EndInAir`가 착지 후 복귀할 목적지(`Idle`/`Cycle`의 alias).
 
 > **검증 한계:** alias가 정확히 어떤 state들을 묶는지(membership)는 현재 Monolith 액션(`get_state_info`)이 alias 노드를 반환하지 않아 조회할 수 없다. alias의 *존재*와 *연결된 transition*은 확인했으나, 묶인 state 집합은 에디터의 `LocomotionSM` 그래프에서 직접 확인해야 한다. 이 문서는 추정 membership을 사실로 적지 않는다.
 
@@ -338,8 +338,8 @@ Base AnimGraph에 `FullBody`, `UpperBody`, `UpperBodyAdditive` slot이 존재하
 | 노드 | 클래스 | 역할 |
 |------|--------|------|
 | `Output Pose` | `AnimGraphNode_Root` | Result pin 이 `Copy Pose From Mesh.Pose` 로 연결 |
-| `Copy Pose From Mesh` | `AnimGraphNode_CopyPoseFromMesh` | `SourceMeshComponent` 입력 핀이 **연결되지 않음** — 실행 시 attached parent 의 mesh 가 source 로 사용된다 (Copy Pose From Mesh 노드의 `Use Attached Parent` 동작) |
-| (comment) | `EdGraphNode_Comment` | *"This will copy the pose from the parent mesh component that our mesh component is attached to"* — 라이라 저자가 직접 적은 design intent |
+| `Copy Pose From Mesh` | `AnimGraphNode_CopyPoseFromMesh` | `SourceMeshComponent` 입력 핀이 **연결되지 않음** - 실행 시 attached parent 의 mesh 가 source 로 사용된다 (Copy Pose From Mesh 노드의 `Use Attached Parent` 동작) |
+| (comment) | `EdGraphNode_Comment` | *"This will copy the pose from the parent mesh component that our mesh component is attached to"* - 라이라 저자가 직접 적은 design intent |
 
 이 ABP 는 `B_Manny` / `B_Quinn` 같은 cosmetic actor 의 `MeshComponent` 에 적용되어, 자신이 attach 된 부모 mesh (보통 invisible driving mesh) 의 pose 를 매 frame 복제한다. 별도 input pin 설정 없이 attach 만 맞으면 동작한다.
 
@@ -360,7 +360,7 @@ Base AnimGraph에 `FullBody`, `UpperBody`, `UpperBodyAdditive` slot이 존재하
 
 ### Post Process ABP 의 위치
 
-엔진 표준 — Skeletal Mesh 의 detail panel `Post Process Anim Blueprint` 슬롯에 지정한다. main AnimInstance (`ABP_Mannequin_Base` 등) 가 평가된 후, 같은 frame 에서 mesh 별 1회 추가 평가된다. 두 ABP 가 분리된 이유는 Manny / Quinn skeleton 의 비례·관절 corrective 가 다르기 때문이다.
+엔진 표준 - Skeletal Mesh 의 detail panel `Post Process Anim Blueprint` 슬롯에 지정한다. main AnimInstance (`ABP_Mannequin_Base` 등) 가 평가된 후, 같은 frame 에서 mesh 별 1회 추가 평가된다. 두 ABP 가 분리된 이유는 Manny / Quinn skeleton 의 비례·관절 corrective 가 다르기 때문이다.
 
 ### `ABP_Manny_PostProcess` AnimGraph (Monolith 확인)
 
@@ -377,7 +377,7 @@ Base AnimGraph에 `FullBody`, `UpperBody`, `UpperBodyAdditive` slot이 존재하
 
 Pose Driver 체인은 좌·우 팔 (clavicle → upperarm → lowerarm → hand) 과 좌·우 다리 (thigh → calf → foot) 순으로 순차 평가된다. 각 driver 가 source bone 의 회전에 따라 corrective shape 또는 보조 회전을 적용.
 
-`ABP_Quinn_PostProcess` 도 동일 구조 (변수·함수·컴포넌트 수치까지 일치) 로 추정 — 본 원장에서는 Quinn 측 AnimGraph 의 정확한 노드 enumeration 은 미수행 (`ABP_Manny_PostProcess` 와 동일 패턴 가정).
+`ABP_Quinn_PostProcess` 도 동일 구조 (변수·함수·컴포넌트 수치까지 일치) 로 추정 - 본 원장에서는 Quinn 측 AnimGraph 의 정확한 노드 enumeration 은 미수행 (`ABP_Manny_PostProcess` 와 동일 패턴 가정).
 
 ## `ABP_Mannequin_Retarget` · `ABP_UE4_Mannequin_Retarget` (보강 2026-05-24)
 
@@ -399,8 +399,8 @@ Pose Driver 체인은 좌·우 팔 (clavicle → upperarm → lowerarm → hand)
 | 노드 | 클래스 | 역할 |
 |------|--------|------|
 | `Output Pose` | `AnimGraphNode_Root` | Result pin 이 `Retarget Pose From Mesh.Pose` 로 연결 |
-| `Retarget Pose From Mesh` | `AnimGraphNode_RetargetPoseFromMesh` | 입력 핀 미연결 — attached parent mesh 의 pose 를 source 로 retarget |
-| (comment) | `EdGraphNode_Comment` | *"This will retarget the pose from the parent mesh component (source) that our mesh component is attached to. This ABP should have the skeleton for our \*target\* mesh we're displaying, not the \*source\* mesh playing the animation."* — 라이라 저자가 직접 적은 design intent |
+| `Retarget Pose From Mesh` | `AnimGraphNode_RetargetPoseFromMesh` | 입력 핀 미연결 - attached parent mesh 의 pose 를 source 로 retarget |
+| (comment) | `EdGraphNode_Comment` | *"This will retarget the pose from the parent mesh component (source) that our mesh component is attached to. This ABP should have the skeleton for our \*target\* mesh we're displaying, not the \*source\* mesh playing the animation."* - 라이라 저자가 직접 적은 design intent |
 
 CopyPose 와 같은 attached-parent 패턴이지만 노드가 `Copy Pose From Mesh` 대신 IK Retargeter 의 `Retarget Pose From Mesh`. **source skeleton 과 target skeleton 이 호환되지 않을 때** (예: UE5 Mannequin → UE4 Mannequin) 사용한다. `IKRetargeter` 자산을 통해 source/target IK Rig 를 연결.
 
@@ -427,7 +427,7 @@ CopyPose 와 같은 attached-parent 패턴이지만 노드가 `Copy Pose From Me
 
 1. `FLyraCharacterPartList::PostReplicatedAdd` (또는 `AddEntry`) → `SpawnActorForEntry(Entry)` 호출
 2. `SpawnActorForEntry` 가 `UChildActorComponent` 를 만들어 `Entry.SpawnedComponent` 에 저장하고, owning pawn 의 `GetSceneComponentToAttachTo()` (Character 면 mesh, 아니면 root) 에 attach
-3. spawn 직후 owner 의 `BroadcastChanged()` 호출 — `BodyMeshes.SelectBestBodyStyle(MergedTags)` 로 invisible driving mesh 를 main mesh 에 적용 + delegate 발행
+3. spawn 직후 owner 의 `BroadcastChanged()` 호출 - `BodyMeshes.SelectBestBodyStyle(MergedTags)` 로 invisible driving mesh 를 main mesh 에 적용 + delegate 발행
 
 즉 **B_Manny/B_Quinn 의 root MeshComponent 는 owner pawn 의 mesh (invisible driving mesh) 에 attach 된다.** 이 attach 가 `ABP_Mannequin_CopyPose` 의 "attached parent" 가 되어 pose 복제가 동작한다.
 

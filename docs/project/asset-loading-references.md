@@ -1,20 +1,20 @@
-# 라이라(Lyra) 에셋 비동기 로딩 — 온라인 참고 문서 모음
+# 라이라(Lyra) 에셋 비동기 로딩 - 온라인 참고 문서 모음
 
 > 라이라의 에셋 비동기 로딩 시스템 (`ULyraAssetManager` · `FLyraAssetManagerStartupJob` · `ULyraGameData` · `ULyraExperienceManagerComponent` · `UAsyncAction_ExperienceReady` · `ULyraLoadingScreenSubsystem` + AssetBundle 메타) 을 **분석·학습** 하고 다른 프로젝트로 이식할 때 참고할 공식·권위 있는 온라인 문서 목록입니다.
 > 작업 개요·분석 도구·아키텍처는 루트 [`../CLAUDE.md`](../../CLAUDE.md) 를, 실제 에셋/코드 조회는 Monolith·라이더 MCP 를 사용하십시오.
 >
-> - 기준 엔진 버전: **UE 5.7** — `dev.epicgames.com` 문서는 페이지 우측 상단에서 버전 선택 가능
+> - 기준 엔진 버전: **UE 5.7** - `dev.epicgames.com` 문서는 페이지 우측 상단에서 버전 선택 가능
 > - 링크 최종 확인: **2026-05-25**
 
-## 핵심 이해 — 라이라의 비동기 로딩
+## 핵심 이해 - 라이라의 비동기 로딩
 
 라이라의 에셋 로딩은 **Asset Manager 기반 데이터 주도 모델** 입니다. 핵심은 세 가지:
 
-- **Primary Asset Type 등록** — `Config/DefaultGame.ini` 의 `[/Script/Engine.AssetManagerSettings]` 에 등록된 type 만 인덱스됨. 라이라는 8개 type 사용.
-- **AssetBundle 메타** — `UPROPERTY(meta=(AssetBundles="Client,Server"))` 로 표시된 soft reference 가 Client/Server bundle 에 자동 수집. `ChangeBundleStateForPrimaryAssets` 가 NetMode 별로 필요한 bundle 만 로드.
-- **Startup Job + Experience Manager** — `ULyraAssetManager::StartInitialLoading()` 의 weighted job queue + `ULyraExperienceManagerComponent` 의 7단계 state machine 으로 게임 시작 / Experience 전환 시 비동기 로딩 + 진행률 보고.
+- **Primary Asset Type 등록** - `Config/DefaultGame.ini` 의 `[/Script/Engine.AssetManagerSettings]` 에 등록된 type 만 인덱스됨. 라이라는 8개 type 사용.
+- **AssetBundle 메타** - `UPROPERTY(meta=(AssetBundles="Client,Server"))` 로 표시된 soft reference 가 Client/Server bundle 에 자동 수집. `ChangeBundleStateForPrimaryAssets` 가 NetMode 별로 필요한 bundle 만 로드.
+- **Startup Job + Experience Manager** - `ULyraAssetManager::StartInitialLoading()` 의 weighted job queue + `ULyraExperienceManagerComponent` 의 7단계 state machine 으로 게임 시작 / Experience 전환 시 비동기 로딩 + 진행률 보고.
 
-추가로 **`ULyraGameData`** 가 전역 GE 클래스 (Damage/Heal/DynamicTag) 의 `TSoftClassPtr` 보관소 역할 — 어디서든 `ULyraGameData::Get()` 으로 접근 가능 (`ULyraAssetManager` 가 startup job 으로 미리 로드).
+추가로 **`ULyraGameData`** 가 전역 GE 클래스 (Damage/Heal/DynamicTag) 의 `TSoftClassPtr` 보관소 역할 - 어디서든 `ULyraGameData::Get()` 으로 접근 가능 (`ULyraAssetManager` 가 startup job 으로 미리 로드).
 
 ## 사용법
 
@@ -28,7 +28,7 @@
 
 ## 1. 공식 라이라 문서 (최우선)
 
-### ⭐ Lyra Sample Game
+### (특별) Lyra Sample Game
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/lyra-sample-game-in-unreal-engine>
 
 라이라 프로젝트 전체 개요. Asset Manager · Experience · Game Features 의 통합 그림.
@@ -67,7 +67,7 @@ Game Features 시스템 일반 + 라이라 적용. `ExplicitlyLoaded=true` 패�
 ### Asset Bundles
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/asset-bundles-in-unreal-engine>
 
-`meta=(AssetBundles="Client,Server")` UPROPERTY 메타. soft reference 가 자동으로 PrimaryDataAsset 의 `AssetBundleData.Bundles[<name>].BundleAssets` 에 수집됨 (cooking 시 `UpdateAssetBundleData()` 가 빌드). 라이라는 9개 위치에서 사용 — UI 자산은 `Client` 만, gameplay 자산 (ability/effect/input) 은 `Client,Server` 양쪽.
+`meta=(AssetBundles="Client,Server")` UPROPERTY 메타. soft reference 가 자동으로 PrimaryDataAsset 의 `AssetBundleData.Bundles[<name>].BundleAssets` 에 수집됨 (cooking 시 `UpdateAssetBundleData()` 가 빌드). 라이라는 9개 위치에서 사용 - UI 자산은 `Client` 만, gameplay 자산 (ability/effect/input) 은 `Client,Server` 양쪽.
 
 ### Soft Object Pointers
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/referencing-assets-in-unreal-engine>
@@ -101,28 +101,28 @@ Game Features 시스템 일반 + 라이라 적용. `ExplicitlyLoaded=true` 패�
 ### Game Instance Subsystem
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/subsystems-in-unreal-engine>
 
-`UGameInstanceSubsystem` — GameInstance 라이프사이클 (게임 종료까지 유지, map transition 가로지름). 라이라 `ULyraLoadingScreenSubsystem` 이 사용 — 로딩 화면 widget 클래스를 map 전환 너머 유지.
+`UGameInstanceSubsystem` - GameInstance 라이프사이클 (게임 종료까지 유지, map transition 가로지름). 라이라 `ULyraLoadingScreenSubsystem` 이 사용 - 로딩 화면 widget 클래스를 map 전환 너머 유지.
 
 ### LoadAlwaysLoadedCues (GameplayCueManager)
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-cues-for-the-gameplay-ability-system-in-unreal-engine>
 
-`ULyraGameplayCueManager::LoadAlwaysLoadedCues` 가 라이라 `StartInitialLoading` 의 첫 startup job 으로 호출 — 자주 쓰이는 cue 를 미리 로드.
+`ULyraGameplayCueManager::LoadAlwaysLoadedCues` 가 라이라 `StartInitialLoading` 의 첫 startup job 으로 호출 - 자주 쓰이는 cue 를 미리 로드.
 
 ---
 
 ## 4. 학습 자료 (커뮤니티)
 
-### Tom Looman — Asset Manager Guide
+### Tom Looman - Asset Manager Guide
 <https://www.tomlooman.com/unreal-engine-asset-manager-async-loading/>
 
 Asset Manager + Primary Asset Type + AssetBundle 기초의 사실상 표준 가이드. 라이라 분석 전 개념 정리에 적합.
 
-### X157 — Lyra Experience System
+### X157 - Lyra Experience System
 <https://x157.github.io/UE5/LyraExperience/>
 
 라이라 Experience 시스템 + 비동기 로딩 흐름 커뮤니티 분석. ExperienceManagerComponent 의 state machine 다이어그램 포함.
 
-### Exploring Lyra — Experience & Asset Loading (커뮤니티 튜토리얼)
+### Exploring Lyra - Experience & Asset Loading (커뮤니티 튜토리얼)
 <https://dev.epicgames.com/community/learning/tutorials/>
 
 Epic Developer Community 의 라이라 분해 튜토리얼 시리즈. Experience 활성화 흐름 디버깅 가이드.
@@ -137,8 +137,8 @@ Epic Developer Community 의 라이라 분해 튜토리얼 시리즈. Experience
 |-------------|------------------|-----------|
 | `UAssetManager` 파생 | `Source/LyraGame/System/LyraAssetManager.h/.cpp` | 라이더 MCP |
 | `AssetManagerClassName` 등록 | `Config/DefaultEngine.ini` 의 `[/Script/Engine.Engine].AssetManagerClassName=/Script/LyraGame.LyraAssetManager` | `Read` (ini) |
-| Asset Manager config | `Config/DefaultEngine.ini` 의 `[/Script/LyraGame.LyraAssetManager]` 절 — `LyraGameDataPath` · `DefaultPawnData` | `Read` (ini) |
-| Primary Asset Types | `Config/DefaultGame.ini` 의 `[/Script/Engine.AssetManagerSettings]` 절 — 8개 type | `Read` (ini) |
+| Asset Manager config | `Config/DefaultEngine.ini` 의 `[/Script/LyraGame.LyraAssetManager]` 절 - `LyraGameDataPath` · `DefaultPawnData` | `Read` (ini) |
+| Primary Asset Types | `Config/DefaultGame.ini` 의 `[/Script/Engine.AssetManagerSettings]` 절 - 8개 type | `Read` (ini) |
 | Startup Job 패턴 | `Source/LyraGame/System/LyraAssetManagerStartupJob.h/.cpp` + `LyraAssetManager.cpp` 의 `STARTUP_JOB` 매크로 | 라이더 MCP |
 | 전역 GameData 자산 (UPrimaryDataAsset) | `Source/LyraGame/System/LyraGameData.h/.cpp` + `Content/DefaultGameData.uasset` | 라이더 MCP + Monolith `blueprint_query.get_cdo_properties` |
 | Experience Manager Component | `Source/LyraGame/GameModes/LyraExperienceManagerComponent.h/.cpp` | 라이더 MCP |

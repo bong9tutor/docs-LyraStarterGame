@@ -1,6 +1,6 @@
 # Lyra CommonUI 코드 분석
 
-확인일: 2026-05-24  
+확인일: 2026-05-24 
 분석 범위: `Source/LyraGame/UI/` (핵심 메커니즘 5종) + `Plugins/UIExtension/` 공개 API + `Source/LyraGame/GameFeatures/GameFeatureAction_AddWidget.*`
 
 ## 핵심 요약
@@ -10,7 +10,7 @@ Lyra 의 UI 아키텍처는 **데이터 주도 모듈형**으로, 화면을 만�
 - `ULyraActivatableWidget`: CommonUI 의 activatable widget 을 라이라 input mode (`Default`/`GameAndMenu`/`Game`/`Menu`) 와 묶어 자동으로 input config 를 적용.
 - `ALyraHUD`: AHUD 의 얇은 래퍼. 디버그 렌더링과 GameFramework 컴포넌트 확장 수신만 담당하고, 실제 위젯 구성은 **GameFeatureAction 이 외부에서 주입**한다.
 - `ULyraHUDLayout`: 한 게임 layer (예: `UI.Layer.Game`) 에 들어가는 활성화 widget. escape 액션 바인딩과 컨트롤러 분리 감지를 책임진다.
-- `ULyraTaggedWidget`: gameplay tag 로 가시성을 게이팅하는 widget 베이스. (단, 본문에서 실제 태그 listening 은 미구현 — 코드 주석에 `UE-142237` 명시)
+- `ULyraTaggedWidget`: gameplay tag 로 가시성을 게이팅하는 widget 베이스. (단, 본문에서 실제 태그 listening 은 미구현 - 코드 주석에 `UE-142237` 명시)
 - `UGameFeatureAction_AddWidgets`: Experience 가 활성화될 때 `ALyraHUD` 에 `Layout[]` 과 `Widgets[]` 를 등록. layout 은 layer 에 push, widget 은 `UUIExtensionSubsystem` 슬롯에 register.
 
 이 위에 두 외부 시스템이 얹힌다.
@@ -27,8 +27,8 @@ Lyra 의 UI 아키텍처는 **데이터 주도 모듈형**으로, 화면을 만�
 3. `ALyraHUD::PreInitializeComponents()` 가 자신을 receiver 로 등록하고, `BeginPlay()` 가 `NAME_GameActorReady` 이벤트를 발송한다.
 4. `HandleActorExtension()` 이 그 이벤트를 받아 `AddWidgets()` 를 호출.
 5. `AddWidgets()` 는 두 종류를 등록한다.
-   - `Layout[]` 각 항목 → `UCommonUIExtensions::PushContentToLayer_ForPlayer(LocalPlayer, LayerID, LayoutClass)` 로 push.
-   - `Widgets[]` 각 항목 → `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext(SlotID, LocalPlayer, WidgetClass, -1)` 로 register.
+ - `Layout[]` 각 항목 → `UCommonUIExtensions::PushContentToLayer_ForPlayer(LocalPlayer, LayerID, LayoutClass)` 로 push.
+ - `Widgets[]` 각 항목 → `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext(SlotID, LocalPlayer, WidgetClass, -1)` 로 register.
 6. push 된 layout 은 `ULyraHUDLayout` 이고, `NativeOnInitialized()` 에서 escape action (`UI.Action.Escape`) 바인딩과 (필요 시) 컨트롤러 분리 감지 delegate 를 건다.
 7. layout 내부의 extension point 위젯이 자신의 slot tag 로 `RegisterExtensionPoint` 를 호출하면, 4단계에서 등록된 widget 들이 매칭되어 layout 안에 표시된다.
 
@@ -52,7 +52,7 @@ Lyra 의 UI 아키텍처는 **데이터 주도 모듈형**으로, 화면을 만�
 
 | `ELyraWidgetInputMode` | `ECommonInputMode` | MouseCaptureMode |
 |-----------------------|--------------------|------------------|
-| `Default` | (TOptional 비어 있음 — 기본 동작) | - |
+| `Default` | (TOptional 비어 있음 - 기본 동작) | - |
 | `GameAndMenu` | `All` | `GameMouseCaptureMode` |
 | `Game` | `Game` | `GameMouseCaptureMode` |
 | `Menu` | `Menu` | `NoCapture` (강제) |
@@ -71,16 +71,16 @@ Lyra 의 UI 아키텍처는 **데이터 주도 모듈형**으로, 화면을 만�
 
 | 함수 | 역할 |
 |------|------|
-| `PreInitializeComponents()` | `UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this)` — 외부 확장이 이 액터에 component/extension 을 붙일 수 있게 함 |
-| `BeginPlay()` | `SendGameFrameworkComponentExtensionEvent(NAME_GameActorReady)` — `UGameFeatureAction_AddWidgets` 가 이 이벤트를 듣고 위젯을 push |
+| `PreInitializeComponents()` | `UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this)` - 외부 확장이 이 액터에 component/extension 을 붙일 수 있게 함 |
+| `BeginPlay()` | `SendGameFrameworkComponentExtensionEvent(NAME_GameActorReady)` - `UGameFeatureAction_AddWidgets` 가 이 이벤트를 듣고 위젯을 push |
 | `EndPlay()` | receiver 등록 해제 |
 | `GetDebugActorList()` | 모든 `UAbilitySystemComponent` 인스턴스의 avatar/owner actor 를 디버그 표시 대상에 추가 (gameplay debugger 용) |
 
 | 멤버 변수 |
 |-----------|
-| (위젯·layout 관련 멤버 없음 — 외부 데이터가 모든 구성 담당) |
+| (위젯·layout 관련 멤버 없음 - 외부 데이터가 모든 구성 담당) |
 
-`PrimaryActorTick.bStartWithTickEnabled = false` — tick 자체를 꺼서 매 frame 부하 없음.
+`PrimaryActorTick.bStartWithTickEnabled = false` - tick 자체를 꺼서 매 frame 부하 없음.
 
 ## `ULyraHUDLayout`
 
@@ -129,7 +129,7 @@ Lyra 의 UI 아키텍처는 **데이터 주도 모듈형**으로, 화면을 만�
 | `SetVisibility()` override | 외부 호출 → `bWantsToBeVisible` 갱신 + `Shown/Hidden` 둘 중 하나에 값 기록 → 최종 가시성 계산 |
 | `OnWatchedTagsChanged()` | 태그 변경 시 가시성 재계산 |
 
-### 검증 한계 — 태그 listening 미구현
+### 검증 한계 - 태그 listening 미구현
 
 `NativeConstruct()` 와 `NativeDestruct()` 모두 `//@TODO` 주석만 남아 있고, `SetVisibility()`·`OnWatchedTagsChanged()` 내부의 `bHasHiddenTags` 가 **`false` 로 하드코딩**되어 있다 (`//@TODO: Foo->HasAnyTags(HiddenByTags)`). 즉 **현재 시점에서 `HiddenByTags` 는 가시성에 영향을 주지 않는다.** 코드 상단 주석에 `UE-142237` 이슈 번호가 명시되어 있다.
 
@@ -170,7 +170,7 @@ UCLASS class UGameFeatureAction_AddWidgets : UGameFeatureAction_WorldActionBase 
 |------|------|
 | 1. world 추가 | `AddToWorld()` → `UGameFrameworkComponentManager::AddExtensionHandler(ALyraHUD::StaticClass(), HandleActorExtension)` |
 | 2. HUD 등장 | `ALyraHUD::BeginPlay()` 가 `NAME_GameActorReady` 발송 |
-| 3. dispatcher | `HandleActorExtension()` — `Added` 계열이면 `AddWidgets`, `Removed` 계열이면 `RemoveWidgets` |
+| 3. dispatcher | `HandleActorExtension()` - `Added` 계열이면 `AddWidgets`, `Removed` 계열이면 `RemoveWidgets` |
 | 4. layout push | `Layout[]` 각 항목 → `UCommonUIExtensions::PushContentToLayer_ForPlayer(LocalPlayer, LayerID, LayoutClass)` |
 | 5. widget register | `Widgets[]` 각 항목 → `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext(SlotID, LocalPlayer, WidgetClass, -1)` |
 | 6. 비활성 | `OnGameFeatureDeactivating()` → `Reset()` → 각 layout `DeactivateWidget()` + 각 extension handle `Unregister()` |
@@ -219,7 +219,7 @@ TMap<FGameFeatureStateChangeContext, FPerContextData> ContextData; // PIE 멀티
 | `RegisterExtensionPoint(Tag, Match, AllowedClasses[], Callback)` | extension point 등록 (구독자). 매칭 시 callback 호출 |
 | `RegisterExtensionPointForContext(Tag, Context, Match, AllowedClasses[], Callback)` | context object 와 함께 등록 (특정 player 대상) |
 | `RegisterExtensionAsWidget(Tag, WidgetClass, Priority)` | widget extension 등록 (공급자) |
-| `RegisterExtensionAsWidgetForContext(Tag, Context, WidgetClass, Priority)` | context-aware widget extension (`UGameFeatureAction_AddWidgets` 가 사용 — context = LocalPlayer) |
+| `RegisterExtensionAsWidgetForContext(Tag, Context, WidgetClass, Priority)` | context-aware widget extension (`UGameFeatureAction_AddWidgets` 가 사용 - context = LocalPlayer) |
 | `RegisterExtensionAsData(Tag, Context, Data, Priority)` | data extension |
 | `UnregisterExtension(Handle)` / `UnregisterExtensionPoint(Handle)` | 등록 해제 |
 
@@ -238,7 +238,7 @@ TMap<FGameplayTag, FExtensionList>       ExtensionMap;     // tag → extension[
 
 `FUIExtensionPoint::DoesExtensionPassContract(Extension)` 가 (a) tag 매칭, (b) `AllowedDataClasses` 가 비어 있지 않으면 data class 의 isA 체크 두 가지를 본다. 통과한 extension 만 콜백을 받는다.
 
-### `UUIExtensionPointWidget` — layout 안 slot 구독 widget
+### `UUIExtensionPointWidget` - layout 안 slot 구독 widget
 
 파일: [`../Plugins/UIExtension/Source/Public/Widgets/UIExtensionPointWidget.h`](../Plugins/UIExtension/Source/Public/Widgets/UIExtensionPointWidget.h)
 
@@ -284,7 +284,7 @@ class UUIExtensionPointWidget : public UDynamicEntryBoxBase {
 - [`../Source/LyraGame/UI/Subsystem/LyraUIManagerSubsystem.h`](../Source/LyraGame/UI/Subsystem/LyraUIManagerSubsystem.h)
 - [`../Source/LyraGame/UI/Subsystem/LyraUIManagerSubsystem.cpp`](../Source/LyraGame/UI/Subsystem/LyraUIManagerSubsystem.cpp)
 
-`UGameUIManagerSubsystem` (CommonGame 플러그인) 파생. 라이라 측 추가 동작은 한 가지 — **HUD 의 `bShowHUD` 토글을 root layout 가시성으로 동기화**.
+`UGameUIManagerSubsystem` (CommonGame 플러그인) 파생. 라이라 측 추가 동작은 한 가지 - **HUD 의 `bShowHUD` 토글을 root layout 가시성으로 동기화**.
 
 | 함수 | 역할 |
 |------|------|
@@ -294,7 +294,7 @@ class UUIExtensionPointWidget : public UDynamicEntryBoxBase {
 
 콘솔 `showhud` 또는 코드로 `bShowHUD = false` 설정 시 root layout 전체가 사라진다 (디버그/스크린샷용).
 
-`UGameUIManagerSubsystem` 자체 (CommonGame) 가 `UGameUIPolicy` 통해 각 LocalPlayer 의 `UPrimaryGameLayout` 을 관리한다 — Lyra 는 이 상위 메커니즘을 그대로 사용.
+`UGameUIManagerSubsystem` 자체 (CommonGame) 가 `UGameUIPolicy` 통해 각 LocalPlayer 의 `UPrimaryGameLayout` 을 관리한다 - Lyra 는 이 상위 메커니즘을 그대로 사용.
 
 ## Blueprint ↔ C++ 대응표
 
@@ -314,11 +314,11 @@ UI 가 예상대로 안 보일 때:
 
 1. 현재 Experience 가 의도한 ActionSet 을 포함하는지 확인 (`B_LyraDefaultExperience` 등).
 2. ActionSet 의 `Actions` 배열에 `GameFeatureAction_AddWidgets` 가 있는지, 그 안 `Layout`/`Widgets` 가 비어 있지 않은지.
-3. `Widgets[].SlotID` 가 layout 안 extension point 의 tag 와 일치하는지 — 한 글자라도 다르면 매칭 안 됨. `PartialMatch` 모드라면 부모 태그도 OK.
+3. `Widgets[].SlotID` 가 layout 안 extension point 의 tag 와 일치하는지 - 한 글자라도 다르면 매칭 안 됨. `PartialMatch` 모드라면 부모 태그도 OK.
 4. 위젯이 layer 에 push 됐지만 안 보인다면 `ULyraUIManagerSubsystem` 이 `bShowHUD=false` 로 collapsed 시켰는지 확인 (`showhud` 콘솔로 토글).
 5. escape 메뉴가 안 뜨면 `W_DefaultHUDLayout` 의 `EscapeMenuClass` CDO 가 null 인지 확인 (`ensure(!EscapeMenuClass.IsNull())` 가 가드).
 6. controller disconnect 메뉴 안 뜨면 platform tag 확인 (`Platform.Trait.Input.PrimarlyController` 가 platform traits 에 있어야 함). PC 에서는 기본적으로 안 뜬다.
-7. `ULyraTaggedWidget` 의 `HiddenByTags` 가 동작 안 한다고 보고된다면 **정상** — 미구현 상태이므로 다른 게이팅 메커니즘을 써야 한다.
+7. `ULyraTaggedWidget` 의 `HiddenByTags` 가 동작 안 한다고 보고된다면 **정상** - 미구현 상태이므로 다른 게이팅 메커니즘을 써야 한다.
 
 ## 확장 시 권장 방식
 
@@ -327,11 +327,11 @@ UI 가 예상대로 안 보일 때:
 1. widget BP 작성 (`UCommonUserWidget` 또는 적절한 베이스 상속).
 2. layout 안 적당한 extension point 의 slot tag 확인 (또는 새 slot tag 정의 + layout BP 에 extension point widget 추가).
 3. 이 위젯을 노출하고 싶은 Experience 의 ActionSet 의 `GameFeatureAction_AddWidgets.Widgets[]` 에 `WidgetClass + SlotID` 항목 추가.
-4. 다른 Experience 에는 영향 없음 — Experience 별로 다른 widget 세트가 가능.
+4. 다른 Experience 에는 영향 없음 - Experience 별로 다른 widget 세트가 가능.
 
 새 layout / layer 를 추가하려면:
 
 1. `Config/DefaultGameplayTags.ini` 에 새 `UI.Layer.*` 태그 정의.
 2. `ULyraHUDLayout` 파생 widget BP 작성 (필요하면 새 C++ 클래스).
 3. `Layout[]` 에 `(LayoutClass, LayerID)` 항목 추가.
-4. `UGameUIPolicy` 에 layer ID 가 등록되어 있어야 push 가 동작 — CommonGame 플러그인 측 설정.
+4. `UGameUIPolicy` 에 layer ID 가 등록되어 있어야 push 가 동작 - CommonGame 플러그인 측 설정.

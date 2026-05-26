@@ -1,6 +1,6 @@
 # Lyra CommonUI 학습 문서 섹션 설계
 
-확인일: 2026-05-24  
+확인일: 2026-05-24 
 목적: 라이라 CommonUI 분석·학습 문서를 기능별로 어떻게 나눌지 결정하기 위한 정보 구조 설계
 
 이 문서는 검증 원장 [`ui-code-analysis.md`](ui-code-analysis.md), [`ui-blueprint-analysis.md`](ui-blueprint-analysis.md) 와 Epic 공식 CommonUI / Lyra UI 문서 ("공식 온라인 대조 출처" 절 참조) 를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 확장하기 쉬운지 정리한다. 작성 패턴은 [`animation-learning-section-plan.md`](animation-learning-section-plan.md) 와 동일하다.
@@ -11,18 +11,18 @@
 
 핵심은 다음 다섯 시스템의 책임 분리를 학습 동선의 골격으로 두는 것이다.
 
-- **CommonUI 자체** (Epic 플러그인) — 입력 라우팅 + 활성화 widget + 스타일 + 입력 액션 매핑.
-- **CommonGame 의 GameUI Manager** — `UGameUIPolicy` 가 `UPrimaryGameLayout` 의 `UI.Layer.*` 4개를 관리.
-- **UIExtension 플러그인** — `HUD.Slot.*` 태그 ↔ `Activatable Widget` 매핑.
-- **Lyra 의 GameFeatureAction_AddWidgets** — Experience 가 활성화될 때 위 둘에 위젯을 데이터로 주입.
-- **GameSettings 플러그인** — 설정 화면. 라이라 코어 UI 와는 분리된 사실상의 위성 시스템.
+- **CommonUI 자체** (Epic 플러그인) - 입력 라우팅 + 활성화 widget + 스타일 + 입력 액션 매핑.
+- **CommonGame 의 GameUI Manager** - `UGameUIPolicy` 가 `UPrimaryGameLayout` 의 `UI.Layer.*` 4개를 관리.
+- **UIExtension 플러그인** - `HUD.Slot.*` 태그 ↔ `Activatable Widget` 매핑.
+- **Lyra 의 GameFeatureAction_AddWidgets** - Experience 가 활성화될 때 위 둘에 위젯을 데이터로 주입.
+- **GameSettings 플러그인** - 설정 화면. 라이라 코어 UI 와는 분리된 사실상의 위성 시스템.
 
 추천 상위 섹션은 다음 **8개** 다.
 
 0. 전체 지도와 학습 경로
 1. CommonUI 의 입력 라우팅과 활성화 모델
 2. HUD 액터와 게임 UI 매니저 (`ALyraHUD` + `UGameUIPolicy` + `ULyraUIManagerSubsystem`)
-3. `ULyraHUDLayout` — layer 안 활성화 widget 의 책임
+3. `ULyraHUDLayout` - layer 안 활성화 widget 의 책임
 4. `GameFeatureAction_AddWidgets` + `UUIExtensionSubsystem` 의 위젯 주입
 5. `ULyraTaggedWidget` 과 가시성 게이팅 (미구현 사실 포함)
 6. Common Style 과 라이라 위젯 라이브러리
@@ -149,12 +149,12 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 - CommonUI: `UCommonActivatableWidget`, `UCommonActivatableWidgetStack`, `UCommonActivatableWidgetSwitcher`
 - 라이라: `ULyraActivatableWidget`, `ELyraWidgetInputMode`
-- `BP_GetDesiredFocusTarget` 미구현 시 컴파일 경고 — 게임패드 UX 의 핵심
+- `BP_GetDesiredFocusTarget` 미구현 시 컴파일 경고 - 게임패드 UX 의 핵심
 
 검증 포인트:
 
 - 라이라 widget 의 CDO 에서 `InputConfig` 값이 의도와 맞는지 (`W_DefaultHUDLayout = GameAndMenu` 검증됨).
-- `BP_GetDesiredFocusTarget` 구현 여부 — 미구현 시 게임패드 포커스 못 잡음.
+- `BP_GetDesiredFocusTarget` 구현 여부 - 미구현 시 게임패드 포커스 못 잡음.
 
 작성 우선순위: 최상
 
@@ -179,11 +179,11 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 검증 포인트:
 
 - 콘솔 `showhud` 입력 시 root layout 이 `Collapsed` 로 가는지 (`ULyraUIManagerSubsystem` 의 매 tick 동기화 확인).
-- `UGameUIPolicy` CDO 에 4개 layer 가 모두 등록돼 있는지 — 본 원장 범위 밖, 별도 확인 필요.
+- `UGameUIPolicy` CDO 에 4개 layer 가 모두 등록돼 있는지 - 본 원장 범위 밖, 별도 확인 필요.
 
 작성 우선순위: 최상
 
-### 3. `ULyraHUDLayout` — layer 안 활성화 widget
+### 3. `ULyraHUDLayout` - layer 안 활성화 widget
 
 역할: layer 에 push 되는 단위 widget 의 책임을 잡는 섹션. escape 메뉴와 컨트롤러 분리 화면 두 가지 정책이 여기 모인다.
 
@@ -217,7 +217,7 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 - `UGameFeatureAction_AddWidgets` 의 `Layout[]` 과 `Widgets[]` 는 각각 무엇이 다른가?
 - `FLyraHUDLayoutRequest` 와 `FLyraHUDElementEntry` 의 구조는?
-- layer push 는 `UCommonUIExtensions::PushContentToLayer_ForPlayer`, widget register 는 `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext` — 두 호출의 차이는?
+- layer push 는 `UCommonUIExtensions::PushContentToLayer_ForPlayer`, widget register 는 `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext` - 두 호출의 차이는?
 - `UIExtensionPointWidget` (또는 동등한 BP 위젯) 이 layout 안에서 어떻게 slot 을 구독하는가?
 - `EUIExtensionPointMatch` (ExactMatch vs PartialMatch) 와 `AllowedDataClasses` contract 가 어떻게 매칭을 통제하는가?
 - 한 slot 에 widget 2개가 등록되면 어떻게 표시되는가? (예: `HUD.Slot.RightSideTouchInputs` 에 `W_OnScreenJoystick_Right` + `W_FireButton`)
@@ -278,7 +278,7 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 - Common UI Quickstart 5단계 (Epic 공식)
 - `CommonButtonBase`, `CommonTextBlock`, `CommonBorder`, `CommonActivatableWidgetSwitcher/Stack`
 - 라이라: `ULyraButtonBase`, `ULyraActionWidget`, `ULyraBoundActionButton`, `ULyraTabButtonBase`, `ULyraTabListWidgetBase`, `ULyraWidgetFactory`, `ULyraListView`
-- 입력 액션 데이터 테이블 (Lyra 측 자산 — 별도 확인 필요)
+- 입력 액션 데이터 테이블 (Lyra 측 자산 - 별도 확인 필요)
 - `UI.Action.*` 태그 6종 (Confirm, Cancel, NextTab, PreviousTab + escape, 그 외)
 
 검증 포인트:
@@ -339,11 +339,11 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 각 섹션이 다룰 **개별 기능 단위** 를 키워드로 조사해, Epic 공식 문서 (2026-05-24 열람) 와 코드 / Monolith 조회로 교차 검증했다. 후속 학습 문서는 아래 항목을 다루되 검증 등급을 유지해야 한다.
 
-검증 범례: **✅** 검증 원장 또는 C++ 직접 확인 · **◐** 공식 문서 + 라이라 간접 단서로 확인했으나 노드·CDO 단위는 에디터 확인 필요 · **△** 공식 UE 일반 개념 또는 학습 후보이며 라이라 로컬 사용 범위는 추가 확인 필요
+검증 범례: **검증 완료** 검증 원장 또는 C++ 직접 확인 · **◐** 공식 문서 + 라이라 간접 단서로 확인했으나 노드·CDO 단위는 에디터 확인 필요 · **△** 공식 UE 일반 개념 또는 학습 후보이며 라이라 로컬 사용 범위는 추가 확인 필요
 
 ### 공식 온라인 대조 출처
 
-공식 Epic 문서·커뮤니티 자료의 정식 목록은 별도 문서 [`ui-references.md`](ui-references.md) 에 있다 — 카테고리별 분류 (공식 라이라 / CommonUI 시스템 / UI Extension / 학습 자료) + 문서 ↔ 라이라 프로젝트 매핑 표. 본 섹션 설계는 그 references 문서를 1차 참고로 둔다. HTML 페이지의 `chapter-brief` "보충 자료" 칸도 같은 references 문서의 URL 을 인용한다.
+공식 Epic 문서·커뮤니티 자료의 정식 목록은 별도 문서 [`ui-references.md`](ui-references.md) 에 있다 - 카테고리별 분류 (공식 라이라 / CommonUI 시스템 / UI Extension / 학습 자료) + 문서 ↔ 라이라 프로젝트 매핑 표. 본 섹션 설계는 그 references 문서를 1차 참고로 둔다. HTML 페이지의 `chapter-brief` "보충 자료" 칸도 같은 references 문서의 URL 을 인용한다.
 
 ### 섹션 1 - CommonUI 입력 · 활성화
 
@@ -351,57 +351,57 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 |-------------|----------------|------|
 | Input Routing | `CommonGameViewportClient` (프로젝트 설정 적용) | ◐ Epic 문서; Lyra `DefaultEngine.ini` 확인 필요 |
 | Action Router | `CommonUIActionRouterBase`, `UIActionRouterTypes` | △ 일반 개념 |
-| Activatable widget lifecycle | `UCommonActivatableWidget::NativeOnActivated/Deactivated` | ✅ Epic API + 라이라 상속 |
-| Activatable input config | `ULyraActivatableWidget::GetDesiredInputConfig` 가 `ELyraWidgetInputMode` 4종 → `FUIInputConfig` 매핑 | ✅ |
+| Activatable widget lifecycle | `UCommonActivatableWidget::NativeOnActivated/Deactivated` | 검증 완료 Epic API + 라이라 상속 |
+| Activatable input config | `ULyraActivatableWidget::GetDesiredInputConfig` 가 `ELyraWidgetInputMode` 4종 → `FUIInputConfig` 매핑 | 검증 완료 |
 | Activatable widget stack/switcher | `UCommonActivatableWidgetStack`, `UCommonActivatableWidgetSwitcher` | ◐ Epic 문서; Lyra 위젯 사용 위치 별도 확인 |
 | Back action | `IsBackHandler`, `OnHandleBackAction` | △ 일반 개념; 라이라 사용 위치 별도 확인 |
-| Desired focus target | `BP_GetDesiredFocusTarget` 미구현 시 컴파일 경고 | ✅ `ULyraActivatableWidget::ValidateCompiledWidgetTree` |
-| Modal widget | `bIsModal` 속성 | ✅ `W_DefaultHUDLayout` CDO 에서 `false` 확인 |
+| Desired focus target | `BP_GetDesiredFocusTarget` 미구현 시 컴파일 경고 | 검증 완료 `ULyraActivatableWidget::ValidateCompiledWidgetTree` |
+| Modal widget | `bIsModal` 속성 | 검증 완료 `W_DefaultHUDLayout` CDO 에서 `false` 확인 |
 
 ### 섹션 2 - HUD 액터 · UI 매니저
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `AHUD` 라이라 래퍼 | `ALyraHUD::PreInitializeComponents`/`BeginPlay`/`EndPlay` | ✅ |
-| GameFramework component receiver | `UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this)` | ✅ |
-| `NAME_GameActorReady` 이벤트 | `BeginPlay` 발송 → `UGameFeatureAction_AddWidgets::HandleActorExtension` | ✅ |
-| Debug actor list | `ALyraHUD::GetDebugActorList` — 모든 ASC 의 avatar/owner | ✅ |
-| Game UI Manager | `UGameUIManagerSubsystem` (CommonGame) → `ULyraUIManagerSubsystem` | ✅ |
+| `AHUD` 라이라 래퍼 | `ALyraHUD::PreInitializeComponents`/`BeginPlay`/`EndPlay` | 검증 완료 |
+| GameFramework component receiver | `UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this)` | 검증 완료 |
+| `NAME_GameActorReady` 이벤트 | `BeginPlay` 발송 → `UGameFeatureAction_AddWidgets::HandleActorExtension` | 검증 완료 |
+| Debug actor list | `ALyraHUD::GetDebugActorList` - 모든 ASC 의 avatar/owner | 검증 완료 |
+| Game UI Manager | `UGameUIManagerSubsystem` (CommonGame) → `ULyraUIManagerSubsystem` | 검증 완료 |
 | `UGameUIPolicy` / `UPrimaryGameLayout` | layer 등록 | ◐ CommonGame 플러그인 ; 라이라 정책 자산 별도 확인 |
-| `bShowHUD` 동기화 | `ULyraUIManagerSubsystem::SyncRootLayoutVisibilityToShowHUD` | ✅ |
-| `UI.Layer.*` 4종 | `UI.Layer.Game/GameMenu/Menu/Modal` (`Config/DefaultGameplayTags.ini`) | ✅ |
+| `bShowHUD` 동기화 | `ULyraUIManagerSubsystem::SyncRootLayoutVisibilityToShowHUD` | 검증 완료 |
+| `UI.Layer.*` 4종 | `UI.Layer.Game/GameMenu/Menu/Modal` (`Config/DefaultGameplayTags.ini`) | 검증 완료 |
 
 ### 섹션 3 - `ULyraHUDLayout`
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| Escape 액션 바인딩 | `RegisterUIActionBinding(UI.Action.Escape, HandleEscapeAction)` | ✅ |
-| Escape 메뉴 push | `UCommonUIExtensions::PushStreamedContentToLayer_ForPlayer(LocalPlayer, UI.Layer.Menu, EscapeMenuClass)` | ✅ |
-| `EscapeMenuClass` CDO | `W_DefaultHUDLayout` → `/Game/UI/Hud/W_LyraGameMenu` | ✅ |
-| Controller disconnect | `IPlatformInputDeviceMapper` connection/pairing delegate | ✅ |
-| Platform trait gating | `Platform.Trait.Input.PrimarlyController` 검사 | ✅ |
-| Disconnect 화면 push | `UCommonUIExtensions::PushContentToLayer_ForPlayer(UI.Layer.Menu, ControllerDisconnectedScreen)` | ✅ |
-| Disconnect 화면 CDO | `W_DefaultHUDLayout` → `/Game/UI/Foundation/Dialogs/W_ControllerDisconnected` | ✅ |
-| HUD layout BP 인벤토리 | `W_DefaultHUDLayout`, `W_FrontEndHUDLayout`, `W_ShooterHUDLayout`, `W_TopDownArenaHUDLayout` | ✅ |
+| Escape 액션 바인딩 | `RegisterUIActionBinding(UI.Action.Escape, HandleEscapeAction)` | 검증 완료 |
+| Escape 메뉴 push | `UCommonUIExtensions::PushStreamedContentToLayer_ForPlayer(LocalPlayer, UI.Layer.Menu, EscapeMenuClass)` | 검증 완료 |
+| `EscapeMenuClass` CDO | `W_DefaultHUDLayout` → `/Game/UI/Hud/W_LyraGameMenu` | 검증 완료 |
+| Controller disconnect | `IPlatformInputDeviceMapper` connection/pairing delegate | 검증 완료 |
+| Platform trait gating | `Platform.Trait.Input.PrimarlyController` 검사 | 검증 완료 |
+| Disconnect 화면 push | `UCommonUIExtensions::PushContentToLayer_ForPlayer(UI.Layer.Menu, ControllerDisconnectedScreen)` | 검증 완료 |
+| Disconnect 화면 CDO | `W_DefaultHUDLayout` → `/Game/UI/Foundation/Dialogs/W_ControllerDisconnected` | 검증 완료 |
+| HUD layout BP 인벤토리 | `W_DefaultHUDLayout`, `W_FrontEndHUDLayout`, `W_ShooterHUDLayout`, `W_TopDownArenaHUDLayout` | 검증 완료 |
 | `W_FrontEnd*`·`W_Shooter*`·`W_TopDown*` 의 parent · CDO | (미확인) | ◐ Monolith 추가 조회 필요 |
 
 ### 섹션 4 - 위젯 주입 (`GameFeatureAction_AddWidgets` + UIExtension)
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `UGameFeatureAction_AddWidgets` 데이터 구조 | `Layout[]: FLyraHUDLayoutRequest`, `Widgets[]: FLyraHUDElementEntry` | ✅ |
-| `AddToWorld` → extension handler | `UGameFrameworkComponentManager::AddExtensionHandler(ALyraHUD::StaticClass(), ...)` | ✅ |
-| Dispatcher | `HandleActorExtension` (Added/Removed) | ✅ |
-| Layout push | `UCommonUIExtensions::PushContentToLayer_ForPlayer(LocalPlayer, LayerID, LayoutClass)` | ✅ |
-| Widget register | `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext(SlotID, LocalPlayer, WidgetClass, -1)` | ✅ |
-| Per-context 데이터 분리 | `TMap<FGameFeatureStateChangeContext, FPerContextData>` (PIE 멀티 세션) | ✅ |
-| Data validation | `IsDataValid` — null LayoutClass/WidgetClass, 무효 LayerID/SlotID 모두 invalid | ✅ |
-| `UUIExtensionSubsystem` 매칭 | `RegisterExtensionPoint`, `RegisterExtensionAsWidget`, `FUIExtensionPoint::DoesExtensionPassContract` | ✅ |
-| `EUIExtensionPointMatch` | `ExactMatch` vs `PartialMatch` | ✅ Epic UIExtension 헤더 |
-| `AllowedDataClasses` contract | extension point 가 받는 data class isA 체크 | ✅ |
-| `HUD.Slot.*` 태그 15종 | Lyra core 7 + ShooterCore 8 | ✅ |
-| `LAS_ShooterGame_StandardHUD` CDO | Layout 1 (`W_ShooterHUDLayout → UI.Layer.Game`) + Widgets 11 | ✅ |
-| 같은 slot 에 widget 2개 | `HUD.Slot.RightSideTouchInputs` 에 joystick + fire button | ✅ |
+| `UGameFeatureAction_AddWidgets` 데이터 구조 | `Layout[]: FLyraHUDLayoutRequest`, `Widgets[]: FLyraHUDElementEntry` | 검증 완료 |
+| `AddToWorld` → extension handler | `UGameFrameworkComponentManager::AddExtensionHandler(ALyraHUD::StaticClass(), ...)` | 검증 완료 |
+| Dispatcher | `HandleActorExtension` (Added/Removed) | 검증 완료 |
+| Layout push | `UCommonUIExtensions::PushContentToLayer_ForPlayer(LocalPlayer, LayerID, LayoutClass)` | 검증 완료 |
+| Widget register | `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext(SlotID, LocalPlayer, WidgetClass, -1)` | 검증 완료 |
+| Per-context 데이터 분리 | `TMap<FGameFeatureStateChangeContext, FPerContextData>` (PIE 멀티 세션) | 검증 완료 |
+| Data validation | `IsDataValid` - null LayoutClass/WidgetClass, 무효 LayerID/SlotID 모두 invalid | 검증 완료 |
+| `UUIExtensionSubsystem` 매칭 | `RegisterExtensionPoint`, `RegisterExtensionAsWidget`, `FUIExtensionPoint::DoesExtensionPassContract` | 검증 완료 |
+| `EUIExtensionPointMatch` | `ExactMatch` vs `PartialMatch` | 검증 완료 Epic UIExtension 헤더 |
+| `AllowedDataClasses` contract | extension point 가 받는 data class isA 체크 | 검증 완료 |
+| `HUD.Slot.*` 태그 15종 | Lyra core 7 + ShooterCore 8 | 검증 완료 |
+| `LAS_ShooterGame_StandardHUD` CDO | Layout 1 (`W_ShooterHUDLayout → UI.Layer.Game`) + Widgets 11 | 검증 완료 |
+| 같은 slot 에 widget 2개 | `HUD.Slot.RightSideTouchInputs` 에 joystick + fire button | 검증 완료 |
 | 다른 Experience 의 ActionSet | `B_LyraShooterGame_ControlPoints`, `B_ShooterGame_Elimination`, `B_ShooterGame_Perf` | ◐ 파일 존재만 확인; CDO 별도 조회 필요 |
 | `UIExtensionPointWidget` (layout 안 slot 구독 widget) | 위치 · 계층 | ◐ 에디터 확인 필요 |
 
@@ -409,27 +409,27 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `HiddenByTags` 인터페이스 | `FGameplayTagContainer HiddenByTags` 속성 | ✅ |
-| Shown/Hidden visibility | `ShownVisibility`, `HiddenVisibility` 기본값 (Visible/Collapsed) | ✅ |
-| `bWantsToBeVisible` 의도 보존 | 외부 `SetVisibility` 호출의 의도 기억 | ✅ |
-| 태그 listening 미구현 | `bHasHiddenTags = false` 하드코딩 + `//@TODO`, `UE-142237` 이슈 | ✅ (코드에 명시) |
-| 대안 — `UCommonUIVisibilitySubsystem` | platform trait 기반 widget 가시성. 라이라 사용 위치 확인됨: `Source/LyraGame/UI/LyraHUDLayout.cpp`, `Source/LyraGame/UI/Foundation/LyraControllerDisconnectedScreen.cpp`, `Source/LyraGame/Settings/CustomSettings/LyraSettingValueDiscrete_PerfStat.cpp`, `Source/LyraGame/Development/LyraPlatformEmulationSettings.cpp` | ✅ 사용처 직접 확인 (단, `ULyraTaggedWidget::HiddenByTags` 자체는 여전히 미구현 — `UE-142237` TODO 유지) |
+| `HiddenByTags` 인터페이스 | `FGameplayTagContainer HiddenByTags` 속성 | 검증 완료 |
+| Shown/Hidden visibility | `ShownVisibility`, `HiddenVisibility` 기본값 (Visible/Collapsed) | 검증 완료 |
+| `bWantsToBeVisible` 의도 보존 | 외부 `SetVisibility` 호출의 의도 기억 | 검증 완료 |
+| 태그 listening 미구현 | `bHasHiddenTags = false` 하드코딩 + `//@TODO`, `UE-142237` 이슈 | 검증 완료 (코드에 명시) |
+| 대안 - `UCommonUIVisibilitySubsystem` | platform trait 기반 widget 가시성. 라이라 사용 위치 확인됨: `Source/LyraGame/UI/LyraHUDLayout.cpp`, `Source/LyraGame/UI/Foundation/LyraControllerDisconnectedScreen.cpp`, `Source/LyraGame/Settings/CustomSettings/LyraSettingValueDiscrete_PerfStat.cpp`, `Source/LyraGame/Development/LyraPlatformEmulationSettings.cpp` | 검증 완료 사용처 직접 확인 (단, `ULyraTaggedWidget::HiddenByTags` 자체는 여전히 미구현 - `UE-142237` TODO 유지) |
 
 ### 섹션 6 - Common Style · 위젯 라이브러리
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| Viewport 입력 라우팅 | `Config/DefaultEngine.ini` 의 `GameViewportClientClassName=/Script/LyraGame.LyraGameViewportClient` + `ULyraGameViewportClient : UCommonGameViewportClient` 상속 (`Source/LyraGame/UI/LyraGameViewportClient.h`) | ✅ 두 파일 직접 확인 |
+| Viewport 입력 라우팅 | `Config/DefaultEngine.ini` 의 `GameViewportClientClassName=/Script/LyraGame.LyraGameViewportClient` + `ULyraGameViewportClient : UCommonGameViewportClient` 상속 (`Source/LyraGame/UI/LyraGameViewportClient.h`) | 검증 완료 두 파일 직접 확인 |
 | Input Action Data Table | `CommonInputActionDataBase` row | ◐ Epic Quickstart; Lyra 측 자산 별도 확인 |
 | Default 내비게이션 | `CommonUIInputData` (Click/Back) | ◐ |
 | Controller data | `CommonInputBaseControllerData` per-platform | ◐ |
 | Style 자산 | `CommonButtonStyle`, `CommonTextStyle`, `CommonBorderStyle` | △ Epic API; Lyra 사용 자산 별도 확인 |
-| `LyraButtonBase` | `Source/LyraGame/UI/Foundation/LyraButtonBase.h` | ✅ 파일 존재 |
-| `LyraActionWidget` | `Source/LyraGame/UI/Foundation/LyraActionWidget.h` | ✅ 파일 존재 |
-| `LyraBoundActionButton` | `Source/LyraGame/UI/Common/LyraBoundActionButton.h` | ✅ |
-| `LyraTabButtonBase` / `LyraTabListWidgetBase` | `Source/LyraGame/UI/Common/` | ✅ |
-| `LyraWidgetFactory` | `Source/LyraGame/UI/Common/LyraWidgetFactory.h` | ✅ |
-| `LyraListView` | `Source/LyraGame/UI/Common/LyraListView.h` | ✅ |
+| `LyraButtonBase` | `Source/LyraGame/UI/Foundation/LyraButtonBase.h` | 검증 완료 파일 존재 |
+| `LyraActionWidget` | `Source/LyraGame/UI/Foundation/LyraActionWidget.h` | 검증 완료 파일 존재 |
+| `LyraBoundActionButton` | `Source/LyraGame/UI/Common/LyraBoundActionButton.h` | 검증 완료 |
+| `LyraTabButtonBase` / `LyraTabListWidgetBase` | `Source/LyraGame/UI/Common/` | 검증 완료 |
+| `LyraWidgetFactory` | `Source/LyraGame/UI/Common/LyraWidgetFactory.h` | 검증 완료 |
+| `LyraListView` | `Source/LyraGame/UI/Common/LyraListView.h` | 검증 완료 |
 | `UI.Action.*` 태그 (혼합 출처) | `UI.Action.Back` (ini 정의), `UI.Action.Escape` (`Config/DefaultInput.ini` 의 `InputActions`), `UI.Action.Cancel/Confirm/NextTab/PreviousTab` (Monolith tag 인덱스 확인) | ◐ Monolith 인덱스에 6종 모두 존재; `Cancel/Confirm/NextTab/PreviousTab` 의 정의 위치 (CommonInput data table 또는 widget CDO) 는 Monolith 추가 조회 필요 |
 
 ### 섹션 7 - 설정 화면 · GameSettings 플러그인
@@ -441,26 +441,26 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 | Value 종류 | `ValueScalarDynamic`, `ValueDiscreteDynamic_Bool/Number/Enum` | ◐ |
 | `UGameSettingPanel` / `UGameSettingListEntryBase` / `UGameSettingVisualData` | UI 연결 | ◐ |
 | Edit conditions | `FWhenCondition`, `FWhenPlatformHasTrait`, `FWhenPlayingAsPrimaryPlayer` | ◐ |
-| `ULyraSettingScreen` | `Source/LyraGame/UI/LyraSettingScreen.h` | ✅ 파일 존재 |
+| `ULyraSettingScreen` | `Source/LyraGame/UI/LyraSettingScreen.h` | 검증 완료 파일 존재 |
 | Lyra settings 데이터 | `ULyraSettingsLocal`, `ULyraSettingsShared` | ◐ 파일 존재 가정; 별도 확인 |
-| Frontend perf settings 적용 | `Source/LyraGame/UI/Frontend/ApplyFrontendPerfSettingsAction.h` | ✅ |
+| Frontend perf settings 적용 | `Source/LyraGame/UI/Frontend/ApplyFrontendPerfSettingsAction.h` | 검증 완료 |
 
 ### 섹션 8 - 프론트엔드 · Common User
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `LyraFrontendStateComponent` | `Source/LyraGame/UI/Frontend/LyraFrontendStateComponent.h` | ✅ |
-| `LyraLobbyBackground` | `Source/LyraGame/UI/Frontend/LyraLobbyBackground.h` | ✅ |
-| `LyraLoadingScreenSubsystem` | `Source/LyraGame/UI/Foundation/LyraLoadingScreenSubsystem.h` | ✅ |
+| `LyraFrontendStateComponent` | `Source/LyraGame/UI/Frontend/LyraFrontendStateComponent.h` | 검증 완료 |
+| `LyraLobbyBackground` | `Source/LyraGame/UI/Frontend/LyraLobbyBackground.h` | 검증 완료 |
+| `LyraLoadingScreenSubsystem` | `Source/LyraGame/UI/Foundation/LyraLoadingScreenSubsystem.h` | 검증 완료 |
 | `UCommonUserSubsystem` | 로그인·인증·권한 | ◐ Epic Common User 문서 |
 | `UCommonSessionSubsystem` | 세션 (호스팅 / P2P / EOS) | ◐ |
 | `CommonGameInstance` | Lyra `UGameInstance` 가 상속 | ◐ 확인 필요 |
-| `ULyraUserFacingExperienceDefinition` | 매치 옵션 정의 → 세션 서브시스템 | ✅ Epic 문서 + Lyra 헤더 존재 |
+| `ULyraUserFacingExperienceDefinition` | 매치 옵션 정의 → 세션 서브시스템 | 검증 완료 Epic 문서 + Lyra 헤더 존재 |
 | `W_LyraStartup` / `W_ExperienceSelectionScreen` | 로그인·매치 선택 widget | ◐ Epic Common User 문서 |
 
 ### 키워드 검토 결과
 
-- 위 키워드 목록은 학습 항목으로 적절. 모두 동일한 수준의 로컬 사실로 적으면 안 됨 — `✅` 만 본문에 확정적으로 반영, `◐`/`△` 는 "공식 개념", "에디터/Monolith 추가 조회 과제", "추가 검증 필요" 로 구분한다.
+- 위 키워드 목록은 학습 항목으로 적절. 모두 동일한 수준의 로컬 사실로 적으면 안 됨 - `✅` 만 본문에 확정적으로 반영, `◐`/`△` 는 "공식 개념", "에디터/Monolith 추가 조회 과제", "추가 검증 필요" 로 구분한다.
 - 현재 목록에서 명백히 라이라와 무관한 키워드는 발견 안 됨.
 - 섹션 4 (위젯 주입) 와 섹션 6 (스타일·위젯) 에 키워드가 가장 몰린다. 섹션 4 는 라이라 UI 모듈성의 핵심이라 그대로 두고, 섹션 6 는 분량이 크면 (`common-styles-and-input.html` + `lyra-widget-library.html`) 두 페이지로 분할 가능.
 - 섹션 5 (TaggedWidget) 키워드가 적어 보이지만 "**미구현 인터페이스를 명확히 알리는 것**" 이 학습 목적이므로 별도 섹션 유지.
@@ -468,7 +468,7 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 
 ## HTML 산출물 대응표
 
-위 8개 학습 섹션을 실제 `dynamic-html/pages/lyra-ui-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-ui-`, 시스템 내 번호 (글로벌 번호 X).
+위 8개 학습 섹션을 실제 `dynamic-html/pages/lyra-ui-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 - 파일명 접두어 `lyra-ui-`, 시스템 내 번호 (글로벌 번호 X).
 
 | 페이지 번호 | HTML 파일 | 포함 섹션 | 목차명 | 권장 학습 블록 |
 |-------------|-----------|-----------|--------|----------------|
@@ -479,13 +479,13 @@ CommonUI 는 그 자체로 큰 플러그인이다 (입력 라우팅, activatable
 | 5 | `lyra-ui-widget-injection.html` | 섹션 4 | 학습 목차 | flow (AddWidgets 런타임) + structure (UIExtension pub/sub) + comparison (layer push vs slot register) + reference (`LAS_ShooterGame_StandardHUD`) |
 | 6 | `lyra-ui-tagged-widget-visibility.html` | 섹션 5 | 학습 목차 | structure (`ULyraTaggedWidget`) + verification (미구현 항목) + decision (가시성 대안 선택) + `note-warning` |
 | 7 | `lyra-ui-styles-widgets.html` | 섹션 6 | 항목 목차 또는 학습 목차 | reference (라이라 위젯 라이브러리) + structure (Common Style 자산) + recipe (새 버튼·탭 작성) |
-| — (보류) | `lyra-ui-settings.html` (분리 예정) | 섹션 7 | 학습 목차 | structure (`UGameSetting` 모델) + reference (settings registry) + recipe (새 설정 추가) | **HTML 생성 보류** — 현재 원장 범위가 `Source/LyraGame/UI/` 중심이라 `Source/LyraGame/Settings/` 원장 보강 (`LyraGameSettingRegistry`·`LyraSettingsLocal`·`LyraSettingsShared`·6 종 카테고리 `_Audio/Gamepad/Gameplay/MouseAndKeyboard/PerfStats/Video.cpp`) 후 별도 페이지로 작성 |
-| — (보류) | `lyra-ui-frontend-common-user.html` (분리 예정) | 섹션 8 | 학습 목차 | structure (`LyraFrontendStateComponent` + Common User) + flow (로그인 → 매치 선택 → 세션) + reference (`W_LyraStartup`·`W_ExperienceSelectionScreen`) | **HTML 생성 보류** — Common User 의 `UCommonUserSubsystem`·`UCommonSessionSubsystem` 인스턴스화 위치와 `W_*` widget CDO 가 원장 미보강. Settings 와 성격이 다르므로 분리
+| - (보류) | `lyra-ui-settings.html` (분리 예정) | 섹션 7 | 학습 목차 | structure (`UGameSetting` 모델) + reference (settings registry) + recipe (새 설정 추가) | **HTML 생성 보류** - 현재 원장 범위가 `Source/LyraGame/UI/` 중심이라 `Source/LyraGame/Settings/` 원장 보강 (`LyraGameSettingRegistry`·`LyraSettingsLocal`·`LyraSettingsShared`·6 종 카테고리 `_Audio/Gamepad/Gameplay/MouseAndKeyboard/PerfStats/Video.cpp`) 후 별도 페이지로 작성 |
+| - (보류) | `lyra-ui-frontend-common-user.html` (분리 예정) | 섹션 8 | 학습 목차 | structure (`LyraFrontendStateComponent` + Common User) + flow (로그인 → 매치 선택 → 세션) + reference (`W_LyraStartup`·`W_ExperienceSelectionScreen`) | **HTML 생성 보류** - Common User 의 `UCommonUserSubsystem`·`UCommonSessionSubsystem` 인스턴스화 위치와 `W_*` widget CDO 가 원장 미보강. Settings 와 성격이 다르므로 분리
 
 원칙:
 - 페이지 1~7 은 우선순위 "최상~중" 의 코어 학습. 페이지 8 은 위성 시스템이라 선택.
 - 섹션 6 가 분량이 크면 페이지 7 을 `lyra-ui-common-styles.html` + `lyra-ui-widget-library.html` 두 페이지로 분할 가능 (위 표는 1페이지 안).
-- 각 페이지 카드의 `<h3>` 첫 번째 단어는 시스템 내 페이지 번호 — 마침표 + 공백 (`1. ...`). 사양의 "번호 ↔ 제목 구분자" 절 준수.
+- 각 페이지 카드의 `<h3>` 첫 번째 단어는 시스템 내 페이지 번호 - 마침표 + 공백 (`1. ...`). 사양의 "번호 ↔ 제목 구분자" 절 준수.
 
 ## 검증 등급 유지 항목
 
@@ -495,13 +495,13 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 |-------------|-------------------------------|
 | `lyra-ui-input-activation.html` | `CommonUIActionRouterBase` 의 라이라 사용 위치, back action 의 실제 routing, `UCommonActivatableWidgetStack` / `Switcher` 사용 사례는 ◐ |
 | `lyra-ui-hud-manager.html` | `UGameUIPolicy` / `UPrimaryGameLayout` CDO 의 layer 4종 등록 여부는 별도 확인 전까지 ◐ |
-| `lyra-ui-hud-layout.html` | `W_FrontEndHUDLayout`·`W_ShooterHUDLayout`·`W_TopDownArenaHUDLayout` 의 parent · CDO 는 ◐ (`W_DefaultHUDLayout` 만 ✅) |
+| `lyra-ui-hud-layout.html` | `W_FrontEndHUDLayout`·`W_ShooterHUDLayout`·`W_TopDownArenaHUDLayout` 의 parent · CDO 는 ◐ (`W_DefaultHUDLayout` 만 검증 완료) |
 | `lyra-ui-widget-injection.html` | 다른 Experience ActionSet (`B_LyraShooterGame_ControlPoints` 등) 의 `GameFeatureAction_AddWidgets` CDO 는 ◐ ; layout 안 `UUIExtensionPointWidget` 의 위치·계층은 ◐ (UMG designer tree 확인 필요) |
-| `lyra-ui-tagged-widget-visibility.html` | `HiddenByTags` 런타임 listening 미구현 사실은 ✅ (코드 주석 명시 — `UE-142237`). 대안 (`UCommonUIVisibilitySubsystem`) 의 라이라 사용 위치는 ✅ — `LyraHUDLayout.cpp`·`LyraControllerDisconnectedScreen.cpp`·`LyraSettingValueDiscrete_PerfStat.cpp`·`LyraPlatformEmulationSettings.cpp` 4 파일에서 확인됨 |
-| `lyra-ui-styles-widgets.html` | Common Style 자산·input action data table·controller data 의 라이라 CDO 는 모두 ◐ 까지 ; 라이라 측 widget 파생 클래스의 파일 존재만 ✅, BP 사용 위치는 ◐ |
-| `lyra-ui-settings.html` · `lyra-ui-frontend-common-user.html` (둘 다 보류) | HTML 미생성. 생성 전 `Source/LyraGame/Settings/` 와 `Source/LyraGame/UI/Frontend/` + Common User 인스턴스화 위치를 원장에 ✅ 로 보강 필요. 보강된 뒤에도 partial 로 유지될 항목: 각 `UGameSetting*` 값 클래스의 정확한 카테고리 매핑, `W_LyraStartup` / `W_ExperienceSelectionScreen` 의 CDO 와 세션 옵션 흐름 |
+| `lyra-ui-tagged-widget-visibility.html` | `HiddenByTags` 런타임 listening 미구현 사실은 검증 완료 (코드 주석 명시 - `UE-142237`). 대안 (`UCommonUIVisibilitySubsystem`) 의 라이라 사용 위치는 검증 완료 - `LyraHUDLayout.cpp`·`LyraControllerDisconnectedScreen.cpp`·`LyraSettingValueDiscrete_PerfStat.cpp`·`LyraPlatformEmulationSettings.cpp` 4 파일에서 확인됨 |
+| `lyra-ui-styles-widgets.html` | Common Style 자산·input action data table·controller data 의 라이라 CDO 는 모두 ◐ 까지 ; 라이라 측 widget 파생 클래스의 파일 존재만 검증 완료, BP 사용 위치는 ◐ |
+| `lyra-ui-settings.html` · `lyra-ui-frontend-common-user.html` (둘 다 보류) | HTML 미생성. 생성 전 `Source/LyraGame/Settings/` 와 `Source/LyraGame/UI/Frontend/` + Common User 인스턴스화 위치를 원장에 검증 완료 로 보강 필요. 보강된 뒤에도 partial 로 유지될 항목: 각 `UGameSetting*` 값 클래스의 정확한 카테고리 매핑, `W_LyraStartup` / `W_ExperienceSelectionScreen` 의 CDO 와 세션 옵션 흐름 |
 
-**원장 보강이 우선** — 위 ◐ 항목 중 자주 인용될 사실은 HTML 생성 전에 Monolith / 라이더 MCP 로 확인해 원장 (`ui-code-analysis.md` · `ui-blueprint-analysis.md`) 에 먼저 추가하고 ✅ 로 승격한다. HTML 페이지에서 새 사실을 정의하지 않는다.
+**원장 보강이 우선** - 위 ◐ 항목 중 자주 인용될 사실은 HTML 생성 전에 Monolith / 라이더 MCP 로 확인해 원장 (`ui-code-analysis.md` · `ui-blueprint-analysis.md`) 에 먼저 추가하고 검증 완료 로 승격한다. HTML 페이지에서 새 사실을 정의하지 않는다.
 
 ## 원장 범위 한계 (Settings / Frontend)
 
@@ -523,8 +523,8 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 
 | 문서군 | 역할 | 사실의 출처 여부 |
 |--------|------|-------------------|
-| [`ui-code-analysis.md`](ui-code-analysis.md), [`ui-blueprint-analysis.md`](ui-blueprint-analysis.md) | **검증 원장 (verified fact ledger)** — Monolith · C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
-| 후속 8개 학습 문서 | **기능별 학습 안내서** — 검증 원장의 사실을 데이터 흐름 순서로 재배열하고 실습·디버깅·확장 레시피를 더함 | 아니오. 원장을 인용 |
+| [`ui-code-analysis.md`](ui-code-analysis.md), [`ui-blueprint-analysis.md`](ui-blueprint-analysis.md) | **검증 원장 (verified fact ledger)** - Monolith · C++ 재조회로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO 값의 근거 |
+| 후속 8개 학습 문서 | **기능별 학습 안내서** - 검증 원장의 사실을 데이터 흐름 순서로 재배열하고 실습·디버깅·확장 레시피를 더함 | 아니오. 원장을 인용 |
 | [`ui-references.md`](ui-references.md) | 개념 학습용 공식 문서·커뮤니티 자료 링크 + 문서 ↔ 프로젝트 매핑 | 아니오. 외부 개념 |
 
 운영 규칙:
@@ -532,7 +532,7 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 - 학습 문서는 사실을 새로 조사하지 말고 검증 원장을 인용한다. 원장에 없는 사실이 필요하면 Monolith · 라이더 MCP 로 확인한 뒤 **원장에 먼저 추가** 하고 학습 문서가 그것을 인용한다.
 - 학습 문서가 원장과 어긋나는 내용을 발견하면 Monolith · 라이더 MCP 로 재확인하고 양쪽을 함께 갱신한다.
 - 두 분석 문서를 유지해야 하는 이유: 학습 문서는 흐름 위주라 "이 값이 어디서 검증됐는가" 의 추적성이 약해진다. 원장이 추적성을 담당하면 학습 문서는 가벼워진다.
-- 공식 온라인 자료의 정식 목록과 카테고리 분류는 [`ui-references.md`](ui-references.md) 에 분리되어 있다 — `animation-references.md` 와 동일한 형식. 본 섹션 설계는 그 references 문서를 1차 참고로 인용한다.
+- 공식 온라인 자료의 정식 목록과 카테고리 분류는 [`ui-references.md`](ui-references.md) 에 분리되어 있다 - `animation-references.md` 와 동일한 형식. 본 섹션 설계는 그 references 문서를 1차 참고로 인용한다.
 
 ## 독자별 학습 경로
 
@@ -542,7 +542,7 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 2. CommonUI 의 입력·활성화 모델 (섹션 1)
 3. HUD 액터와 게임 UI 매니저 (섹션 2)
 4. `ULyraHUDLayout` (섹션 3)
-5. 위젯 주입 — `GameFeatureAction_AddWidgets` + UIExtension (섹션 4)
+5. 위젯 주입 - `GameFeatureAction_AddWidgets` + UIExtension (섹션 4)
 
 목표는 "왜 이 widget 이 이 위치에 떠 있는가" 를 한 흐름으로 설명할 수 있게 되는 것.
 
@@ -561,17 +561,17 @@ HTML 페이지가 마크다운 원장보다 높은 등급으로 사실을 표시
 1. CommonUI 의 입력·활성화 모델 (섹션 1)
 2. HUD 액터와 게임 UI 매니저 (섹션 2)
 3. 위젯 주입 (섹션 4)
-4. `ULyraTaggedWidget` 의 미구현 인터페이스 (섹션 5) — 어떤 인터페이스에 의존하면 안 되는지
+4. `ULyraTaggedWidget` 의 미구현 인터페이스 (섹션 5) - 어떤 인터페이스에 의존하면 안 되는지
 5. 설정 화면과 `GameSettings` (섹션 7)
 
 GameFeatureAction 의 component manager 연동, UIExtension subsystem 의 매칭 contract, settings registry 의 데이터 모델 등 메커니즘 중심.
 
 ### 콘텐츠 확장 담당자 (새 위젯 / 새 layer / 새 Experience HUD)
 
-1. 위젯 주입 (섹션 4) — 가장 핵심
+1. 위젯 주입 (섹션 4) - 가장 핵심
 2. `ULyraHUDLayout` (섹션 3)
 3. HUD 액터와 게임 UI 매니저 (섹션 2)
 4. Common Style · 위젯 라이브러리 (섹션 6)
-5. (Experience HUD 신규 작성) 설정 화면 (섹션 7) — 설정 항목 추가 시
+5. (Experience HUD 신규 작성) 설정 화면 (섹션 7) - 설정 항목 추가 시
 
-목표는 코드 수정 없이 새 widget 을 새 Experience 에 노출할 수 있게 되는 것 — `GameFeatureAction_AddWidgets.Widgets[]` 에 항목 추가 한 줄로 끝나는 지점을 이해.
+목표는 코드 수정 없이 새 widget 을 새 Experience 에 노출할 수 있게 되는 것 - `GameFeatureAction_AddWidgets.Widgets[]` 에 항목 추가 한 줄로 끝나는 지점을 이해.

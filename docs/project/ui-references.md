@@ -12,8 +12,8 @@
 
 - **CommonUI** (Epic 플러그인) - 입력 라우팅 (`CommonGameViewportClient`, `CommonUIActionRouterBase`), activatable widget, style, input action 매핑, 카드룰 내비게이션
 - **CommonGame** (Epic 플러그인) - `UGameUIManagerSubsystem`, `UGameUIPolicy`, `UPrimaryGameLayout` + `UI.Layer.*` 관리
-- **UIExtension** (Epic 플러그인, 라이라에 포함) - `UUIExtensionSubsystem`, `UUIExtensionPointWidget` — `HUD.Slot.*` tag 기반 위젯 매칭
-- **라이라 액션** - `UGameFeatureAction_AddWidgets` — Experience 가 활성화될 때 위 둘에 위젯을 데이터로 주입
+- **UIExtension** (Epic 플러그인, 라이라에 포함) - `UUIExtensionSubsystem`, `UUIExtensionPointWidget` - `HUD.Slot.*` tag 기반 위젯 매칭
+- **라이라 액션** - `UGameFeatureAction_AddWidgets` - Experience 가 활성화될 때 위 둘에 위젯을 데이터로 주입
 - **GameSettings** (Epic 플러그인) - 설정 화면 데이터 모델
 
 추가로 **Common User** (`UCommonUserSubsystem`, `UCommonSessionSubsystem`) 는 로그인·세션 추상화로, 프론트엔드 흐름에서만 필요한 위성 시스템입니다 (이름은 비슷하지만 CommonUI 와 다른 플러그인).
@@ -29,7 +29,7 @@
 
 ## 1. 공식 라이라 문서 (최우선)
 
-### ⭐ Lyra Sample Game
+### (특별) Lyra Sample Game
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/lyra-sample-game-in-unreal-engine>
 
 라이라 프로젝트 전체 개요. UMG widget 인벤토리, GameFeatures + Common User 위치, FrontEnd Map (`L_LyraFrontEnd`) 등 UI 관련 내용을 포함.
@@ -37,7 +37,7 @@
 ### Lyra Sample Game Settings
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/lyra-sample-game-settings-in-unreal-engine>
 
-`GameSettings` 플러그인의 라이라 적용 — `UGameSettingRegistry`, `UGameSetting`, `UGameSettingValue`, `UGameSettingCollection`, value type specialization (`ScalarDynamic`, `DiscreteDynamic_Bool/Number/Enum`), `UGameSettingPanel`, `UGameSettingListEntryBase`, edit conditions (`FWhenCondition`, `FWhenPlatformHasTrait`, `FWhenPlayingAsPrimaryPlayer`).
+`GameSettings` 플러그인의 라이라 적용 - `UGameSettingRegistry`, `UGameSetting`, `UGameSettingValue`, `UGameSettingCollection`, value type specialization (`ScalarDynamic`, `DiscreteDynamic_Bool/Number/Enum`), `UGameSettingPanel`, `UGameSettingListEntryBase`, edit conditions (`FWhenCondition`, `FWhenPlatformHasTrait`, `FWhenPlayingAsPrimaryPlayer`).
 
 ### Common User Plugin in Lyra
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/common-user-plugin-in-unreal-engine-for-lyra-sample-game>
@@ -63,12 +63,12 @@ CommonUI 가 해결하는 문제 (다층 메뉴 내비게이션, 콘솔별 버�
 ### Common UI Quickstart Guide
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/common-ui-quickstart-guide-for-unreal-engine>
 
-5단계 셋업 — (1) Viewport input routing → (2) Input Action Data Tables (`CommonInputActionDataBase`) → (3) Default 내비게이션 (`CommonUIInputData`) → (4) Controller data (`CommonInputBaseControllerData`) → (5) Style 자산. 새 프로젝트에 CommonUI 를 도입할 때의 정석 절차.
+5단계 셋업 - (1) Viewport input routing → (2) Input Action Data Tables (`CommonInputActionDataBase`) → (3) Default 내비게이션 (`CommonUIInputData`) → (4) Controller data (`CommonInputBaseControllerData`) → (5) Style 자산. 새 프로젝트에 CommonUI 를 도입할 때의 정석 절차.
 
 ### UCommonActivatableWidget API
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Plugins/CommonUI/UCommonActivatableWidget>
 
-활성화 widget 의 핵심 API — `GetDesiredFocusTarget`, `GetDesiredInputConfig`, `BP_OnActivated/Deactivated`, `BP_GetDesiredFocusTarget`, `IsBackHandler`, `IsModal`, `OnHandleBackAction`, `VisibilityBoundWidgets`. 라이라 `ULyraActivatableWidget` 의 직접 부모.
+활성화 widget 의 핵심 API - `GetDesiredFocusTarget`, `GetDesiredInputConfig`, `BP_OnActivated/Deactivated`, `BP_GetDesiredFocusTarget`, `IsBackHandler`, `IsModal`, `OnHandleBackAction`, `VisibilityBoundWidgets`. 라이라 `ULyraActivatableWidget` 의 직접 부모.
 
 ### UCommonActivatableWidgetStack API
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Plugins/CommonUI/UCommonActivatableWidgetStack>
@@ -89,7 +89,7 @@ UIExtension 플러그인의 Epic 공식 문서는 매우 빈약합니다. **커�
 ### UI Extension UE5 (X157 Dev Notes)
 <https://x157.github.io/UE5/UIExtension/>
 
-UIExtension subsystem 의 의도와 사용 패턴 — `Extension Point` gameplay tag ↔ `Activatable Widget` 매핑, Experience 별 widget 교체 (`HUD.Slot.Score` 가 Experience 마다 다른 widget 으로). 라이라의 `GameFeatureAction_AddWidgets` 흐름 이해의 핵심 참고.
+UIExtension subsystem 의 의도와 사용 패턴 - `Extension Point` gameplay tag ↔ `Activatable Widget` 매핑, Experience 별 widget 교체 (`HUD.Slot.Score` 가 Experience 마다 다른 widget 으로). 라이라의 `GameFeatureAction_AddWidgets` 흐름 이해의 핵심 참고.
 
 ---
 
@@ -108,9 +108,9 @@ UIExtension subsystem 의 의도와 사용 패턴 — `Extension Point` gameplay
 ### Common UI Plugin (X157)
 <https://x157.github.io/UE5/CommonUI/>
 
-CommonUI 자체에 대한 커뮤니티 노트 — Quickstart 보다 깊은 내용을 다룸.
+CommonUI 자체에 대한 커뮤니티 노트 - Quickstart 보다 깊은 내용을 다룸.
 
-### XistCommonGameSample (GitHub — Lyra 풍 HUD 참조 구현)
+### XistCommonGameSample (GitHub - Lyra 풍 HUD 참조 구현)
 <https://github.com/XistGG/XistCommonGameSample>
 
 UE 5.7 기준 Lyra-like HUD & Input Setup 의 미니멀 참조 프로젝트. 라이라 전체 코드보다 작아서 학습용으로 좋음.
@@ -131,7 +131,7 @@ UE 5.7 기준 Lyra-like HUD & Input Setup 의 미니멀 참조 프로젝트. 라
 | `UCommonActivatableWidget` | `Source/LyraGame/UI/LyraActivatableWidget.h` (`ULyraActivatableWidget`) | 라이더 MCP |
 | `CommonGameViewportClient` | `Source/LyraGame/UI/LyraGameViewportClient.h` (`ULyraGameViewportClient`) + `Config/DefaultEngine.ini` `GameViewportClientClassName` | `Read` (헤더 + ini) |
 | `UGameUIManagerSubsystem` | `Source/LyraGame/UI/Subsystem/LyraUIManagerSubsystem.h` (`ULyraUIManagerSubsystem`) | 라이더 MCP |
-| `UGameUIPolicy` / `UPrimaryGameLayout` | (CommonGame 플러그인 — 라이라 측 policy 자산은 별도 확인 필요) | Monolith `blueprint_query` |
+| `UGameUIPolicy` / `UPrimaryGameLayout` | (CommonGame 플러그인 - 라이라 측 policy 자산은 별도 확인 필요) | Monolith `blueprint_query` |
 | `UUIExtensionSubsystem` | `Plugins/UIExtension/Source/Public/UIExtensionSystem.h` (라이라에 포함된 Epic 플러그인) | 라이더 MCP / `Read` |
 | `UUIExtensionPointWidget` (layout 안 slot 구독 widget) | `Plugins/UIExtension/Source/Public/Widgets/UIExtensionPointWidget.h` | `Read` |
 | `UGameFeatureAction_AddWidgets` | `Source/LyraGame/GameFeatures/GameFeatureAction_AddWidget.h` | 라이더 MCP |
@@ -139,7 +139,7 @@ UE 5.7 기준 Lyra-like HUD & Input Setup 의 미니멀 참조 프로젝트. 라
 | `UI.Layer.*` 태그 (Game/GameMenu/Menu/Modal) | `Config/DefaultGameplayTags.ini` 정의 + `Source/LyraGame/UI/LyraHUDLayout.cpp` 의 `UE_DEFINE_GAMEPLAY_TAG_STATIC` 네이티브 정의 | `Read` (ini + .cpp) |
 | `HUD.Slot.*` 태그 (15종) | `Config/DefaultGameplayTags.ini` (Lyra core 7종) + `Plugins/GameFeatures/ShooterCore/Config/Tags/ShooterCoreTags.ini` (8종) | `Read` (ini) |
 | Experience action set | `Plugins/GameFeatures/ShooterCore/Content/Experiences/LAS_ShooterGame_StandardHUD` 등 | Monolith `blueprint_query.get_cdo_properties` |
-| `UGameSettingRegistry` 외 GameSettings 모델 | `Source/LyraGame/Settings/LyraGameSettingRegistry.h` 외 (별도 시스템 — 본 references 범위 밖) | 라이더 MCP |
+| `UGameSettingRegistry` 외 GameSettings 모델 | `Source/LyraGame/Settings/LyraGameSettingRegistry.h` 외 (별도 시스템 - 본 references 범위 밖) | 라이더 MCP |
 | `UCommonUserSubsystem` / `UCommonSessionSubsystem` | CommonUser 플러그인 + `Source/LyraGame/UI/Frontend/` 의 라이라 측 사용 | 라이더 MCP |
 | 입력 액션 (`UI.Action.*` 태그) | `Config/DefaultGameplayTags.ini` (`UI.Action.Back`) + `Config/DefaultInput.ini` (`UI.Action.Escape` InputActions) + (`Cancel/Confirm/NextTab/PreviousTab` 은 Monolith 인덱스에 확인되나 정의 위치 별도 조회 필요) | `Read` (ini) / Monolith |
 

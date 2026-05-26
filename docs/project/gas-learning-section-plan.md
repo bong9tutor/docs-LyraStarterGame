@@ -1,6 +1,6 @@
 # Lyra GAS 학습 문서 섹션 설계
 
-확인일: 2026-05-25  
+확인일: 2026-05-25 
 목적: 라이라 GAS 분석·학습 문서를 기능별로 어떻게 나눌지 결정하기 위한 정보 구조 설계
 
 이 문서는 검증 원장 [`gas-code-analysis.md`](gas-code-analysis.md) · [`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) 와 Epic 공식 GAS 문서 ([`gas-references.md`](gas-references.md) 참조) 를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 확장하기 쉬운지 정리한다. 작성 패턴은 [`animation-learning-section-plan.md`](animation-learning-section-plan.md) · [`ui-learning-section-plan.md`](ui-learning-section-plan.md) 와 동일.
@@ -13,17 +13,17 @@
 
 0. 전체 지도와 학습 경로
 1. ASC 보유 위치 3종 (PlayerState / GameState / CharacterWithAbilities) 과 초기화 흐름
-2. `ULyraAbilitySet` — 어빌리티 + 이펙트 + AttributeSet 묶음 부여
-3. `ULyraGameplayAbility` — `ActivationPolicy` · `ActivationGroup` · `AdditionalCosts` · 입력 라우팅
+2. `ULyraAbilitySet` - 어빌리티 + 이펙트 + AttributeSet 묶음 부여
+3. `ULyraGameplayAbility` - `ActivationPolicy` · `ActivationGroup` · `AdditionalCosts` · 입력 라우팅
 4. 태그 관계 매핑 (`ULyraAbilityTagRelationshipMapping`) 과 활성화 차단/취소
-5. AttributeSet + Execution — 데미지/힐 파이프라인 (`CombatSet → DamageExecution → HealthSet`)
-6. GameplayCue + `ULyraGameplayCueManager` — delay-load 정책과 13개 `GCN_*`
-7. GamePhase — `ULyraGamePhaseSubsystem` + `ULyraGamePhaseAbility` 와 페이즈 계층
+5. AttributeSet + Execution - 데미지/힐 파이프라인 (`CombatSet → DamageExecution → HealthSet`)
+6. GameplayCue + `ULyraGameplayCueManager` - delay-load 정책과 13개 `GCN_*`
+7. GamePhase - `ULyraGamePhaseSubsystem` + `ULyraGamePhaseAbility` 와 페이즈 계층
 8. 글로벌 ASC 일괄 적용 (`ULyraGlobalAbilitySystem`) + Effect Context 확장 (`FLyraGameplayEffectContext` · `ILyraAbilitySourceInterface`)
 
 핵심은 다음 두 가지를 분리하는 것이다:
-- **"어빌리티가 부여되는가" 와 "어빌리티가 활성화되는가"** — 같은 ASC 위에서 일어나지만 책임이 다르다 (AbilitySet vs InputTag/ActivationGroup).
-- **"GE 가 attribute 를 바꾸는가" 와 "execution 이 attribute 를 계산하는가"** — modifier 와 execution calculation 의 차이는 라이라 데미지 파이프라인 이해의 출발점.
+- **"어빌리티가 부여되는가" 와 "어빌리티가 활성화되는가"** - 같은 ASC 위에서 일어나지만 책임이 다르다 (AbilitySet vs InputTag/ActivationGroup).
+- **"GE 가 attribute 를 바꾸는가" 와 "execution 이 attribute 를 계산하는가"** - modifier 와 execution calculation 의 차이는 라이라 데미지 파이프라인 이해의 출발점.
 
 ## 조사 근거
 
@@ -32,7 +32,7 @@
 | 문서 | 강점 | 학습 목차로 부족한 점 |
 |------|------|---------------------|
 | [`gas-code-analysis.md`](gas-code-analysis.md) | 15종 C++ 클래스의 책임·런타임 흐름·디버깅 체크리스트 | 코드 책임 중심이라 "어떤 학습 순서로 읽어야 흐름이 잡히는가" 가 분리되어야 한다 |
-| [`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) | **GAS 자산 원장의 단일 기준** — Monolith CDO 검증 완료 (2026-05-25) | 핵심 자산 11 AbilitySet + 6 GamePhase + 1 TagRelationship + 대표 8 GA + 9 GE + 21 GCN + 6 PawnData + 4 AttributeSet 모두 ✅ — 본 계획은 그 원장 위에 학습 동선만 결정 |
+| [`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) | **GAS 자산 원장의 단일 기준** - Monolith CDO 검증 완료 (2026-05-25) | 핵심 자산 11 AbilitySet + 6 GamePhase + 1 TagRelationship + 대표 8 GA + 9 GE + 21 GCN + 6 PawnData + 4 AttributeSet 모두 검증 완료 - 본 계획은 그 원장 위에 학습 동선만 결정 |
 
 따라서 후속 학습 문서는 두 원장을 대체하지 않고, 두 원장의 사실을 데이터 흐름 순서로 재배열하는 안내서로 작성한다.
 
@@ -109,7 +109,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 핵심 질문:
 - 일반 플레이어의 ASC 는 어디에 있는가? (PS)
 - GamePhase 용 ASC 는 어디에 있는가? (GS)
-- 자기 자신이 ASC 를 갖는 캐릭터는 언제 쓰는가? (CharacterWithAbilities — 봇 등)
+- 자기 자신이 ASC 를 갖는 캐릭터는 언제 쓰는가? (CharacterWithAbilities - 봇 등)
 - PawnExtensionComponent 가 ASC 를 어떻게 pawn 에 연결하는가?
 - pawn 이 바뀔 때 ASC 의 avatar 만 바뀌고 어빌리티는 그대로 유지되는 이유는?
 
@@ -117,13 +117,13 @@ GAS 의 데이터 흐름은 3단으로 본다:
 - `ALyraPlayerState` (`IAbilitySystemInterface` 구현, `AbilitySystemComponent` 보유)
 - `ALyraGameState` (GamePhase 용 ASC)
 - `ALyraCharacterWithAbilities` (자기 ASC 변형)
-- `ULyraPawnExtensionComponent::InitializeAbilitySystem` — init state `DataInitialized` 시점에 호출
+- `ULyraPawnExtensionComponent::InitializeAbilitySystem` - init state `DataInitialized` 시점에 호출
 - `ULyraAbilitySystemComponent::InitAbilityActorInfo` 의 `bHasNewPawnAvatar` 분기
 - `OnAbilitySystemInitialized` / `OnAbilitySystemUninitialized` delegate
 
 작성 우선순위: 최상
 
-### 2. `ULyraAbilitySet` — 어빌리티 + 이펙트 + AttributeSet 묶음 부여
+### 2. `ULyraAbilitySet` - 어빌리티 + 이펙트 + AttributeSet 묶음 부여
 
 역할: 모듈형 부여의 핵심 메커니즘.
 
@@ -135,7 +135,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 - 장비가 grant 하는 어빌리티 (`ULyraEquipmentInstance`) 는 PawnData 와 어떻게 다른가?
 
 주요 대상:
-- `ULyraAbilitySet::GiveToAbilitySystem` 흐름 (4단계 — Authoritative 검사 → Attribute 생성 → Ability grant → Effect apply)
+- `ULyraAbilitySet::GiveToAbilitySystem` 흐름 (4단계 - Authoritative 검사 → Attribute 생성 → Ability grant → Effect apply)
 - `FLyraAbilitySet_GrantedHandles::TakeFromAbilitySystem` 회수
 - 11개 `AbilitySet_*` 자산 인벤토리 (코어 / ShooterCore / ShooterExplorer / TopDownArena)
 - Pawn 측 grant 경로 (`LyraPawnData->AbilitySets[]`)
@@ -143,7 +143,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 
 작성 우선순위: 최상
 
-### 3. `ULyraGameplayAbility` — 활성 정책
+### 3. `ULyraGameplayAbility` - 활성 정책
 
 역할: 어빌리티가 언제 / 어떻게 활성되는가의 라이라 측 정책.
 
@@ -165,7 +165,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 
 작성 우선순위: 최상
 
-### 4. `ULyraAbilityTagRelationshipMapping` — 어빌리티 사이 관계
+### 4. `ULyraAbilityTagRelationshipMapping` - 어빌리티 사이 관계
 
 역할: 어빌리티 간 block / cancel / required / blocked 를 데이터로 표현.
 
@@ -179,7 +179,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 - `ULyraAbilityTagRelationshipMapping::GetAbilityTagsToBlockAndCancel` · `GetRequiredAndBlockedActivationTags` · `IsAbilityCancelledByTag`
 - ASC 와의 통합 지점 (오버라이드된 가상 함수)
 - `LyraPawnData->TagRelationshipMapping` 의 적용 위치
-- `Ability_ActivateFail_*` 태그와의 관계 — 실패 원인을 어떻게 노출하는가
+- `Ability_ActivateFail_*` 태그와의 관계 - 실패 원인을 어떻게 노출하는가
 
 작성 우선순위: 상
 
@@ -197,9 +197,9 @@ GAS 의 데이터 흐름은 3단으로 본다:
 - `TAG_Gameplay_DamageImmunity` · `TAG_Gameplay_DamageSelfDestruct` 등 데미지 관련 태그의 사용은?
 
 주요 대상:
-- `ULyraCombatSet` (BaseDamage · BaseHeal) — source attribute
-- `ULyraHealthSet` (Health · MaxHealth · Damage · Healing) — target attribute, meta attribute 정책
-- `ULyraDamageExecution::Execute_Implementation` — 5단계 흐름
+- `ULyraCombatSet` (BaseDamage · BaseHeal) - source attribute
+- `ULyraHealthSet` (Health · MaxHealth · Damage · Healing) - target attribute, meta attribute 정책
+- `ULyraDamageExecution::Execute_Implementation` - 5단계 흐름
 - `ULyraHealExecution` (대비)
 - `ULyraTeamSubsystem::CanCauseDamage` 호출
 - `ILyraAbilitySourceInterface` 와 구현체 (무기 인스턴스)
@@ -227,7 +227,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 
 작성 우선순위: 상
 
-### 7. GamePhase — `ULyraGamePhaseSubsystem`
+### 7. GamePhase - `ULyraGamePhaseSubsystem`
 
 역할: 게임 모드의 페이즈 진행을 어빌리티 + 태그 계층으로 표현.
 
@@ -249,7 +249,7 @@ GAS 의 데이터 흐름은 3단으로 본다:
 
 ### 8. (선택) 글로벌 ASC + Effect Context 확장
 
-역할: ASC 위의 보조 시스템 — 글로벌 적용과 컨텍스트 확장.
+역할: ASC 위의 보조 시스템 - 글로벌 적용과 컨텍스트 확장.
 
 핵심 질문:
 - `ULyraGlobalAbilitySystem::ApplyEffectToAll` 은 언제 쓰는가?
@@ -267,126 +267,126 @@ GAS 의 데이터 흐름은 3단으로 본다:
 
 작성 우선순위: 중
 
-## 세부 학습 항목 — 기능 키워드 검증 매핑
+## 세부 학습 항목 - 기능 키워드 검증 매핑
 
-각 섹션이 다룰 **개별 기능 단위** 를 키워드로 정리. `✅` = 코드 직접 확인 · `◐` = 자산 존재만 ✅, CDO 내용은 partial · `△` = 공식 GAS 일반 개념.
+각 섹션이 다룰 **개별 기능 단위** 를 키워드로 정리. `✅` = 코드 직접 확인 · `◐` = 자산 존재만 검증 완료, CDO 내용은 partial · `△` = 공식 GAS 일반 개념.
 
-### 섹션 1 — ASC 초기화
-
-| 학습 키워드 | Lyra 구현 앵커 | 검증 |
-|-------------|----------------|------|
-| ASC 소유 (PS) | `ALyraPlayerState::AbilitySystemComponent` + `IAbilitySystemInterface` | ✅ |
-| ASC 초기화 (PS owner + Pawn avatar) | `LyraPlayerState.cpp:172` | ✅ |
-| GameState ASC (GamePhase 용) | `LyraGameState.cpp:47` | ✅ |
-| 자기 ASC 캐릭터 | `LyraCharacterWithAbilities.cpp:32` | ✅ |
-| PawnExtensionComponent 초기화 | `LyraPawnExtensionComponent::InitializeAbilitySystem` | ✅ |
-| InitState 4단계 | `LyraGameplayTags.h` 의 `InitState_*` 4종 | ✅ |
-| `bHasNewPawnAvatar` 분기 | `LyraAbilitySystemComponent.cpp:46` | ✅ |
-| `OnPawnAvatarSet` 디스패치 | `LyraAbilitySystemComponent.cpp:60` | ✅ |
-| `TryActivateAbilitiesOnSpawn` | `LyraAbilitySystemComponent.cpp:84` | ✅ |
-| AnimInstance 연결 | `ULyraAnimInstance::InitializeWithAbilitySystem` 호출 | ✅ |
-
-### 섹션 2 — AbilitySet
+### 섹션 1 - ASC 초기화
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| AbilitySet USTRUCT 3종 | `FLyraAbilitySet_GameplayAbility/Effect/AttributeSet` | ✅ |
-| Grant 4단계 (Auth 검사 → Attr → Ability → Effect) | `ULyraAbilitySet::GiveToAbilitySystem` | ✅ |
-| 회수 | `FLyraAbilitySet_GrantedHandles::TakeFromAbilitySystem` | ✅ |
+| ASC 소유 (PS) | `ALyraPlayerState::AbilitySystemComponent` + `IAbilitySystemInterface` | 검증 완료 |
+| ASC 초기화 (PS owner + Pawn avatar) | `LyraPlayerState.cpp:172` | 검증 완료 |
+| GameState ASC (GamePhase 용) | `LyraGameState.cpp:47` | 검증 완료 |
+| 자기 ASC 캐릭터 | `LyraCharacterWithAbilities.cpp:32` | 검증 완료 |
+| PawnExtensionComponent 초기화 | `LyraPawnExtensionComponent::InitializeAbilitySystem` | 검증 완료 |
+| InitState 4단계 | `LyraGameplayTags.h` 의 `InitState_*` 4종 | 검증 완료 |
+| `bHasNewPawnAvatar` 분기 | `LyraAbilitySystemComponent.cpp:46` | 검증 완료 |
+| `OnPawnAvatarSet` 디스패치 | `LyraAbilitySystemComponent.cpp:60` | 검증 완료 |
+| `TryActivateAbilitiesOnSpawn` | `LyraAbilitySystemComponent.cpp:84` | 검증 완료 |
+| AnimInstance 연결 | `ULyraAnimInstance::InitializeWithAbilitySystem` 호출 | 검증 완료 |
+
+### 섹션 2 - AbilitySet
+
+| 학습 키워드 | Lyra 구현 앵커 | 검증 |
+|-------------|----------------|------|
+| AbilitySet USTRUCT 3종 | `FLyraAbilitySet_GameplayAbility/Effect/AttributeSet` | 검증 완료 |
+| Grant 4단계 (Auth 검사 → Attr → Ability → Effect) | `ULyraAbilitySet::GiveToAbilitySystem` | 검증 완료 |
+| 회수 | `FLyraAbilitySet_GrantedHandles::TakeFromAbilitySystem` | 검증 완료 |
 | Pawn 측 grant 트리거 | `LyraPawnData::AbilitySets[]` + (◐ 호출 위치) | ◐ |
 | Equipment 측 grant | `ULyraEquipmentInstance` (◐ 확인 필요) | ◐ |
 | 11개 AbilitySet 자산 | 인벤토리 확인 | ◐ (CDO 보강 필요) |
 | `AbilitySet_ShooterHero` 의 그란트 내용 | (CDO) | ◐ Monolith 보강 |
 
-### 섹션 3 — GameplayAbility 활성 정책
+### 섹션 3 - GameplayAbility 활성 정책
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| ActivationPolicy 3종 | `ELyraAbilityActivationPolicy` enum | ✅ |
-| ActivationGroup 3종 | `ELyraAbilityActivationGroup` enum | ✅ |
-| 동시 활성 카운트 | `ActivationGroupCounts[]` + `IsActivationGroupBlocked` | ✅ |
-| InputTag 라우팅 | `AbilityInputTagPressed/Released` + `ProcessAbilityInput` | ✅ |
-| 입력 차단 | `TAG_Gameplay_AbilityInputBlocked` | ✅ |
-| AdditionalCosts 3종 | `LyraAbilityCost_InventoryItem/_ItemTagStack/_PlayerTagStack` | ✅ |
-| Death ability | `LyraGameplayAbility_Death` + `GameplayEvent_Death` 트리거 | ✅ |
-| Jump ability | `LyraGameplayAbility_Jump` | ✅ |
-| Reset ability | `LyraGameplayAbility_Reset` + `GameplayEvent_RequestReset` 트리거 | ✅ |
-| Equipment ability | `LyraGameplayAbility_FromEquipment` (`GetAssociatedEquipment`) | ✅ |
-| Ranged Weapon ability | `LyraGameplayAbility_RangedWeapon` + `ELyraAbilityTargetingSource` 6종 | ✅ |
-| Camera mode 일시 | `SetCameraMode` / `ClearCameraMode` | ✅ |
-| 실패 처리 | `FailureTagToUserFacingMessages` + `FailureTagToAnimMontage` + `ClientNotifyAbilityFailed` RPC | ✅ |
-| Failure 태그 7종 | `Ability_ActivateFail_*` | ✅ |
+| ActivationPolicy 3종 | `ELyraAbilityActivationPolicy` enum | 검증 완료 |
+| ActivationGroup 3종 | `ELyraAbilityActivationGroup` enum | 검증 완료 |
+| 동시 활성 카운트 | `ActivationGroupCounts[]` + `IsActivationGroupBlocked` | 검증 완료 |
+| InputTag 라우팅 | `AbilityInputTagPressed/Released` + `ProcessAbilityInput` | 검증 완료 |
+| 입력 차단 | `TAG_Gameplay_AbilityInputBlocked` | 검증 완료 |
+| AdditionalCosts 3종 | `LyraAbilityCost_InventoryItem/_ItemTagStack/_PlayerTagStack` | 검증 완료 |
+| Death ability | `LyraGameplayAbility_Death` + `GameplayEvent_Death` 트리거 | 검증 완료 |
+| Jump ability | `LyraGameplayAbility_Jump` | 검증 완료 |
+| Reset ability | `LyraGameplayAbility_Reset` + `GameplayEvent_RequestReset` 트리거 | 검증 완료 |
+| Equipment ability | `LyraGameplayAbility_FromEquipment` (`GetAssociatedEquipment`) | 검증 완료 |
+| Ranged Weapon ability | `LyraGameplayAbility_RangedWeapon` + `ELyraAbilityTargetingSource` 6종 | 검증 완료 |
+| Camera mode 일시 | `SetCameraMode` / `ClearCameraMode` | 검증 완료 |
+| 실패 처리 | `FailureTagToUserFacingMessages` + `FailureTagToAnimMontage` + `ClientNotifyAbilityFailed` RPC | 검증 완료 |
+| Failure 태그 7종 | `Ability_ActivateFail_*` | 검증 완료 |
 | 32개 GA 자산 | 인벤토리 확인 | ◐ (각 GA 의 ActivationGroup CDO 보강 필요) |
 
-### 섹션 4 — TagRelationshipMapping
+### 섹션 4 - TagRelationshipMapping
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| FLyraAbilityTagRelationship 4 컨테이너 | `LyraAbilityTagRelationshipMapping.h` | ✅ |
-| ASC 통합 위치 | `ApplyAbilityBlockAndCancelTags` · `GetAdditionalActivationTagRequirements` | ✅ |
-| PawnData 적용 | `PawnExtensionComponent::InitializeAbilitySystem` | ✅ |
+| FLyraAbilityTagRelationship 4 컨테이너 | `LyraAbilityTagRelationshipMapping.h` | 검증 완료 |
+| ASC 통합 위치 | `ApplyAbilityBlockAndCancelTags` · `GetAdditionalActivationTagRequirements` | 검증 완료 |
+| PawnData 적용 | `PawnExtensionComponent::InitializeAbilitySystem` | 검증 완료 |
 | `TagRelationships_ShooterHero` 의 entry | (CDO) | ◐ Monolith 보강 |
 
-### 섹션 5 — 데미지/힐 파이프라인
+### 섹션 5 - 데미지/힐 파이프라인
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| LyraCombatSet (source) | `BaseDamage` · `BaseHeal` | ✅ |
-| LyraHealthSet (target) | `Health` · `MaxHealth` · `Damage` (메타) · `Healing` (메타) | ✅ |
-| 메타 어트리뷰트 정책 | `HideFromModifiers` UPROPERTY 메타 | ✅ |
-| DamageExecution 5단계 | `LyraDamageExecution::Execute_Implementation` | ✅ |
-| HealExecution | `LyraHealExecution::Execute_Implementation` | ✅ |
-| BaseDamage capture | `FGameplayEffectAttributeCaptureDefinition` (Source, Snapshot) | ✅ |
-| Team check | `ULyraTeamSubsystem::CanCauseDamage` | ✅ |
-| Distance attenuation | `ILyraAbilitySourceInterface::GetDistanceAttenuation` | ✅ |
-| Physical material attenuation | `GetPhysicalMaterialAttenuation` | ✅ |
-| OnOutOfHealth | `ULyraHealthSet::OnOutOfHealth` delegate | ✅ |
-| Damage 관련 태그 5종 | `TAG_Gameplay_Damage*` · `TAG_Lyra_Damage_Message` | ✅ |
+| LyraCombatSet (source) | `BaseDamage` · `BaseHeal` | 검증 완료 |
+| LyraHealthSet (target) | `Health` · `MaxHealth` · `Damage` (메타) · `Healing` (메타) | 검증 완료 |
+| 메타 어트리뷰트 정책 | `HideFromModifiers` UPROPERTY 메타 | 검증 완료 |
+| DamageExecution 5단계 | `LyraDamageExecution::Execute_Implementation` | 검증 완료 |
+| HealExecution | `LyraHealExecution::Execute_Implementation` | 검증 완료 |
+| BaseDamage capture | `FGameplayEffectAttributeCaptureDefinition` (Source, Snapshot) | 검증 완료 |
+| Team check | `ULyraTeamSubsystem::CanCauseDamage` | 검증 완료 |
+| Distance attenuation | `ILyraAbilitySourceInterface::GetDistanceAttenuation` | 검증 완료 |
+| Physical material attenuation | `GetPhysicalMaterialAttenuation` | 검증 완료 |
+| OnOutOfHealth | `ULyraHealthSet::OnOutOfHealth` delegate | 검증 완료 |
+| Damage 관련 태그 5종 | `TAG_Gameplay_Damage*` · `TAG_Lyra_Damage_Message` | 검증 완료 |
 | GE_Damage_* 자산 6개 | 인벤토리 확인 | ◐ (modifier 값 + execution 참조 보강 필요) |
-| Death 자동 트리거 | `GameplayEvent_Death` + `ULyraGameplayAbility_Death` | ✅ |
+| Death 자동 트리거 | `GameplayEvent_Death` + `ULyraGameplayAbility_Death` | 검증 완료 |
 
-### 섹션 6 — GameplayCue
+### 섹션 6 - GameplayCue
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| LyraGameplayCueManager 오버라이드 | 5종 가상 함수 | ✅ |
-| Delay-load + Always-load | `LoadAlwaysLoadedCues` + `PreloadedCues` + `AlwaysLoadedCues` | ✅ |
-| Tag loaded → preload | `OnGameplayTagLoaded` → `ProcessTagToPreload` → `OnPreloadCueComplete` | ✅ |
+| LyraGameplayCueManager 오버라이드 | 5종 가상 함수 | 검증 완료 |
+| Delay-load + Always-load | `LoadAlwaysLoadedCues` + `PreloadedCues` + `AlwaysLoadedCues` | 검증 완료 |
+| Tag loaded → preload | `OnGameplayTagLoaded` → `ProcessTagToPreload` → `OnPreloadCueComplete` | 검증 완료 |
 | 13개 GCN 자산 | 인벤토리 확인 | ◐ |
-| `GameplayCue.*` 태그 13개 | ini 정의 | ✅ |
+| `GameplayCue.*` 태그 13개 | ini 정의 | 검증 완료 |
 | GCN ↔ 태그 매핑 | (CDO) | ◐ Monolith 보강 |
-| `DumpGameplayCues` 콘솔 | `static void DumpGameplayCues(Args)` | ✅ |
+| `DumpGameplayCues` 콘솔 | `static void DumpGameplayCues(Args)` | 검증 완료 |
 
-### 섹션 7 — GamePhase
+### 섹션 7 - GamePhase
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| ULyraGamePhaseAbility | `GamePhaseTag` 필드 + Activate/EndAbility 오버라이드 | ✅ |
-| ULyraGamePhaseSubsystem API | `StartPhase` · `WhenPhaseStartsOrIsActive` · `WhenPhaseEnds` · `IsPhaseActive` | ✅ |
-| 페이즈 계층 정책 | `OnBeginPhase` 의 부모 매칭 검사 | ✅ |
-| EPhaseTagMatchType | `ExactMatch` vs `PartialMatch` | ✅ |
-| GameState ASC 사용 | `StartPhase` 가 `GameState->FindComponentByClass<ULyraAbilitySystemComponent>` 호출 | ✅ |
-| BlueprintAuthorityOnly | `K2_StartPhase` 등 | ✅ |
-| `WorldType` 제한 | `DoesSupportWorldType` Game/PIE만 | ✅ |
+| ULyraGamePhaseAbility | `GamePhaseTag` 필드 + Activate/EndAbility 오버라이드 | 검증 완료 |
+| ULyraGamePhaseSubsystem API | `StartPhase` · `WhenPhaseStartsOrIsActive` · `WhenPhaseEnds` · `IsPhaseActive` | 검증 완료 |
+| 페이즈 계층 정책 | `OnBeginPhase` 의 부모 매칭 검사 | 검증 완료 |
+| EPhaseTagMatchType | `ExactMatch` vs `PartialMatch` | 검증 완료 |
+| GameState ASC 사용 | `StartPhase` 가 `GameState->FindComponentByClass<ULyraAbilitySystemComponent>` 호출 | 검증 완료 |
+| BlueprintAuthorityOnly | `K2_StartPhase` 등 | 검증 완료 |
+| `WorldType` 제한 | `DoesSupportWorldType` Game/PIE만 | 검증 완료 |
 | 6개 Phase 자산 | 인벤토리 확인 | ◐ (`GamePhaseTag` 실제 값 보강 필요) |
 | `GE_PregameLobby` · `GE_DamageImmunity_FromGameMode` | 자산 존재 | ◐ (페이즈 ↔ GE 관계 보강 필요) |
 
-### 섹션 8 — 글로벌 ASC + Context
+### 섹션 8 - 글로벌 ASC + Context
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| LyraGlobalAbilitySystem API | `ApplyAbilityToAll` · `ApplyEffectToAll` · `RegisterASC` · `UnregisterASC` | ✅ |
-| FGlobalAppliedAbilityList | TMap<ASC, SpecHandle> 자료구조 | ✅ |
-| 자동 적용 (RegisterASC) | InitAbilityActorInfo 의 RegisterASC 호출 | ✅ |
-| FLyraGameplayEffectContext | `CartridgeID` + `AbilitySourceObject` | ✅ |
-| NetSerialize | `WithNetSerializer` trait | ✅ |
-| ExtractEffectContext | static helper | ✅ |
+| LyraGlobalAbilitySystem API | `ApplyAbilityToAll` · `ApplyEffectToAll` · `RegisterASC` · `UnregisterASC` | 검증 완료 |
+| FGlobalAppliedAbilityList | TMap<ASC, SpecHandle> 자료구조 | 검증 완료 |
+| 자동 적용 (RegisterASC) | InitAbilityActorInfo 의 RegisterASC 호출 | 검증 완료 |
+| FLyraGameplayEffectContext | `CartridgeID` + `AbilitySourceObject` | 검증 완료 |
+| NetSerialize | `WithNetSerializer` trait | 검증 완료 |
+| ExtractEffectContext | static helper | 검증 완료 |
 | ULyraAbilitySystemGlobals | 컨텍스트 발급 오버라이드 (◐ cpp 미확인) | ◐ |
 | ILyraAbilitySourceInterface | 2개 함수 + 구현체 (◐ 무기 인스턴스 확인 필요) | ◐ |
 
 ## HTML 산출물 대응표
 
-위 9개 학습 섹션을 실제 `dynamic-html/pages/lyra-gas-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-gas-`, 시스템 내 번호 (글로벌 번호 X).
+위 9개 학습 섹션을 실제 `dynamic-html/pages/lyra-gas-*.html` 페이지로 어떻게 매핑할지의 권장안. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 - 파일명 접두어 `lyra-gas-`, 시스템 내 번호 (글로벌 번호 X).
 
 | 페이지 번호 | HTML 파일 | 포함 섹션 | 목차명 | 권장 학습 블록 |
 |-------------|-----------|-----------|--------|----------------|
@@ -397,33 +397,33 @@ GAS 의 데이터 흐름은 3단으로 본다:
 | 5 | `lyra-gas-tag-relationships.html` | 섹션 4 | 학습 목차 | structure (FLyraAbilityTagRelationship 4 컨테이너) + decision (block/cancel/required/blocked 적용 시점) + flow (PawnData → ASC) + verification (`TagRelationships_ShooterHero` ◐) |
 | 6 | `lyra-gas-damage-pipeline.html` | 섹션 5 | 흐름 목차 | flow (BaseDamage capture → execution → meta → Health) + flow (OnOutOfHealth → Death) + comparison (Damage vs Heal execution) + reference (메타 어트리뷰트 정책) |
 | 7 | `lyra-gas-cues.html` | 섹션 6 | 학습 목차 | structure (LyraGameplayCueManager 오버라이드) + flow (Tag loaded → preload → cue 생성) + reference (21 GameplayCue 자산 + cue_tag 매핑 + 이름 접두어 규칙 `GCN_`/`GCNL_`/`GC_`) + recipe (새 cue 추가) |
-| 8 | `lyra-gas-game-phase.html` | 섹션 7 | 학습 목차 | structure (GamePhaseAbility + Subsystem) + decision (페이즈 계층 — 부모/형제) + flow (Phase_Warmup → Playing → PostGame) + reference (6개 Phase 자산) + recipe (새 페이즈 추가) |
-| 9 | `lyra-gas-globals-context.html` | 섹션 8 | 학습 목차 | structure (GlobalAbilitySystem + Context 확장) + reference (FLyraGameplayEffectContext 필드) + recipe (글로벌 효과 추가) | 선택 — 후순위 |
+| 8 | `lyra-gas-game-phase.html` | 섹션 7 | 학습 목차 | structure (GamePhaseAbility + Subsystem) + decision (페이즈 계층 - 부모/형제) + flow (Phase_Warmup → Playing → PostGame) + reference (6개 Phase 자산) + recipe (새 페이즈 추가) |
+| 9 | `lyra-gas-globals-context.html` | 섹션 8 | 학습 목차 | structure (GlobalAbilitySystem + Context 확장) + reference (FLyraGameplayEffectContext 필드) + recipe (글로벌 효과 추가) | 선택 - 후순위 |
 
 원칙:
-- 페이지 1~7 은 우선순위 "최상~상" 의 코어 학습. 페이지 8 은 모드 학습. 페이지 9 는 후순위 — 보조 시스템.
-- 각 페이지 카드의 `<h3>` 첫 단어는 시스템 내 페이지 번호 — 마침표 + 공백 (`1. ...`). 사양의 "번호 ↔ 제목 구분자" 절 준수.
+- 페이지 1~7 은 우선순위 "최상~상" 의 코어 학습. 페이지 8 은 모드 학습. 페이지 9 는 후순위 - 보조 시스템.
+- 각 페이지 카드의 `<h3>` 첫 단어는 시스템 내 페이지 번호 - 마침표 + 공백 (`1. ...`). 사양의 "번호 ↔ 제목 구분자" 절 준수.
 
 ## 검증 등급 유지 항목 (2026-05-25 Monolith 보강 후 갱신)
 
-HTML 페이지가 검증 원장보다 높은 등급으로 사실을 표시하지 않도록, 각 페이지마다 **partial / unverified 로 유지해야 할 항목** 을 정한다. Monolith MCP 보강 ([`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) 참조) 이후 대부분의 ◐ 항목이 ✅ 로 승격됨.
+HTML 페이지가 검증 원장보다 높은 등급으로 사실을 표시하지 않도록, 각 페이지마다 **partial / unverified 로 유지해야 할 항목** 을 정한다. Monolith MCP 보강 ([`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) 참조) 이후 대부분의 ◐ 항목이 검증 완료 로 승격됨.
 
 | HTML 페이지 | partial / unverified 로 유지해야 할 항목 |
 |-------------|-------------------------------|
-| `lyra-gas-asc-init.html` | ASC 초기화 4경로 ✅. **남은 ◐**: `LyraCharacterWithAbilities` 가 실제로 어떤 BP / 시나리오에 쓰이는지 (find_references 필요). |
-| `lyra-gas-ability-set.html` | 11개 AbilitySet 의 grant 내용 모두 ✅ (`AbilitySet_ShooterHero` 11종 abil, `Pistol/Rifle/Shotgun` 3종, Arena 2종 + AttributeSet, 등). 무기 grant 경로 (PawnData vs Equipment) ✅. **남은 ◐**: `ULyraEquipmentInstance::OnEquipped` 의 AbilitySet grant 위치 (equipment 시스템 원장 범위). |
-| `lyra-gas-ability-policy.html` | 8개 대표 GA (Jump · Death · Heal · Dash · ADS · Melee · Weapon_Fire 베이스 · AutoReload · AutoRespawn) 의 `ActivationPolicy`/`ActivationOwnedTags`/`triggers`/`net policies`/`cooldown` ✅. **남은 ◐**: 32 GA 중 나머지 24 의 동일 필드, 모든 GA 의 `ActivationGroup` 분포 (gas_query 응답에 없으므로 `blueprint_query.get_cdo_properties` 추가 호출 필요). `GA_Melee.triggers=InputTag.Weapon.ADS` 의 의도 (BP 그래프 확인). |
-| `lyra-gas-tag-relationships.html` | `TagRelationships_ShooterHero` 의 **9 entry 전체 ✅** (Dash 가 모든 액션 차단, Reload 는 Emote 만 차단, Emote 가 Falling 차단 등 정확한 매핑). 추가 ◐ 없음. |
-| `lyra-gas-damage-pipeline.html` | 데미지 흐름 ✅. 4개 무기 GE + Basic_Instant + Melee ✅ — **모두 modifier 없이 execution 만, 무기별 차이는 `AssetTagsGameplayEffectComponent.DamageType.*` 태그 1개**. Heal_Instant ✅. **남은 ◐**: `GE_Damage_Basic_Periodic` / `_SetByCaller` 2개 (Instant 와 패턴 동일 추정), `ULyraHealthComponent` 가 `LyraHealthSet` 을 ASC 에 add 하는 정확한 위치 (Rider 로 cpp 추적 필요). |
-| `lyra-gas-cues.html` | **21개 GCN 의 `cue_tag` ↔ 자산 매핑 전체 ✅** (이전 추정 13개 → 실측 21개). 이름 접두어 규칙 (`GCN_` burst / `GCNL_` looping / `GC_` 단일) ✅. 추가 ◐ 없음. |
-| `lyra-gas-game-phase.html` | **6 Phase 자산의 `GamePhaseTag` 값 모두 ✅** (`ShooterGame.GamePhase.Warmup/Playing/PostGame` — 두 모드 공유). Phase 어빌리티 공통 정책 ✅ (`OnInputTriggered` + `Independent` + `ServerOnly`). `GE_PregameLobby` ↔ `Phase_Warmup` 적용 관계는 추정 ◐ (BP graph 또는 cpp 호출 위치로 확인 필요). |
+| `lyra-gas-asc-init.html` | ASC 초기화 4경로 검증 완료. **남은 ◐**: `LyraCharacterWithAbilities` 가 실제로 어떤 BP / 시나리오에 쓰이는지 (find_references 필요). |
+| `lyra-gas-ability-set.html` | 11개 AbilitySet 의 grant 내용 모두 검증 완료 (`AbilitySet_ShooterHero` 11종 abil, `Pistol/Rifle/Shotgun` 3종, Arena 2종 + AttributeSet, 등). 무기 grant 경로 (PawnData vs Equipment) 검증 완료. **남은 ◐**: `ULyraEquipmentInstance::OnEquipped` 의 AbilitySet grant 위치 (equipment 시스템 원장 범위). |
+| `lyra-gas-ability-policy.html` | 8개 대표 GA (Jump · Death · Heal · Dash · ADS · Melee · Weapon_Fire 베이스 · AutoReload · AutoRespawn) 의 `ActivationPolicy`/`ActivationOwnedTags`/`triggers`/`net policies`/`cooldown` 검증 완료. **남은 ◐**: 32 GA 중 나머지 24 의 동일 필드, 모든 GA 의 `ActivationGroup` 분포 (gas_query 응답에 없으므로 `blueprint_query.get_cdo_properties` 추가 호출 필요). `GA_Melee.triggers=InputTag.Weapon.ADS` 의 의도 (BP 그래프 확인). |
+| `lyra-gas-tag-relationships.html` | `TagRelationships_ShooterHero` 의 **9 entry 전체 검증 완료** (Dash 가 모든 액션 차단, Reload 는 Emote 만 차단, Emote 가 Falling 차단 등 정확한 매핑). 추가 ◐ 없음. |
+| `lyra-gas-damage-pipeline.html` | 데미지 흐름 검증 완료. 4개 무기 GE + Basic_Instant + Melee 검증 완료 - **모두 modifier 없이 execution 만, 무기별 차이는 `AssetTagsGameplayEffectComponent.DamageType.*` 태그 1개**. Heal_Instant 검증 완료. **남은 ◐**: `GE_Damage_Basic_Periodic` / `_SetByCaller` 2개 (Instant 와 패턴 동일 추정), `ULyraHealthComponent` 가 `LyraHealthSet` 을 ASC 에 add 하는 정확한 위치 (Rider 로 cpp 추적 필요). |
+| `lyra-gas-cues.html` | **21개 GCN 의 `cue_tag` ↔ 자산 매핑 전체 검증 완료** (이전 추정 13개 → 실측 21개). 이름 접두어 규칙 (`GCN_` burst / `GCNL_` looping / `GC_` 단일) 검증 완료. 추가 ◐ 없음. |
+| `lyra-gas-game-phase.html` | **6 Phase 자산의 `GamePhaseTag` 값 모두 검증 완료** (`ShooterGame.GamePhase.Warmup/Playing/PostGame` - 두 모드 공유). Phase 어빌리티 공통 정책 검증 완료 (`OnInputTriggered` + `Independent` + `ServerOnly`). `GE_PregameLobby` ↔ `Phase_Warmup` 적용 관계는 추정 ◐ (BP graph 또는 cpp 호출 위치로 확인 필요). |
 | `lyra-gas-globals-context.html` | **남은 ◐**: `ULyraAbilitySystemGlobals.cpp` 의 컨텍스트 오버라이드 (Rider MCP 로 cpp 확인 필요), `ILyraAbilitySourceInterface` 구현체 (`ULyraRangedWeaponInstance` 등 무기 인스턴스, weapons 원장 범위). |
 
-**보강 작업 결과** — 본 시점 검증 원장의 ✅ 비율 대폭 상승. HTML 페이지 9개를 만들 때 위 표의 ✅ 항목은 모두 본문에 확정적으로 인용 가능, ◐ 항목은 본문에서 명시적으로 partial 표시 (배지 `◐`, "추정", "에디터 확인 필요" 등).
+**보강 작업 결과** - 본 시점 검증 원장의 검증 완료 비율 대폭 상승. HTML 페이지 9개를 만들 때 위 표의 검증 완료 항목은 모두 본문에 확정적으로 인용 가능, ◐ 항목은 본문에서 명시적으로 partial 표시 (배지 `◐`, "추정", "에디터 확인 필요" 등).
 
-**잘못된 추정 정정** — 이전 분석에서 추정으로 적었던 다음 사실은 Monolith 보강 결과 다르게 확인됨:
+**잘못된 추정 정정** - 이전 분석에서 추정으로 적었던 다음 사실은 Monolith 보강 결과 다르게 확인됨:
 - GCN 자산 수: 13 → **21** (이름 접두어 누락)
-- AbilitySet 의 AttributeSet grant: 라이라 코어는 모두 `[]` — AttributeSet 은 별도 경로 (`ULyraHealthComponent` 등 C++ 컴포넌트가 직접 add). TopDownArena 만 AbilitySet 사용.
+- AbilitySet 의 AttributeSet grant: 라이라 코어는 모두 `[]` - AttributeSet 은 별도 경로 (`ULyraHealthComponent` 등 C++ 컴포넌트가 직접 add). TopDownArena 만 AbilitySet 사용.
 - GE_Damage 무기별 차이: modifier 가 아니라 **`AssetTagsGameplayEffectComponent` 태그 1개** (`GameplayEffect.DamageType.*`).
 - GamePhase 태그: ShooterCore 와 TopDownArena 가 별도 네임스페이스가 아니라 **같은 `ShooterGame.GamePhase.*` 공유**.
 
@@ -431,9 +431,9 @@ HTML 페이지가 검증 원장보다 높은 등급으로 사실을 표시하지
 
 현재 검증 원장 ([`gas-code-analysis.md`](gas-code-analysis.md) · [`gas-blueprint-analysis.md`](gas-blueprint-analysis.md)) 의 분석 범위는 `Source/LyraGame/AbilitySystem/` 중심이다. 다음은 범위 밖이거나 다른 시스템 원장과 겹친다:
 
-- **Equipment 의 ASC 통합** — `ULyraEquipmentInstance::OnEquipped` 가 어떤 AbilitySet 을 grant 하는지는 `equipment-code-analysis.md` (별도 시스템 원장) 의 범위. 본 GAS 원장은 인터페이스만 확인.
-- **Weapon 의 ability 통합** — `ULyraRangedWeaponInstance` + `ULyraGameplayAbility_RangedWeapon` 의 발사 흐름은 `weapons-code-analysis.md` (별도 시스템 원장) 의 범위. 본 GAS 원장은 클래스 존재만 확인.
-- **Inventory 의 ability cost** — `ULyraAbilityCost_InventoryItem` 의 동작은 `inventory-code-analysis.md` (별도 시스템 원장) 의 범위. 본 GAS 원장은 cost interface 만 확인.
+- **Equipment 의 ASC 통합** - `ULyraEquipmentInstance::OnEquipped` 가 어떤 AbilitySet 을 grant 하는지는 `equipment-code-analysis.md` (별도 시스템 원장) 의 범위. 본 GAS 원장은 인터페이스만 확인.
+- **Weapon 의 ability 통합** - `ULyraRangedWeaponInstance` + `ULyraGameplayAbility_RangedWeapon` 의 발사 흐름은 `weapons-code-analysis.md` (별도 시스템 원장) 의 범위. 본 GAS 원장은 클래스 존재만 확인.
+- **Inventory 의 ability cost** - `ULyraAbilityCost_InventoryItem` 의 동작은 `inventory-code-analysis.md` (별도 시스템 원장) 의 범위. 본 GAS 원장은 cost interface 만 확인.
 
 따라서 본 학습 섹션 9개의 HTML 페이지 작성 시 위 시스템과의 cross-link 는 chapter-brief 의 "선행 학습" 칸 또는 본문 인용으로 처리. 별도 시스템 페이지 (`lyra-equipment-overview.html` 등) 가 생성되면 그쪽으로 링크.
 
@@ -441,8 +441,8 @@ HTML 페이지가 검증 원장보다 높은 등급으로 사실을 표시하지
 
 | 문서군 | 역할 | 사실의 출처 여부 |
 |--------|------|-------------------|
-| [`gas-code-analysis.md`](gas-code-analysis.md), [`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) | **검증 원장 (verified fact ledger)** — Rider MCP + Monolith MCP (2026-05-25 보강 완료) 로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO·등록 경로의 근거 |
-| 후속 9개 학습 문서 | **기능별 학습 안내서** — 검증 원장의 사실을 데이터 흐름 순서로 재배열 + 실습·디버깅·확장 레시피 | 아니오. 원장 인용 |
+| [`gas-code-analysis.md`](gas-code-analysis.md), [`gas-blueprint-analysis.md`](gas-blueprint-analysis.md) | **검증 원장 (verified fact ledger)** - Rider MCP + Monolith MCP (2026-05-25 보강 완료) 로 확인한 사실의 단일 출처 | 예. 모든 수치·경로·CDO·등록 경로의 근거 |
+| 후속 9개 학습 문서 | **기능별 학습 안내서** - 검증 원장의 사실을 데이터 흐름 순서로 재배열 + 실습·디버깅·확장 레시피 | 아니오. 원장 인용 |
 | [`gas-references.md`](gas-references.md) | 외부 학습 자료 + 문서 ↔ 프로젝트 매핑 | 아니오. 외부 개념 |
 
 운영 규칙:
@@ -484,9 +484,9 @@ ASC 라이프사이클·태그 매핑·execution 작성 등 메커니즘 중심.
 
 ### 게임 모드 디자이너
 
-1. ASC 초기화 4경로 (섹션 1) — GameState ASC 만 확인
-2. GamePhase (섹션 7) — 핵심
-3. 글로벌 ASC (섹션 8) — `ApplyEffectToAll` 활용
-4. AbilitySet 부여 (섹션 2) — hero 별 차이 이해
+1. ASC 초기화 4경로 (섹션 1) - GameState ASC 만 확인
+2. GamePhase (섹션 7) - 핵심
+3. 글로벌 ASC (섹션 8) - `ApplyEffectToAll` 활용
+4. AbilitySet 부여 (섹션 2) - hero 별 차이 이해
 
 목표는 새 게임 모드의 페이즈 흐름과 모드별 ability 차이를 설계할 수 있게 되는 것.

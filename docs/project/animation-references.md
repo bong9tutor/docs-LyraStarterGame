@@ -4,7 +4,7 @@
 > 작업 개요·분석 도구·아키텍처는 루트 [`CLAUDE.md`](../../CLAUDE.md) 를, 실제 에셋/코드 조회는 Monolith·라이더 MCP 를 사용하십시오.
 >
 > - 기준 엔진 버전: **UE 5.7** - `dev.epicgames.com` 문서는 페이지 우측 상단에서 버전 선택 가능
-> - 링크 최종 확인: **2026-05-24** (섹션 13·섹션 14 보충 — Copy Pose, Modular Characters, Post Process ABP, IK Retargeting 추가)
+> - 링크 최종 확인: **2026-05-24** (섹션 13·섹션 14 보충 - Copy Pose, Modular Characters, Post Process ABP, IK Retargeting 추가)
 
 ## 핵심 이해 - 라이라 애니메이션이란
 
@@ -26,7 +26,7 @@
 
 ## 1. 공식 라이라 문서 (최우선)
 
-### ⭐ Animation in Lyra Sample Game
+### (특별) Animation in Lyra Sample Game
 <https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-in-lyra-sample-game-in-unreal-engine>
 
 라이라 애니메이션 분석의 **1차 기준 문서**. 다루는 주제:
@@ -159,7 +159,7 @@ UE 5.4+ 의 **모션 매칭 기반** 애니메이션 전용 샘플(500+ 애니�
 | 애니메이션 콘텐츠(시퀀스/몽타주/블렌드스페이스) | `Content/Characters/Heroes/Mannequin*` 하위 | Monolith `animation_query` / `project_query` |
 | Copy Pose From Mesh 노드 사용 | `ABP_Mannequin_CopyPose` (`Content/Characters/Heroes/Mannequin/Animations/`) 의 AnimGraph 3 노드, `B_Manny`/`B_Quinn` 의 `MeshComponent` 에 적용 | Monolith `blueprint_query.get_graph_data` |
 | Modular character 구성 | `B_Manny`/`B_Quinn` (cosmetic BP, root `MeshComponent` 만), `ULyraPawnComponent_CharacterParts` + `FLyraCharacterPartList::SpawnActorForEntry` (`Source/LyraGame/Cosmetics/LyraPawnComponent_CharacterParts.h/.cpp`) | 라이더 MCP + Monolith |
-| Post Process Anim Blueprint 슬롯 | `ABP_Manny_PostProcess` · `ABP_Quinn_PostProcess` (`Content/Characters/Heroes/Mannequin/Rig/`) — Control Rig + 14개 PoseDriver | Monolith `blueprint_query.get_graph_data` |
+| Post Process Anim Blueprint 슬롯 | `ABP_Manny_PostProcess` · `ABP_Quinn_PostProcess` (`Content/Characters/Heroes/Mannequin/Rig/`) - Control Rig + 14개 PoseDriver | Monolith `blueprint_query.get_graph_data` |
 | Retarget Pose From Mesh 사용 | `ABP_Mannequin_Retarget` (`Content/Characters/Heroes/Mannequin/Animations/`) · `ABP_UE4_Mannequin_Retarget` (`Content/Characters/Heroes/Mannequin_UE4/Animations/`) | Monolith `blueprint_query.get_graph_data` |
 
 > 콘텐츠 경로·에셋 이름은 라이라 버전에 따라 다를 수 있습니다. 정확한 경로는 Monolith `project_query` 로 확인하십시오.

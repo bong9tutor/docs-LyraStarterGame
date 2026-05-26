@@ -1,6 +1,6 @@
 # Lyra 에셋 비동기 로딩 학습 문서 섹션 설계
 
-확인일: 2026-05-25  
+확인일: 2026-05-25 
 목적: 라이라 에셋 비동기 로딩 분석·학습 문서를 기능별로 어떻게 나눌지 결정 + **다른 UE 프로젝트로 이식 가능한 스텝 바이 스텝 포팅 가이드 제공**
 
 이 문서는 검증 원장 [`asset-loading-code-analysis.md`](asset-loading-code-analysis.md) · [`asset-loading-blueprint-analysis.md`](asset-loading-blueprint-analysis.md) 와 Epic 공식 문서 ([`asset-loading-references.md`](asset-loading-references.md) 참조) 를 바탕으로, 후속 학습 문서를 어떤 기능 단위로 쪼개야 읽기 쉽고 **다른 프로젝트로 옮기기 좋은지** 정리한다.
@@ -9,22 +9,22 @@
 
 라이라 에셋 비동기 로딩 학습 문서는 **3층 구조 + 포팅 가이드 1절** 로 나눈다:
 
-- **층 1: 부팅 로딩** — `ULyraAssetManager` + `StartupJob` + `ULyraGameData`. 게임 시작 시 한 번.
-- **층 2: Experience 로딩** — `ExperienceManagerComponent` 7단계 + AssetBundle + GameFeature. map 전환·매치 시작 시.
-- **층 3: 런타임 로딩** — `GetAsset<T>` template + soft pointer + `LoadedAssets` keep-in-memory.
+- **층 1: 부팅 로딩** - `ULyraAssetManager` + `StartupJob` + `ULyraGameData`. 게임 시작 시 한 번.
+- **층 2: Experience 로딩** - `ExperienceManagerComponent` 7단계 + AssetBundle + GameFeature. map 전환·매치 시작 시.
+- **층 3: 런타임 로딩** - `GetAsset<T>` template + soft pointer + `LoadedAssets` keep-in-memory.
 
 추천 상위 섹션 **8개** + **포팅 가이드 (섹션 9, 본 문서 핵심)**.
 
 0. 전체 지도와 학습 경로
 1. UAssetManager 파생과 부팅 진입점
 2. Startup Job 큐와 진행률 보고
-3. ULyraGameData — 전역 데이터 자산 패턴
+3. ULyraGameData - 전역 데이터 자산 패턴
 4. Primary Asset Type 등록 (DefaultGame.ini)
 5. Experience 로딩 7단계 state machine
-6. AssetBundle 메타 — Client/Server 자동 수집
+6. AssetBundle 메타 - Client/Server 자동 수집
 7. BP 측 비동기 진입점 (AsyncAction_ExperienceReady)
 8. Loading Screen 통합 (CommonLoadingScreen + LoadingScreenSubsystem)
-9. **★ 다른 프로젝트로 이식 — 스텝 바이 스텝 포팅 가이드**
+9. **(핵심) 다른 프로젝트로 이식 - 스텝 바이 스텝 포팅 가이드**
 
 ## 조사 근거
 
@@ -76,7 +76,7 @@
 주요 대상:
 - `ULyraAssetManager` 클래스 골격
 - `UCLASS(Config = Game)` + `UPROPERTY(Config)` 패턴
-- `Get()` static singleton — `GEngine->AssetManager` cast
+- `Get()` static singleton - `GEngine->AssetManager` cast
 - `DefaultEngine.ini` 의 3개 핵심 설정
 
 작성 우선순위: 최상
@@ -100,7 +100,7 @@
 
 작성 우선순위: 상
 
-### 3. ULyraGameData — 전역 데이터 자산 패턴
+### 3. ULyraGameData - 전역 데이터 자산 패턴
 
 역할: "어디서든 접근 가능한 전역 자산" 패턴의 라이라 구현.
 
@@ -114,7 +114,7 @@
 - `ULyraGameData` 의 3개 멤버
 - `GetOrLoadTypedGameData<T>` template
 - `LoadGameDataOfClass` 의 editor 분기 (`GIsEditor` → 동기 로드)
-- Fatal log 처리 — GameData 실패는 복구 불가
+- Fatal log 처리 - GameData 실패는 복구 불가
 
 작성 우선순위: 상
 
@@ -131,8 +131,8 @@
 
 주요 대상:
 - 8개 type 전체 표 (이미 blueprint-analysis 에 검증됨)
-- Map type 의 SpecificAssets — FrontEnd 와 DefaultEditor map 명시
-- LyraExperienceActionSet — Directories 비어 있는데 plugin 측에서 자동 발견되는 메커니즘
+- Map type 의 SpecificAssets - FrontEnd 와 DefaultEditor map 명시
+- LyraExperienceActionSet - Directories 비어 있는데 plugin 측에서 자동 발견되는 메커니즘
 - Engine 기본 type 2개 (`Map`, `PrimaryAssetLabel`) 를 `-` 로 제거 후 라이라 정책으로 `+` 추가하는 패턴
 
 작성 우선순위: 상
@@ -160,7 +160,7 @@
 
 작성 우선순위: 최상
 
-### 6. AssetBundle 메타 — Client/Server 자동 수집
+### 6. AssetBundle 메타 - Client/Server 자동 수집
 
 역할: 라이라가 dedicated server 메모리·디스크를 절약하는 방법.
 
@@ -220,16 +220,16 @@
 
 ---
 
-## ★ 섹션 9 — 다른 프로젝트로 이식: 스텝 바이 스텝 포팅 가이드
+## (핵심) 섹션 9 - 다른 프로젝트로 이식: 스텝 바이 스텝 포팅 가이드
 
 **본 학습 문서의 가장 중요한 절.** 라이라의 비동기 로딩 시스템을 새 UE 프로젝트로 옮길 때 따라할 체크리스트.
 
-### ★ 사전 경고 — 포팅 전에 반드시 읽을 사실 4가지
+### (핵심) 사전 경고 - 포팅 전에 반드시 읽을 사실 4가지
 
 1. **ini 절 위치**: 라이라의 핵심 설정 4개 절 (`[/Script/LyraGame.LyraAssetManager]` · `[/Script/Engine.AssetManagerSettings]` · `[/Script/GameFeatures.GameFeaturesSubsystemSettings]` · `[/Script/CommonLoadingScreen.CommonLoadingScreenSettings]`) 은 모두 **`DefaultGame.ini`** 에 있음. `DefaultEngine.ini` 에는 `AssetManagerClassName` 과 `GlobalDefaultGameMode` 만. 이 차이를 무시하고 복사하면 설정이 적용 안 됨.
 2. **Experience definition 자체는 동기 로드**: `SetCurrentExperience(FPrimaryAssetId)` 의 `AssetPath.TryLoad()` 가 blocking 호출. 소스에 `//@TODO: Async load the experience definition itself` 주석 있음. 비동기는 그 다음 단계 (bundle + GameFeature) 부터.
-3. **DefaultGameData 의 soft class 멤버는 즉시 로드 보장 없음**: `TSoftClassPtr<UGameplayEffect>` 이므로 GameData 자산 로드 ≠ GE 클래스 로드. 사용 시점에 `GetSubclass` 가 동기 로드. 첫 호출 시 hitch 가능 — preload 가 필요하면 startup job 추가 필요.
-4. **AssetBundleData 수집은 2가지 메커니즘**: `meta=(AssetBundles)` 자동 수집 + `AddAdditionalAssetBundleData` override. 커스텀 GameFeatureAction 에서 자산 배열을 들고 있다면 override 필요 — 자동 수집만으로는 안 됨 (라이라 사례: `GameFeatureAction_AddWidget.cpp:34-38` 의 `Widgets[]` 11개).
+3. **DefaultGameData 의 soft class 멤버는 즉시 로드 보장 없음**: `TSoftClassPtr<UGameplayEffect>` 이므로 GameData 자산 로드 ≠ GE 클래스 로드. 사용 시점에 `GetSubclass` 가 동기 로드. 첫 호출 시 hitch 가능 - preload 가 필요하면 startup job 추가 필요.
+4. **AssetBundleData 수집은 2가지 메커니즘**: `meta=(AssetBundles)` 자동 수집 + `AddAdditionalAssetBundleData` override. 커스텀 GameFeatureAction 에서 자산 배열을 들고 있다면 override 필요 - 자동 수집만으로는 안 됨 (라이라 사례: `GameFeatureAction_AddWidget.cpp:34-38` 의 `Widgets[]` 11개).
 
 ### 포팅 범위 결정 (3 옵션)
 
@@ -241,15 +241,15 @@
 | **B (중간)** | A + GameData 패턴 + Startup Job 큐 | 4시간 | "부팅 시 비동기 로드 + 진행률 보고 필요" |
 | **C (전체)** | B + Experience 시스템 + GameFeature 통합 + Loading Screen | 1-2일 | "라이라 풍의 데이터 주도 게임 모드 시스템 필요" |
 
-### 옵션 A — 최소 포팅 (1시간)
+### 옵션 A - 최소 포팅 (1시간)
 
 **목표**: 새 프로젝트가 `UAssetManager` 파생을 사용 + Primary Asset Type 1~2개 등록.
 
-#### A.1 — Build.cs 의존성 추가
+#### A.1 - Build.cs 의존성 추가
 
 `Source/{프로젝트명}/{프로젝트명}.Build.cs` 의 `PublicDependencyModuleNames` 에 `"GameplayTags"` 가 있는지 확인 (대부분 기본). 추가 의존성은 없음.
 
-#### A.2 — AssetManager 파생 클래스 작성
+#### A.2 - AssetManager 파생 클래스 작성
 
 `Source/{프로젝트명}/System/{Prefix}AssetManager.h`:
 
@@ -286,7 +286,7 @@ void U{Prefix}AssetManager::StartInitialLoading() {
 }
 ```
 
-#### A.3 — DefaultEngine.ini 에 AssetManagerClassName 등록
+#### A.3 - DefaultEngine.ini 에 AssetManagerClassName 등록
 
 `Config/DefaultEngine.ini` 에 (또는 기존 `[/Script/Engine.Engine]` 절 안에) 추가:
 
@@ -297,9 +297,9 @@ AssetManagerClassName=/Script/{프로젝트명}.{Prefix}AssetManager
 
 **검증**: 에디터 재시작 후 `LogAssetManager` 로그에서 새 클래스명 확인.
 
-**★ 위치 주의**: `AssetManagerClassName` 만 `DefaultEngine.ini` 에 둠. AssetManager 의 config 속성 (`LyraGameDataPath` 등) 과 `PrimaryAssetTypesToScan` 은 A.4 이후의 **`DefaultGame.ini`** 에. 라이라 패턴이 그렇고, 다른 위치에 두면 엔진이 못 읽음.
+**(핵심) 위치 주의**: `AssetManagerClassName` 만 `DefaultEngine.ini` 에 둠. AssetManager 의 config 속성 (`LyraGameDataPath` 등) 과 `PrimaryAssetTypesToScan` 은 A.4 이후의 **`DefaultGame.ini`** 에. 라이라 패턴이 그렇고, 다른 위치에 두면 엔진이 못 읽음.
 
-#### A.4 — Primary Asset Type 1개 등록 (옵션)
+#### A.4 - Primary Asset Type 1개 등록 (옵션)
 
 새 type 이 필요하면 (예: `MyGameData`):
 
@@ -312,11 +312,11 @@ AssetManagerClassName=/Script/{프로젝트명}.{Prefix}AssetManager
 
 **완료 검증**: 에디터에서 `Window → Asset Manager` → `Primary Asset Types` 탭에 새 type 표시.
 
-### 옵션 B — 중간 포팅 (4시간) — A 위에 추가
+### 옵션 B - 중간 포팅 (4시간) - A 위에 추가
 
 **목표**: 전역 데이터 자산 + 부팅 시 비동기 로드 + 진행률 보고.
 
-#### B.1 — StartupJob 패턴 복사
+#### B.1 - StartupJob 패턴 복사
 
 `Source/{프로젝트명}/System/{Prefix}AssetManagerStartupJob.h` + `.cpp` 를 라이라에서 직접 복사. 클래스명만 prefix 교체.
 
@@ -326,7 +326,7 @@ AssetManagerClassName=/Script/{프로젝트명}.{Prefix}AssetManager
 
 이 파일은 의존성이 `Engine/StreamableManager.h` 만이라 그대로 복사 가능.
 
-#### B.2 — AssetManager 에 startup job 추가
+#### B.2 - AssetManager 에 startup job 추가
 
 `{Prefix}AssetManager.cpp` 의 `StartInitialLoading` 안에 매크로 추가:
 
@@ -344,7 +344,7 @@ void U{Prefix}AssetManager::StartInitialLoading() {
 
 `DoAllStartupJobs` 도 라이라에서 복사 (`LyraAssetManager.cpp` 의 같은 이름 함수).
 
-#### B.3 — GameData 전역 자산 패턴 작성
+#### B.3 - GameData 전역 자산 패턴 작성
 
 `Source/{프로젝트명}/System/MyGameData.h`:
 
@@ -382,26 +382,26 @@ UPROPERTY(Transient)
 TMap<TObjectPtr<UClass>, TObjectPtr<UPrimaryDataAsset>> GameDataMap;
 ```
 
-#### B.4 — DefaultGame.ini 에 GameData 경로 등록
+#### B.4 - DefaultGame.ini 에 GameData 경로 등록
 
-★ **`DefaultGame.ini`** 에 (라이라가 `[/Script/LyraGame.LyraAssetManager]` 를 `DefaultGame.ini:54` 에 두는 패턴 — `DefaultEngine.ini` 가 아님):
+(핵심) **`DefaultGame.ini`** 에 (라이라가 `[/Script/LyraGame.LyraAssetManager]` 를 `DefaultGame.ini:54` 에 두는 패턴 - `DefaultEngine.ini` 가 아님):
 
 ```ini
 [/Script/{프로젝트명}.{Prefix}AssetManager]
 MyGameDataPath=/Game/MyGameData.MyGameData
 ```
 
-#### B.5 — 자산 생성
+#### B.5 - 자산 생성
 
 에디터에서 `Content/MyGameData.uasset` 생성 (`UMyGameData` 인스턴스). 전역 멤버 채워 넣기.
 
 **완료 검증**: 부팅 시 로그에서 `Startup job "GetMyGameData()" took N.NN seconds to complete` 출력 확인.
 
-### 옵션 C — 전체 포팅 (1-2일) — B 위에 추가
+### 옵션 C - 전체 포팅 (1-2일) - B 위에 추가
 
 **목표**: Experience 시스템 + GameFeature 통합 + Loading Screen.
 
-#### C.1 — 의존성 플러그인 활성화
+#### C.1 - 의존성 플러그인 활성화
 
 `.uproject` 에 다음 플러그인 추가 (또는 에디터 Plugins 메뉴에서):
 - `GameFeatures` (엔진 기본, 활성화만)
@@ -417,18 +417,18 @@ MyGameDataPath=/Game/MyGameData.MyGameData
 "EnhancedInput",       // GameFeatureAction_AddInputBinding 사용 시
 ```
 
-#### C.2 — Experience Definition 4종 클래스 복사
+#### C.2 - Experience Definition 4종 클래스 복사
 
 라이라에서 `Source/LyraGame/GameModes/` 의 4개 파일을 직접 복사 + prefix 교체:
 - `LyraExperienceDefinition.h/.cpp` → `MyExperienceDefinition.h/.cpp`
 - `LyraExperienceActionSet.h/.cpp` → `MyExperienceActionSet.h/.cpp`
-- `LyraExperienceManager.h/.cpp` (PIE 멀티세션 추적 — 보조)
-- `LyraExperienceManagerComponent.h/.cpp` (핵심 — 7단계 state machine)
+- `LyraExperienceManager.h/.cpp` (PIE 멀티세션 추적 - 보조)
+- `LyraExperienceManagerComponent.h/.cpp` (핵심 - 7단계 state machine)
 - `AsyncAction_ExperienceReady.h/.cpp` (BP 진입점)
 
 **의존성 정리**: `#include "LyraLogChannels.h"` → 새 LogChannel 정의 또는 `LogTemp` 로 대체. `#include "Settings/LyraSettingsLocal.h"` → 사용처 확인 후 제거 가능.
 
-#### C.3 — GameMode 가 Experience 선택하도록
+#### C.3 - GameMode 가 Experience 선택하도록
 
 새 `MyGameMode` 의 `InitGame` 또는 `BeginPlay` 안에서:
 
@@ -439,7 +439,7 @@ Component->SetCurrentExperience(FPrimaryAssetId(MyExperienceType, MyExperienceAs
 
 `GameState` 의 `Components` 에 `MyExperienceManagerComponent` 추가 (또는 GameMode 가 `AddComponent` 호출).
 
-#### C.4 — Primary Asset Type 4개 등록 (DefaultGame.ini)
+#### C.4 - Primary Asset Type 4개 등록 (DefaultGame.ini)
 
 ```ini
 [/Script/Engine.AssetManagerSettings]
@@ -451,7 +451,7 @@ Component->SetCurrentExperience(FPrimaryAssetId(MyExperienceType, MyExperienceAs
 
 **중요**: `bHasBlueprintClasses=true` 는 ExperienceDefinition 만 (BP 파생 Experience 자산 indexing 위해).
 
-#### C.5 — GameFeature 플러그인 작성 (옵션)
+#### C.5 - GameFeature 플러그인 작성 (옵션)
 
 새 Game Feature 가 필요하면 에디터 `Plugins → New Plugin → Game Feature (Modular)`. 생성 후 `.uplugin` 편집:
 
@@ -464,7 +464,7 @@ Component->SetCurrentExperience(FPrimaryAssetId(MyExperienceType, MyExperienceAs
 
 이 두 키가 라이라 패턴의 핵심. `false`/`true` 가 아니면 자동 로드되어 Experience 데이터 주도가 깨짐.
 
-#### C.6 — AssetBundle 메타 적용 (자동 수집)
+#### C.6 - AssetBundle 메타 적용 (자동 수집)
 
 자산 참조 멤버에 메타 추가:
 
@@ -480,9 +480,9 @@ TSoftClassPtr<UGameplayAbility> MyAbility;
 
 **검증**: 자산 저장 후 Monolith 또는 에디터에서 PrimaryDataAsset 의 `AssetBundleData.Bundles[Client].BundleAssets` 에 자동 등장 확인.
 
-#### C.6b — ★ 커스텀 GameFeatureAction 이 자산 배열을 들고 있다면 `AddAdditionalAssetBundleData` override
+#### C.6b - (핵심) 커스텀 GameFeatureAction 이 자산 배열을 들고 있다면 `AddAdditionalAssetBundleData` override
 
-라이라 사례: `UGameFeatureAction_AddWidgets` 의 `Widgets[]` 11개는 메타 자동 수집으로 안 잡힘 — override 가 추가:
+라이라 사례: `UGameFeatureAction_AddWidgets` 의 `Widgets[]` 11개는 메타 자동 수집으로 안 잡힘 - override 가 추가:
 
 ```cpp
 // MyGameFeatureAction_AddFoo.h
@@ -503,13 +503,13 @@ void UMyGameFeatureAction_AddFoo::AddAdditionalAssetBundleData(FAssetBundleData&
 **확인 항목**:
 - 커스텀 GameFeatureAction 에 `TArray<FMyStruct>` 멤버가 있고, struct 안에 soft pointer 가 있나? → 메타 자동 수집 안 됨 → override 필요
 - 한 자산이 여러 bundle 에 등록되어야 하나? → override 로 둘 다 호출
-- `WITH_EDITORONLY_DATA` 가드 — runtime 에 호출 안 됨 (cooking 시점)
+- `WITH_EDITORONLY_DATA` 가드 - runtime 에 호출 안 됨 (cooking 시점)
 
 **검증**: 에디터에서 자산 save → reopen → CDO 의 `AssetBundleData.Bundles[Client].BundleAssets` 가 메타로 잡힌 것 + override 가 추가한 것 둘 다 포함하는지 확인.
 
-#### C.7 — Loading Screen 통합
+#### C.7 - Loading Screen 통합
 
-`Config/DefaultGame.ini` (★ 라이라가 `DefaultGame.ini:83` 에 두는 패턴):
+`Config/DefaultGame.ini` ((핵심) 라이라가 `DefaultGame.ini:83` 에 두는 패턴):
 
 ```ini
 [/Script/CommonLoadingScreen.CommonLoadingScreenSettings]
@@ -518,9 +518,9 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 
 `MyExperienceManagerComponent` 가 `ILoadingProcessInterface` 구현 (라이라 코드 그대로 복사). `ShouldShowLoadingScreen` 가 `LoadState != Loaded` 인 동안 true 반환.
 
-(옵션) `ULyraLoadingScreenSubsystem` 복사 — map 전환 너머 widget 클래스 유지 필요할 때만.
+(옵션) `ULyraLoadingScreenSubsystem` 복사 - map 전환 너머 widget 클래스 유지 필요할 때만.
 
-#### C.8 — 첫 Experience 자산 생성
+#### C.8 - 첫 Experience 자산 생성
 
 에디터에서:
 1. `Content/Experiences/B_MyDefaultExperience.uasset` 생성 (`MyExperienceDefinition` BP 파생).
@@ -528,7 +528,7 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 3. `GameFeaturesToEnable` 에 활성화할 플러그인 이름 추가.
 4. `Actions[]` 에 `GameFeatureAction_AddWidgets` 등 추가.
 
-#### C.9 — 부팅 → Experience 활성화 통합 검증
+#### C.9 - 부팅 → Experience 활성화 통합 검증
 
 전체 흐름 검증:
 1. 에디터에서 PIE 시작.
@@ -538,22 +538,22 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 5. BP 측에서 `Wait For Experience Ready` 노드 사용 시 `OnReady` 발화 확인.
 6. 로딩 화면이 `LoadState != Loaded` 동안 표시되고 `Loaded` 도달 시 사라지는지 확인.
 
-### 흔한 포팅 함정 — 체크리스트
+### 흔한 포팅 함정 - 체크리스트
 
 | 함정 | 증상 | 해결 |
 |------|------|------|
 | `AssetManagerClassName` 미설정 | `Cast` fail + Fatal log | `DefaultEngine.ini` 의 `[/Script/Engine.Engine].AssetManagerClassName` 확인 |
-| ★ ini 절 위치 혼동 — `[LyraAssetManager]` / `[GameFeaturesSubsystemSettings]` / `[CommonLoadingScreenSettings]` 를 `DefaultEngine.ini` 에 둠 | 설정이 적용 안 됨 (절은 있는데 키가 안 읽힘) | 4개 절 모두 **`DefaultGame.ini`** 로 이동. `DefaultEngine.ini` 는 `AssetManagerClassName` + `GlobalDefaultGameMode` 만 |
+| (핵심) ini 절 위치 혼동 - `[LyraAssetManager]` / `[GameFeaturesSubsystemSettings]` / `[CommonLoadingScreenSettings]` 를 `DefaultEngine.ini` 에 둠 | 설정이 적용 안 됨 (절은 있는데 키가 안 읽힘) | 4개 절 모두 **`DefaultGame.ini`** 로 이동. `DefaultEngine.ini` 는 `AssetManagerClassName` + `GlobalDefaultGameMode` 만 |
 | Primary Asset Type `Directories` 가 잘못된 경로 | 자산이 indexing 안 됨 → Experience 로드 실패 | 에디터 `Window → Asset Manager` 에서 type 확인 |
 | `bHasBlueprintClasses=false` 인데 BP Experience 사용 | BP Experience 자산이 indexing 안 됨 | 해당 type 의 ini 항목을 `true` 로 수정 |
 | `ExplicitlyLoaded=false` 인 GameFeature | 부팅 시 자동 로드 → Experience 데이터 주도 깨짐 | `.uplugin` 의 `ExplicitlyLoaded=true` 로 |
 | AssetBundle 메타 안 추가 | dedicated server 가 runtime 에 widget 자산 로드 → 메모리 낭비 (cook 측은 별도 검증) | UI 자산 멤버에 `meta=(AssetBundles="Client")` 추가 |
-| ★ 커스텀 GameFeatureAction 의 자산 배열이 bundle 에 안 잡힘 | runtime bundle load 시 자산 누락 → 화면에 안 뜸 | `AddAdditionalAssetBundleData` override 작성 (위 C.6b 참고) |
+| (핵심) 커스텀 GameFeatureAction 의 자산 배열이 bundle 에 안 잡힘 | runtime bundle load 시 자산 누락 → 화면에 안 뜸 | `AddAdditionalAssetBundleData` override 작성 (위 C.6b 참고) |
 | `GameData` 클래스 미등록 | `Get()` 호출 시 Fatal log | `PrimaryAssetTypesToScan` 에 type + `[AssetManager]` 절에 path 둘 다 |
-| ★ GameData 의 soft class 가 첫 사용 시 hitch | 게임 중 갑작스러운 frame 멈춤 | 자주 쓰이는 GE 는 startup job 에서 `GetSubclass` 호출로 preload (또는 strong reference 로 바꿈) |
+| (핵심) GameData 의 soft class 가 첫 사용 시 hitch | 게임 중 갑작스러운 frame 멈춤 | 자주 쓰이는 GE 는 startup job 에서 `GetSubclass` 호출로 preload (또는 strong reference 로 바꿈) |
 | `CallOrRegister_OnExperienceLoaded` 미사용 | Experience 가 아직 로드 안 됐는데 코드 실행 → race condition | `IsExperienceLoaded` 검사 또는 callback 등록 패턴 사용 |
 | `RegisterWithGameInstance` 안 호출 | BP AsyncAction 이 GC 됨 → callback 안 옴 | `WaitForExperienceReady` 의 `Action->RegisterWithGameInstance(World)` 확인 |
-| ★ Startup progress 가 화면에 안 보임 | 진행률 bar 가 안 움직임 | `FLyraAssetManagerStartupJob` 의 60Hz throttle 부등호 방향 확인 (`Now - LastUpdate > 1.0/60` 이 정상 — 라이라 코드는 `LastUpdate - Now > 1.0/60` 으로 의심) + job 의 람다가 `LoadHandle` 인자를 채우는지 |
+| (핵심) Startup progress 가 화면에 안 보임 | 진행률 bar 가 안 움직임 | `FLyraAssetManagerStartupJob` 의 60Hz throttle 부등호 방향 확인 (`Now - LastUpdate > 1.0/60` 이 정상 - 라이라 코드는 `LastUpdate - Now > 1.0/60` 으로 의심) + job 의 람다가 `LoadHandle` 인자를 채우는지 |
 
 ### 포팅 후 측정 (필수 검증 4종)
 
@@ -562,108 +562,108 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 1. **부팅 시간**: 명령줄에 `-LogAssetLoads` + `-LogLoadTimes` → 모든 동기 로드 시간 출력. `Startup job "..." took N.NN seconds` 로그 패턴 확인.
 2. **메모리**: `Lyra.DumpLoadedAssets` (또는 동일 이름 콘솔 명령 작성) → keep-in-memory 자산 목록. 의도하지 않은 keep 가 있으면 `bKeepInMemory=false` 적용.
 3. **Experience 로딩 시간**: `LogLyraExperience` (또는 새 채널) 에서 `StartExperienceLoad` ↔ `OnExperienceFullLoadCompleted` 사이 timestamp 차이.
-4. **★ 필수 — dedicated server cook 산출물 비교**: AssetBundle 적용 전후 `cooked-windows-server` 와 `cooked-windows-client` 폴더 크기를 직접 비교. UI 자산이 server cooked 산출물에서 제외되는지 검증 (runtime bundle 로드 정책 vs 실제 cook 결과는 다를 수 있음 — chunk/stage 설정, 다른 참조 경로 때문).
+4. **(핵심) 필수 - dedicated server cook 산출물 비교**: AssetBundle 적용 전후 `cooked-windows-server` 와 `cooked-windows-client` 폴더 크기를 직접 비교. UI 자산이 server cooked 산출물에서 제외되는지 검증 (runtime bundle 로드 정책 vs 실제 cook 결과는 다를 수 있음 - chunk/stage 설정, 다른 참조 경로 때문).
 
 ---
 
-## 세부 학습 항목 — 기능 키워드 검증 매핑
+## 세부 학습 항목 - 기능 키워드 검증 매핑
 
 각 섹션이 다룰 **개별 기능 단위** 를 키워드로 정리. `✅` = 코드/CDO 직접 확인 · `◐` = 패턴 일반 개념 (구현 라이라 확인) · `△` = UE 일반 개념.
 
-### 섹션 1 — AssetManager 파생
+### 섹션 1 - AssetManager 파생
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `UAssetManager` 파생 | `LyraAssetManager.h` | ✅ |
-| `AssetManagerClassName` ini | `DefaultEngine.ini:26` | ✅ |
-| `UPROPERTY(Config)` 패턴 | `LyraGameDataPath` · `DefaultPawnData` | ✅ |
-| `Get()` static singleton | `GEngine->AssetManager` cast | ✅ |
-| `StartInitialLoading` 오버라이드 | `LyraAssetManager.cpp` | ✅ |
-| `PreBeginPIE` 오버라이드 (editor) | 동일 파일 | ✅ |
+| `UAssetManager` 파생 | `LyraAssetManager.h` | 검증 완료 |
+| `AssetManagerClassName` ini | `DefaultEngine.ini:26` | 검증 완료 |
+| `UPROPERTY(Config)` 패턴 | `LyraGameDataPath` · `DefaultPawnData` | 검증 완료 |
+| `Get()` static singleton | `GEngine->AssetManager` cast | 검증 완료 |
+| `StartInitialLoading` 오버라이드 | `LyraAssetManager.cpp` | 검증 완료 |
+| `PreBeginPIE` 오버라이드 (editor) | 동일 파일 | 검증 완료 |
 
-### 섹션 2 — Startup Job
-
-| 학습 키워드 | Lyra 구현 앵커 | 검증 |
-|-------------|----------------|------|
-| `STARTUP_JOB_WEIGHTED` 매크로 | `LyraAssetManager.cpp` | ✅ |
-| `FLyraAssetManagerStartupJob` USTRUCT | `LyraAssetManagerStartupJob.h` | ✅ |
-| `WaitUntilComplete(0.0f, false)` 블로킹 | `DoJob()` | ✅ |
-| `SubstepProgressDelegate` 60Hz throttle | `UpdateSubstepProgressFromStreamable` | ✅ |
-| `DoAllStartupJobs` 누적 진행률 | `LyraAssetManager.cpp` | ✅ |
-| Dedicated server 분기 | `IsRunningDedicatedServer()` | ✅ |
-| `UpdateInitialGameContentLoadPercent` 후크 | 빈 함수 — 사용자 채움 | ✅ |
-
-### 섹션 3 — GameData 전역 자산
+### 섹션 2 - Startup Job
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `UPrimaryDataAsset` 파생 | `LyraGameData.h` | ✅ |
-| 3개 GE 클래스 보관 | CDO 검증 (Damage_SetByCaller / Heal_SetByCaller / DynamicTag) | ✅ |
-| `GetOrLoadTypedGameData<T>` template | `LyraAssetManager.h` | ✅ |
-| `LoadGameDataOfClass` editor 분기 | `GIsEditor` 분기 | ✅ |
-| Fatal log 처리 | "This is not recoverable" | ✅ |
+| `STARTUP_JOB_WEIGHTED` 매크로 | `LyraAssetManager.cpp` | 검증 완료 |
+| `FLyraAssetManagerStartupJob` USTRUCT | `LyraAssetManagerStartupJob.h` | 검증 완료 |
+| `WaitUntilComplete(0.0f, false)` 블로킹 | `DoJob()` | 검증 완료 |
+| `SubstepProgressDelegate` 60Hz throttle | `UpdateSubstepProgressFromStreamable` | 검증 완료 |
+| `DoAllStartupJobs` 누적 진행률 | `LyraAssetManager.cpp` | 검증 완료 |
+| Dedicated server 분기 | `IsRunningDedicatedServer()` | 검증 완료 |
+| `UpdateInitialGameContentLoadPercent` 후크 | 빈 함수 - 사용자 채움 | 검증 완료 |
 
-### 섹션 4 — Primary Asset Type
-
-| 학습 키워드 | Lyra 구현 앵커 | 검증 |
-|-------------|----------------|------|
-| 8개 type 등록 | `DefaultGame.ini` | ✅ |
-| `-` 후 `+` 패턴 | `Map`, `PrimaryAssetLabel` | ✅ |
-| `bHasBlueprintClasses=true` 의미 | Experience 만 true | ✅ |
-| `CookRule=AlwaysCook` | 7/8 type | ✅ |
-| `bIsEditorOnly=true` | PrimaryAssetLabel | ✅ |
-
-### 섹션 5 — Experience 7단계
+### 섹션 3 - GameData 전역 자산
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `ELyraExperienceLoadState` 7값 | `LyraExperienceManagerComponent.h` | ✅ |
-| `SetCurrentExperience` 진입점 | `LyraExperienceManagerComponent.cpp` | ✅ |
-| `OnRep_CurrentExperience` 복제 | 동일 파일 | ✅ |
-| `ChangeBundleStateForPrimaryAssets` NetMode 분기 | `bLoadClient` / `bLoadServer` | ✅ |
-| `FLyraBundles::Equipped` 커스텀 bundle | `LyraAssetManager.cpp` | ✅ |
-| GameFeature URL 변환 | `GetPluginURLByName` | ✅ |
-| `NumGameFeaturePluginsLoading` 카운트다운 | 동일 파일 | ✅ |
-| Chaos testing delay CVar | `lyra.chaos.ExperienceDelayLoad.*` | ✅ |
-| Priority 3단 콜백 | `OnExperienceLoaded_*Priority` | ✅ |
-| `ShouldShowLoadingScreen` 구현 | line 447 | ✅ |
+| `UPrimaryDataAsset` 파생 | `LyraGameData.h` | 검증 완료 |
+| 3개 GE 클래스 보관 | CDO 검증 (Damage_SetByCaller / Heal_SetByCaller / DynamicTag) | 검증 완료 |
+| `GetOrLoadTypedGameData<T>` template | `LyraAssetManager.h` | 검증 완료 |
+| `LoadGameDataOfClass` editor 분기 | `GIsEditor` 분기 | 검증 완료 |
+| Fatal log 처리 | "This is not recoverable" | 검증 완료 |
 
-### 섹션 6 — AssetBundle 메타
+### 섹션 4 - Primary Asset Type
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `meta=(AssetBundles="Client,Server")` 9곳 | Rider grep | ✅ |
-| UI 자산은 `Client` 만 | `GameFeatureAction_AddWidget.h` | ✅ |
-| 게임플레이 자산은 `Client,Server` | `GameFeatureAction_AddAbilities.h` 외 | ✅ |
-| `UpdateAssetBundleData()` 자동 수집 | `B_LyraDefaultExperience` 1개 widget CDO | ✅ |
-| `LAS_ShooterGame_StandardHUD` 12 widget | CDO 검증 | ✅ |
-| `LoadStateClient` / `LoadStateServer` | `LyraExperienceManagerComponent.cpp` | ✅ |
+| 8개 type 등록 | `DefaultGame.ini` | 검증 완료 |
+| `-` 후 `+` 패턴 | `Map`, `PrimaryAssetLabel` | 검증 완료 |
+| `bHasBlueprintClasses=true` 의미 | Experience 만 true | 검증 완료 |
+| `CookRule=AlwaysCook` | 7/8 type | 검증 완료 |
+| `bIsEditorOnly=true` | PrimaryAssetLabel | 검증 완료 |
 
-### 섹션 7 — AsyncAction
-
-| 학습 키워드 | Lyra 구현 앵커 | 검증 |
-|-------------|----------------|------|
-| `UBlueprintAsyncActionBase` 파생 | `AsyncAction_ExperienceReady.h` | ✅ |
-| 4 step state machine | `Step1~Step4` | ✅ |
-| `RegisterWithGameInstance` (GC 방지) | `WaitForExperienceReady` | ✅ |
-| `GameStateSetEvent.AddUObject` | `Step1_HandleGameStateSet` | ✅ |
-| 이미 로드 시 1 frame 지연 | `SetTimerForNextTick` | ✅ |
-| `SetReadyToDestroy()` | `Step4_BroadcastReady` | ✅ |
-
-### 섹션 8 — Loading Screen
+### 섹션 5 - Experience 7단계
 
 | 학습 키워드 | Lyra 구현 앵커 | 검증 |
 |-------------|----------------|------|
-| `ILoadingProcessInterface` 구현 | `LyraExperienceManagerComponent.h` | ✅ |
-| `ShouldShowLoadingScreen` 구현 | line 447 | ✅ |
-| `UGameInstanceSubsystem` (map 전환 너머) | `LyraLoadingScreenSubsystem.h` | ✅ |
-| Host widget vs Content widget | CommonLoadingScreen 설정 + Subsystem | ✅ |
-| `OnLoadingScreenWidgetChanged` delegate | `LyraLoadingScreenSubsystem.h` | ✅ |
-| `LoadingScreenWidget` ini 설정 | `DefaultEngine.ini` | ✅ |
+| `ELyraExperienceLoadState` 7값 | `LyraExperienceManagerComponent.h` | 검증 완료 |
+| `SetCurrentExperience` 진입점 | `LyraExperienceManagerComponent.cpp` | 검증 완료 |
+| `OnRep_CurrentExperience` 복제 | 동일 파일 | 검증 완료 |
+| `ChangeBundleStateForPrimaryAssets` NetMode 분기 | `bLoadClient` / `bLoadServer` | 검증 완료 |
+| `FLyraBundles::Equipped` 커스텀 bundle | `LyraAssetManager.cpp` | 검증 완료 |
+| GameFeature URL 변환 | `GetPluginURLByName` | 검증 완료 |
+| `NumGameFeaturePluginsLoading` 카운트다운 | 동일 파일 | 검증 완료 |
+| Chaos testing delay CVar | `lyra.chaos.ExperienceDelayLoad.*` | 검증 완료 |
+| Priority 3단 콜백 | `OnExperienceLoaded_*Priority` | 검증 완료 |
+| `ShouldShowLoadingScreen` 구현 | line 447 | 검증 완료 |
+
+### 섹션 6 - AssetBundle 메타
+
+| 학습 키워드 | Lyra 구현 앵커 | 검증 |
+|-------------|----------------|------|
+| `meta=(AssetBundles="Client,Server")` 9곳 | Rider grep | 검증 완료 |
+| UI 자산은 `Client` 만 | `GameFeatureAction_AddWidget.h` | 검증 완료 |
+| 게임플레이 자산은 `Client,Server` | `GameFeatureAction_AddAbilities.h` 외 | 검증 완료 |
+| `UpdateAssetBundleData()` 자동 수집 | `B_LyraDefaultExperience` 1개 widget CDO | 검증 완료 |
+| `LAS_ShooterGame_StandardHUD` 12 widget | CDO 검증 | 검증 완료 |
+| `LoadStateClient` / `LoadStateServer` | `LyraExperienceManagerComponent.cpp` | 검증 완료 |
+
+### 섹션 7 - AsyncAction
+
+| 학습 키워드 | Lyra 구현 앵커 | 검증 |
+|-------------|----------------|------|
+| `UBlueprintAsyncActionBase` 파생 | `AsyncAction_ExperienceReady.h` | 검증 완료 |
+| 4 step state machine | `Step1~Step4` | 검증 완료 |
+| `RegisterWithGameInstance` (GC 방지) | `WaitForExperienceReady` | 검증 완료 |
+| `GameStateSetEvent.AddUObject` | `Step1_HandleGameStateSet` | 검증 완료 |
+| 이미 로드 시 1 frame 지연 | `SetTimerForNextTick` | 검증 완료 |
+| `SetReadyToDestroy()` | `Step4_BroadcastReady` | 검증 완료 |
+
+### 섹션 8 - Loading Screen
+
+| 학습 키워드 | Lyra 구현 앵커 | 검증 |
+|-------------|----------------|------|
+| `ILoadingProcessInterface` 구현 | `LyraExperienceManagerComponent.h` | 검증 완료 |
+| `ShouldShowLoadingScreen` 구현 | line 447 | 검증 완료 |
+| `UGameInstanceSubsystem` (map 전환 너머) | `LyraLoadingScreenSubsystem.h` | 검증 완료 |
+| Host widget vs Content widget | CommonLoadingScreen 설정 + Subsystem | 검증 완료 |
+| `OnLoadingScreenWidgetChanged` delegate | `LyraLoadingScreenSubsystem.h` | 검증 완료 |
+| `LoadingScreenWidget` ini 설정 | `DefaultEngine.ini` | 검증 완료 |
 
 ## HTML 산출물 대응표
 
-위 8개 학습 섹션 + 1개 포팅 가이드 = **HTML 9페이지** 권장. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-asset-loading-`, 시스템 내 번호.
+위 8개 학습 섹션 + 1개 포팅 가이드 = **HTML 9페이지** 권장. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 - 파일명 접두어 `lyra-asset-loading-`, 시스템 내 번호.
 
 | 페이지 번호 | HTML 파일 | 포함 섹션 | 목차명 | 권장 학습 블록 |
 |-------------|-----------|-----------|--------|----------------|
@@ -675,20 +675,20 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 | 6 | `lyra-asset-loading-experience-state-machine.html` | 섹션 5 | 흐름 목차 | flow (7단계 state) + flow (StartExperienceLoad) + flow (GameFeature 일괄 활성화) + reference (Priority 3단 콜백) |
 | 7 | `lyra-asset-loading-asset-bundles.html` | 섹션 6 | 학습 목차 | structure (UPROPERTY 메타) + reference (9곳 사용처 + 12 widget 사례) + decision (Client vs Client,Server 결정) |
 | 8 | `lyra-asset-loading-bp-async-loading-screen.html` | 섹션 7 + 8 | 학습 목차 | flow (AsyncAction 4 step) + structure (Loading Screen 통합) + reference (CommonLoadingScreen 설정) |
-| 9 | **`lyra-asset-loading-porting-guide.html`** | **★ 섹션 9** | 학습 목차 | recipe (옵션 A 4단계) + recipe (옵션 B 5단계) + recipe (옵션 C 9단계) + decision (옵션 결정 표) + verification (흔한 함정 8종) + verification (포팅 후 측정 4종) |
+| 9 | **`lyra-asset-loading-porting-guide.html`** | **(핵심) 섹션 9** | 학습 목차 | recipe (옵션 A 4단계) + recipe (옵션 B 5단계) + recipe (옵션 C 9단계) + decision (옵션 결정 표) + verification (흔한 함정 8종) + verification (포팅 후 측정 4종) |
 
 원칙:
 - 페이지 1~6 은 우선순위 "최상~상". 페이지 7~8 은 보조.
-- **페이지 9 (포팅 가이드) 가 본 시스템 학습의 핵심 산출물** — 다른 프로젝트로 옮길 때 직접 따라할 체크리스트.
+- **페이지 9 (포팅 가이드) 가 본 시스템 학습의 핵심 산출물** - 다른 프로젝트로 옮길 때 직접 따라할 체크리스트.
 
 ## 검증 등급 유지 항목
 
 | HTML 페이지 | partial / unverified 유지 항목 |
 |-------------|-------------------------------|
-| `lyra-asset-loading-startup-jobs.html` | `UpdateInitialGameContentLoadPercent` 후크에 무엇을 연결하는지는 라이라가 비워둠 — "사용자 채움" 표기 |
+| `lyra-asset-loading-startup-jobs.html` | `UpdateInitialGameContentLoadPercent` 후크에 무엇을 연결하는지는 라이라가 비워둠 - "사용자 채움" 표기 |
 | `lyra-asset-loading-experience-state-machine.html` | Priority 3단 콜백 (HighPriority/Normal/LowPriority) 의 실제 사용 분포는 라이라 측 코드 베이스 전수 조사 필요. 본 시점 ◐ |
-| `lyra-asset-loading-asset-bundles.html` | 9곳 메타 사용처 모두 ✅. `UpdateAssetBundleData()` 호출 시점은 엔진 내부 (Editor only) — 라이라 측 control 없음 |
-| `lyra-asset-loading-porting-guide.html` | 옵션 A·B·C 단계는 라이라 코드/ini 직접 참조 ✅. "흔한 함정 8종" 중 일부 (예: ChunkId / Asset Registry) 는 라이라 사용 안 함 — 일반 GAS 패턴으로만 노출 |
+| `lyra-asset-loading-asset-bundles.html` | 9곳 메타 사용처 모두 검증 완료. `UpdateAssetBundleData()` 호출 시점은 엔진 내부 (Editor only) - 라이라 측 control 없음 |
+| `lyra-asset-loading-porting-guide.html` | 옵션 A·B·C 단계는 라이라 코드/ini 직접 참조 검증 완료. "흔한 함정 8종" 중 일부 (예: ChunkId / Asset Registry) 는 라이라 사용 안 함 - 일반 GAS 패턴으로만 노출 |
 
 ## 독자별 학습 경로
 
@@ -705,8 +705,8 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 
 ### 다른 프로젝트로 이식하려는 개발자 (본 시스템의 1차 독자)
 
-1. 전체 지도 (섹션 0) — 3층 구조 이해
-2. **포팅 가이드 (섹션 9) — 옵션 A/B/C 결정**
+1. 전체 지도 (섹션 0) - 3층 구조 이해
+2. **포팅 가이드 (섹션 9) - 옵션 A/B/C 결정**
 3. 선택한 옵션의 단계 따라가며 필요한 섹션 (1~8) 참조
 4. 포팅 완료 후 "흔한 함정 8종" + "포팅 후 측정 4종" 으로 검증
 
@@ -714,10 +714,10 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 
 ### 성능 최적화 담당자
 
-1. AssetBundle 메타 (섹션 6) — server 메모리 절약
-2. Startup Job 진행률 (섹션 2) — 부팅 시간 측정
-3. Experience 7단계 (섹션 5) — Experience 로딩 시간 측정
-4. 런타임 GetAsset (섹션 1 부록) — keep-in-memory 정책
+1. AssetBundle 메타 (섹션 6) - server 메모리 절약
+2. Startup Job 진행률 (섹션 2) - 부팅 시간 측정
+3. Experience 7단계 (섹션 5) - Experience 로딩 시간 측정
+4. 런타임 GetAsset (섹션 1 부록) - keep-in-memory 정책
 
 목표는 부팅 시간·dedicated server 메모리·Experience 전환 시간을 측정·개선할 수 있게 되는 것.
 
@@ -725,8 +725,8 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 
 본 시스템 (`asset-loading`) 은 다른 시스템과 다음 관계:
 
-- **GAS (`gas`)** — `ULyraGameData` 가 3개 GE 클래스 보관, GameFeatureAction_AddAbilities 가 `meta=(AssetBundles="Client,Server")` 사용. 본 시스템 학습 후 GAS 학습으로 자연 이어짐.
-- **CommonUI (`ui`)** — GameFeatureAction_AddWidget 이 `meta=(AssetBundles="Client")` 사용 → Experience 활성화 시 widget 자산 자동 로드. UI 학습자도 본 시스템의 섹션 6 (AssetBundle) 알아야 함.
-- **Animation (`animation`)** — 라이라 ABP 는 strong reference 가 많아 본 시스템과 직접 관계 적음. 단, `LyraPawnData` 가 `LyraAssetManager.DefaultPawnData` 로 등록되는 점에서 부팅 흐름 연결.
+- **GAS (`gas`)** - `ULyraGameData` 가 3개 GE 클래스 보관, GameFeatureAction_AddAbilities 가 `meta=(AssetBundles="Client,Server")` 사용. 본 시스템 학습 후 GAS 학습으로 자연 이어짐.
+- **CommonUI (`ui`)** - GameFeatureAction_AddWidget 이 `meta=(AssetBundles="Client")` 사용 → Experience 활성화 시 widget 자산 자동 로드. UI 학습자도 본 시스템의 섹션 6 (AssetBundle) 알아야 함.
+- **Animation (`animation`)** - 라이라 ABP 는 strong reference 가 많아 본 시스템과 직접 관계 적음. 단, `LyraPawnData` 가 `LyraAssetManager.DefaultPawnData` 로 등록되는 점에서 부팅 흐름 연결.
 
 다른 시스템 분석 후 본 시스템을 보면 "왜 그 시스템이 GameFeatureAction 으로 자산을 주입했는지" 의 큰 그림이 잡힌다.

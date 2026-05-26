@@ -1,6 +1,6 @@
 # Lyra 애니메이션 코드 분석
 
-확인일: 2026-05-22  
+확인일: 2026-05-22 
 분석 범위: `Source/LyraGame` 및 `Plugins/GameFeatures/ShooterTests`의 애니메이션 관련 C++ 코드
 
 ## 핵심 요약
@@ -172,7 +172,7 @@ Equipment manager는 equipment definition에서 instance를 만들고 ability se
 
 `ULyraPawnComponent_CharacterParts`는 replicated fast array (`FLyraCharacterPartList`) 로 character part 목록을 관리한다. 두 단계는 **C++ 함수가 다르고 책임이 분리**되어 있다.
 
-### 1단계 — Character part actor spawn / attach
+### 1단계 - Character part actor spawn / attach
 
 [`../Source/LyraGame/Cosmetics/LyraPawnComponent_CharacterParts.cpp`](../Source/LyraGame/Cosmetics/LyraPawnComponent_CharacterParts.cpp) `PostReplicatedAdd` / `AddEntry` → `FLyraCharacterPartList::SpawnActorForEntry(Entry)` 호출.
 
@@ -180,11 +180,11 @@ Equipment manager는 equipment definition에서 instance를 만들고 ability se
 - spawn 된 child actor 는 보통 `B_Manny` 또는 `B_Quinn` 같은 cosmetic BP 의 인스턴스로, 자기 root `MeshComponent` 가 owner mesh 에 attach 된다.
 - spawn 직후 owner 의 `BroadcastChanged()` 가 호출된다.
 
-### 2단계 — Body mesh selection & 적용 (`BroadcastChanged`)
+### 2단계 - Body mesh selection & 적용 (`BroadcastChanged`)
 
 `BroadcastChanged()` 는 모든 spawned character part actor (각각 `IGameplayTagAssetInterface` 구현 가정) 에서 tag 를 수집해 병합한 뒤 `BodyMeshes.SelectBestBodyStyle(MergedTags)` 로 invisible driving skeletal mesh 를 고른다. 선택된 mesh 는 `SetSkeletalMesh(..., true)` 로 owner pawn 의 mesh 에 적용되고, `ForcedPhysicsAsset` 이 있으면 physics asset 도 함께 바뀐다. 마지막으로 `OnCharacterPartsChanged` delegate 가 broadcast.
 
-> 학습 시 두 단계를 헷갈리지 말 것 — **spawn/attach 는 `SpawnActorForEntry`, mesh selection 은 `BroadcastChanged`** 다. visible cosmetic mesh 가 어디에 붙는가 (1단계) 와 invisible driving mesh 가 어떤 mesh 로 결정되는가 (2단계) 는 서로 다른 단계이며, `ABP_Mannequin_CopyPose` 의 attached-parent pose 복제는 1단계에서 만들어진 attach 관계를 사용한다.
+> 학습 시 두 단계를 헷갈리지 말 것 - **spawn/attach 는 `SpawnActorForEntry`, mesh selection 은 `BroadcastChanged`** 다. visible cosmetic mesh 가 어디에 붙는가 (1단계) 와 invisible driving mesh 가 어떤 mesh 로 결정되는가 (2단계) 는 서로 다른 단계이며, `ABP_Mannequin_CopyPose` 의 attached-parent pose 복제는 1단계에서 만들어진 attach 관계를 사용한다.
 
 `ULyraControllerComponent_CharacterParts`는 controller 측 authority component다. possessed pawn이 바뀔 때 part를 이전 pawn에서 새 pawn으로 옮기며, developer/cheat part와 natural part suppression을 지원한다.
 

@@ -1,7 +1,7 @@
 # Lyra GAS 코드 분석
 
-확인일: 2026-05-25  
-분석 도구: 라이더(JetBrains) MCP (`mcp__jetbrains__*`) — Rider 가 이 프로젝트를 열고 있는 상태에서 수행  
+확인일: 2026-05-25 
+분석 도구: 라이더(JetBrains) MCP (`mcp__jetbrains__*`) - Rider 가 이 프로젝트를 열고 있는 상태에서 수행 
 분석 범위: `Source/LyraGame/AbilitySystem/` 전체 (15종 .h/.cpp) + 사용처 (`Source/LyraGame/Character/` · `Source/LyraGame/Player/` · `Source/LyraGame/GameModes/` · `Source/LyraGame/Equipment/` · `Source/LyraGame/Weapons/`)
 
 ## 핵심 요약
@@ -20,11 +20,11 @@
 
 플레이어가 게임에 들어가서 어빌리티가 실행되기까지의 큰 흐름.
 
-1. `ALyraPlayerState::PostInitializeComponents` 가 자체 `AbilitySystemComponent` 를 생성 — PS 가 owner 가 됨.
+1. `ALyraPlayerState::PostInitializeComponents` 가 자체 `AbilitySystemComponent` 를 생성 - PS 가 owner 가 됨.
 2. `ULyraPawnExtensionComponent` 가 init state `Spawned → DataAvailable → DataInitialized → GameplayReady` 를 진행시키며, `DataInitialized` 시점에 `InitializeAbilitySystem(ASC, OwnerActor)` 호출 (보통 owner = PS).
 3. `InitializeAbilitySystem` 이 `ASC->InitAbilityActorInfo(InOwnerActor, Pawn)` + `ASC->SetTagRelationshipMapping(PawnData->TagRelationshipMapping)` 적용 → `OnAbilitySystemInitialized` delegate broadcast.
-4. ASC 의 `InitAbilityActorInfo` 가 `bHasNewPawnAvatar` 분기 — 모든 어빌리티 인스턴스에 `OnPawnAvatarSet` 콜백, `ULyraGlobalAbilitySystem::RegisterASC`, `ULyraAnimInstance::InitializeWithAbilitySystem`, `TryActivateAbilitiesOnSpawn` 순서 실행.
-5. `LyraPawnData::AbilitySets[]` 의 각 `ULyraAbilitySet` 이 grant 되어 `GrantedGameplayAbilities` · `GrantedGameplayEffects` · `GrantedAttributes` 가 ASC 에 등록 — 핸들은 `FLyraAbilitySet_GrantedHandles` 에 저장돼 나중에 일괄 회수 가능.
+4. ASC 의 `InitAbilityActorInfo` 가 `bHasNewPawnAvatar` 분기 - 모든 어빌리티 인스턴스에 `OnPawnAvatarSet` 콜백, `ULyraGlobalAbilitySystem::RegisterASC`, `ULyraAnimInstance::InitializeWithAbilitySystem`, `TryActivateAbilitiesOnSpawn` 순서 실행.
+5. `LyraPawnData::AbilitySets[]` 의 각 `ULyraAbilitySet` 이 grant 되어 `GrantedGameplayAbilities` · `GrantedGameplayEffects` · `GrantedAttributes` 가 ASC 에 등록 - 핸들은 `FLyraAbilitySet_GrantedHandles` 에 저장돼 나중에 일괄 회수 가능.
 6. 입력이 들어오면 `ULyraInputComponent` 가 InputTag → ASC 의 `AbilityInputTagPressed/Released` 로 전달 → `InputPressedSpecHandles` 에 기록 → 다음 frame 의 `ProcessAbilityInput` 에서 매칭 어빌리티 활성화.
 7. 어빌리티 활성화는 `ELyraAbilityActivationGroup` 검사 (`IsActivationGroupBlocked`) → `GetAdditionalActivationTagRequirements` (TagRelationshipMapping) → Epic 표준 `CanActivateAbility` → `ActivateAbility` 순서.
 8. 어빌리티가 GE 를 적용 시 `MakeEffectContext` 가 `FLyraGameplayEffectContext` 발급 (`CartridgeID` 포함) → execution calculation 이 source/target attribute capture → 라이라 측 정책 (team check · distance attenuation · physical material) 적용 → 최종 modifier 출력.
@@ -43,16 +43,16 @@ Epic `UAbilitySystemComponent` 파생. 핵심 책임 5가지.
 | TagRelationshipMapping 적용 | `TObjectPtr<ULyraAbilityTagRelationshipMapping> TagRelationshipMapping`, `SetTagRelationshipMapping()`, `GetAdditionalActivationTagRequirements()` |
 | 활성화 그룹 카운트 | `int32 ActivationGroupCounts[(uint8)ELyraAbilityActivationGroup::MAX]`, `IsActivationGroupBlocked()`, `AddAbilityToActivationGroup()`, `RemoveAbilityFromActivationGroup()`, `CancelActivationGroupAbilities()` |
 | InputTag 라우팅 | `AbilityInputTagPressed(Tag)` / `Released(Tag)`, `InputPressedSpecHandles[]` · `InputReleasedSpecHandles[]` · `InputHeldSpecHandles[]`, `ProcessAbilityInput(DeltaTime, bGamePaused)`, `ClearAbilityInput()` |
-| Pawn avatar 변경 디스패치 | `InitAbilityActorInfo()` 오버라이드 — `bHasNewPawnAvatar` 시점에 모든 어빌리티 인스턴스의 `OnPawnAvatarSet` 호출 + `ULyraGlobalAbilitySystem::RegisterASC` + `ULyraAnimInstance::InitializeWithAbilitySystem` + `TryActivateAbilitiesOnSpawn` |
+| Pawn avatar 변경 디스패치 | `InitAbilityActorInfo()` 오버라이드 - `bHasNewPawnAvatar` 시점에 모든 어빌리티 인스턴스의 `OnPawnAvatarSet` 호출 + `ULyraGlobalAbilitySystem::RegisterASC` + `ULyraAnimInstance::InitializeWithAbilitySystem` + `TryActivateAbilitiesOnSpawn` |
 | 실패 통지 | `NotifyAbilityFailed()` 오버라이드 → `ClientNotifyAbilityFailed` RPC → `HandleAbilityFailed` → 어빌리티의 `OnAbilityFailedToActivate` 호출 |
 
 ### 동적 태그 GE
 
-`AddDynamicTagGameplayEffect(Tag)` / `RemoveDynamicTagGameplayEffect(Tag)` — `LyraGameData::DynamicTagGameplayEffect` (전역 GE 자산) 를 활용해 ASC 에 임시 태그 부여. 코드가 직접 `LooseGameplayTag` 를 추가하지 않고 GE 로 우회하므로 복제·예측이 자동.
+`AddDynamicTagGameplayEffect(Tag)` / `RemoveDynamicTagGameplayEffect(Tag)` - `LyraGameData::DynamicTagGameplayEffect` (전역 GE 자산) 를 활용해 ASC 에 임시 태그 부여. 코드가 직접 `LooseGameplayTag` 를 추가하지 않고 GE 로 우회하므로 복제·예측이 자동.
 
 ### 입력 차단
 
-`HasMatchingGameplayTag(TAG_Gameplay_AbilityInputBlocked)` 이면 `ProcessAbilityInput` 이 즉시 return — 어빌리티가 일시적으로 입력을 막을 때 사용.
+`HasMatchingGameplayTag(TAG_Gameplay_AbilityInputBlocked)` 이면 `ProcessAbilityInput` 이 즉시 return - 어빌리티가 일시적으로 입력을 막을 때 사용.
 
 ### `OnRep_*` / NetSerialize
 
@@ -99,7 +99,7 @@ USTRUCT() FLyraAbilitySet_GrantedHandles {
 
 ### GiveToAbilitySystem 흐름
 
-1. `IsOwnerActorAuthoritative()` 검사 — server 만 grant 수행.
+1. `IsOwnerActorAuthoritative()` 검사 - server 만 grant 수행.
 2. `GrantedAttributes[]` 각 항목 → `NewObject<UAttributeSet>(LyraASC->GetOwner(), ...)` → `LyraASC->AddAttributeSetSubobject`.
 3. `GrantedGameplayAbilities[]` 각 항목 → `FGameplayAbilitySpec(AbilityCDO, Level)` + `SourceObject` + `DynamicSpecSourceTags.AddTag(InputTag)` → `LyraASC->GiveAbility(Spec)`.
 4. `GrantedGameplayEffects[]` 각 항목 → `LyraASC->ApplyGameplayEffectToSelf(GameplayEffect, Level, MakeEffectContext())`.
@@ -109,26 +109,26 @@ USTRUCT() FLyraAbilitySet_GrantedHandles {
 
 `AbilitySpecHandles` → `ClearAbility`, `GameplayEffectHandles` → `RemoveActiveGameplayEffect`, `GrantedAttributeSets` → `RemoveSpawnedAttribute`. 모든 array reset.
 
-### AbilitySet 부여 경로 2종 (✅ 코드 검증)
+### AbilitySet 부여 경로 2종 (검증 완료 코드 검증)
 
 라이라에서 AbilitySet 이 ASC 에 grant 되는 경로는 **두 갈래로 분리**:
 
-**경로 1 — Pawn 측 (영구 어빌리티)** — `LyraPawnData` 경유:
+**경로 1 - Pawn 측 (영구 어빌리티)** - `LyraPawnData` 경유:
 - `ULyraPawnData::AbilitySets[]` 에 영구 부여할 AbilitySet 등록.
 - `ULyraPawnExtensionComponent::InitializeAbilitySystem` 가 `OnAbilitySystemInitialized` delegate 발화 → PS / GameMode 측 코드가 PawnData 의 AbilitySet 들을 ASC 에 grant.
 - 예: `HeroData_ShooterGame.AbilitySets = [AbilitySet_ShooterHero]` → hero 11종 어빌리티 (Jump · Death · Dash · Emote · Quickbar · ADS · Grenade · Drop · Melee · SpawnEffect · `LyraGameplayAbility_Reset`) 부여.
 
-**경로 2 — Equipment 측 (장비별 일시 어빌리티)** — `ULyraEquipmentManagerComponent` 경유:
+**경로 2 - Equipment 측 (장비별 일시 어빌리티)** - `ULyraEquipmentManagerComponent` 경유:
 - `ULyraEquipmentDefinition::AbilitySetsToGrant[]` 에 장비 장착 시 일시 부여할 AbilitySet 등록 (예: `WID_Pistol.AbilitySetsToGrant = [AbilitySet_ShooterPistol]`).
-- `FLyraEquipmentList::AddEntry` (server only) — 장비 instance 생성 후, `EquipmentCDO->AbilitySetsToGrant` 순회 → 각 `AbilitySet->GiveToAbilitySystem(ASC, &NewEntry.GrantedHandles, Instance)` 호출 → 핸들은 entry 의 `GrantedHandles` (`FLyraAbilitySet_GrantedHandles`) 에 저장.
-- `FLyraEquipmentList::RemoveEntry` — 장비 해제 시 `Entry.GrantedHandles.TakeFromAbilitySystem(ASC)` 으로 일괄 회수.
-- **`ULyraEquipmentInstance::OnEquipped/OnUnequipped` 는 grant 주체가 아님** — `K2_OnEquipped/OnUnequipped` BP 이벤트만 호출. 장비별 런타임 상태 (장착 시각, BP 측 효과 등) 만 담당.
+- `FLyraEquipmentList::AddEntry` (server only) - 장비 instance 생성 후, `EquipmentCDO->AbilitySetsToGrant` 순회 → 각 `AbilitySet->GiveToAbilitySystem(ASC, &NewEntry.GrantedHandles, Instance)` 호출 → 핸들은 entry 의 `GrantedHandles` (`FLyraAbilitySet_GrantedHandles`) 에 저장.
+- `FLyraEquipmentList::RemoveEntry` - 장비 해제 시 `Entry.GrantedHandles.TakeFromAbilitySystem(ASC)` 으로 일괄 회수.
+- **`ULyraEquipmentInstance::OnEquipped/OnUnequipped` 는 grant 주체가 아님** - `K2_OnEquipped/OnUnequipped` BP 이벤트만 호출. 장비별 런타임 상태 (장착 시각, BP 측 효과 등) 만 담당.
 
 | 비교 축 | Pawn 경로 (PawnData) | Equipment 경로 (EquipmentManager) |
 |---------|---------------------|--------------------------------|
 | 등록 위치 | `LyraPawnData::AbilitySets[]` | `LyraEquipmentDefinition::AbilitySetsToGrant[]` |
 | grant 주체 | PawnExtensionComponent 초기화 흐름 | `FLyraEquipmentList::AddEntry` |
-| 회수 주체 | (대개 영구 — pawn destroy 시) | `FLyraEquipmentList::RemoveEntry` (장비 해제 시) |
+| 회수 주체 | (대개 영구 - pawn destroy 시) | `FLyraEquipmentList::RemoveEntry` (장비 해제 시) |
 | 핸들 저장 위치 | (PawnData 외부) | `FLyraAppliedEquipmentEntry::GrantedHandles` |
 | 예시 | `AbilitySet_ShooterHero` (11종) | `AbilitySet_ShooterPistol/Rifle/Shotgun` (각 3종) |
 
@@ -162,7 +162,7 @@ UENUM() ELyraAbilityActivationGroup {
 |------|------|
 | `ELyraAbilityActivationPolicy ActivationPolicy` | 입력 / 자동 활성 분기 |
 | `ELyraAbilityActivationGroup ActivationGroup` | 동시 활성 정책 |
-| `TArray<TObjectPtr<ULyraAbilityCost>> AdditionalCosts` | `Instanced` — 인벤토리 아이템 · 태그 스택 같은 추가 비용 |
+| `TArray<TObjectPtr<ULyraAbilityCost>> AdditionalCosts` | `Instanced` - 인벤토리 아이템 · 태그 스택 같은 추가 비용 |
 | `TMap<FGameplayTag, FText> FailureTagToUserFacingMessages` | 실패 시 표시할 사용자 메시지 |
 | `TMap<FGameplayTag, TObjectPtr<UAnimMontage>> FailureTagToAnimMontage` | 실패 시 재생할 몽타주 |
 | `bool bLogCancelation` | 디버그용 취소 로그 |
@@ -170,12 +170,12 @@ UENUM() ELyraAbilityActivationGroup {
 
 ### 오버라이드 후크
 
-- `CanActivateAbility` — Epic 표준 + `AdditionalCosts` 의 `CheckCost`.
-- `CheckCost` / `ApplyCost` — `AdditionalCosts` 의 각 비용을 순회 호출.
-- `OnGiveAbility` / `OnRemoveAbility` — BP `K2_OnAbilityAdded` / `K2_OnAbilityRemoved` 이벤트 발화.
-- `MakeEffectContext` — `FLyraGameplayEffectContext` 발급 + `SetAbilitySource` 호출.
-- `ApplyAbilityTagsToGameplayEffectSpec` — 어빌리티 태그를 GE Spec 에 자동 attach.
-- `DoesAbilitySatisfyTagRequirements` — `GetAdditionalActivationTagRequirements` 로 ASC 의 TagRelationshipMapping 조회 추가.
+- `CanActivateAbility` - Epic 표준 + `AdditionalCosts` 의 `CheckCost`.
+- `CheckCost` / `ApplyCost` - `AdditionalCosts` 의 각 비용을 순회 호출.
+- `OnGiveAbility` / `OnRemoveAbility` - BP `K2_OnAbilityAdded` / `K2_OnAbilityRemoved` 이벤트 발화.
+- `MakeEffectContext` - `FLyraGameplayEffectContext` 발급 + `SetAbilitySource` 호출.
+- `ApplyAbilityTagsToGameplayEffectSpec` - 어빌리티 태그를 GE Spec 에 자동 attach.
+- `DoesAbilitySatisfyTagRequirements` - `GetAdditionalActivationTagRequirements` 로 ASC 의 TagRelationshipMapping 조회 추가.
 
 ### 파생 클래스 4종
 
@@ -225,24 +225,24 @@ UCLASS() ULyraAbilityTagRelationshipMapping : UDataAsset {
 ## AttributeSet 3종
 
 파일:
-- [`../Source/LyraGame/AbilitySystem/Attributes/LyraAttributeSet.h`](../Source/LyraGame/AbilitySystem/Attributes/LyraAttributeSet.h) — 베이스
+- [`../Source/LyraGame/AbilitySystem/Attributes/LyraAttributeSet.h`](../Source/LyraGame/AbilitySystem/Attributes/LyraAttributeSet.h) - 베이스
 - [`../Source/LyraGame/AbilitySystem/Attributes/LyraHealthSet.h`](../Source/LyraGame/AbilitySystem/Attributes/LyraHealthSet.h) · `.cpp`
 - [`../Source/LyraGame/AbilitySystem/Attributes/LyraCombatSet.h`](../Source/LyraGame/AbilitySystem/Attributes/LyraCombatSet.h) · `.cpp`
 
-### AttributeSet 등록 경로 — default subobject 패턴 (✅ 코드 검증)
+### AttributeSet 등록 경로 - default subobject 패턴 (검증 완료 코드 검증)
 
 **라이라의 HealthSet/CombatSet 은 AbilitySet 의 `GrantedAttributes` 가 아니라 ASC owner actor 의 default subobject 로 생성** 됩니다. 등록 흐름:
 
 | 위치 | 코드 |
 |------|------|
 | `ALyraPlayerState` 생성자 (`LyraPlayerState.cpp:39-40`) | `HealthSet = CreateDefaultSubobject<ULyraHealthSet>(TEXT("HealthSet"))` + 동일 패턴 `CombatSet`. 원본 코멘트: *"These attribute sets will be detected by AbilitySystemComponent::InitializeComponent. Keeping a reference so that the sets don't get garbage collected before that."* |
-| `ALyraCharacterWithAbilities` 생성자 (`LyraCharacterWithAbilities.cpp:20-21`) | 동일 패턴 — Character 가 자기 ASC 를 가질 때도 같은 방식 |
+| `ALyraCharacterWithAbilities` 생성자 (`LyraCharacterWithAbilities.cpp:20-21`) | 동일 패턴 - Character 가 자기 ASC 를 가질 때도 같은 방식 |
 | `UAbilitySystemComponent::InitializeComponent` (엔진) | owner 의 default subobject 를 스캔해 `UAttributeSet` 파생을 자동 감지·등록 |
 
 이 패턴이 의미하는 것:
 - **AbilitySet 의 `GrantedAttributes[]` 는 라이라 hero 측에서 사실상 비어 있음** (`AbilitySet_ShooterHero.GrantedAttributes=[]` 검증). 라이라는 default subobject 패턴 우선.
-- **`AbilitySet.GrantedAttributes` 는 동적 grant 가 필요할 때만 사용** — 예: `AbilitySet_Arena` 가 `TopDownArenaAttributeSet` 을 grant (TopDownArena 모드에서만 hero 가 이 set 을 가짐).
-- **`ULyraHealthComponent` 는 등록 주체가 아님** — `LyraHealthComponent.cpp:70` 의 `HealthSet = AbilitySystemComponent->GetSet<ULyraHealthSet>()` 는 **이미 등록된 set 을 조회만** 함. 그 후 `OnHealthChanged`/`OnMaxHealthChanged`/`OnOutOfHealth` delegate 바인딩 + 초기 체력 (`SetNumericAttributeBase(GetHealthAttribute(), GetMaxHealth())`) 설정 + `Status_Death_*` tag clear.
+- **`AbilitySet.GrantedAttributes` 는 동적 grant 가 필요할 때만 사용** - 예: `AbilitySet_Arena` 가 `TopDownArenaAttributeSet` 을 grant (TopDownArena 모드에서만 hero 가 이 set 을 가짐).
+- **`ULyraHealthComponent` 는 등록 주체가 아님** - `LyraHealthComponent.cpp:70` 의 `HealthSet = AbilitySystemComponent->GetSet<ULyraHealthSet>()` 는 **이미 등록된 set 을 조회만** 함. 그 후 `OnHealthChanged`/`OnMaxHealthChanged`/`OnOutOfHealth` delegate 바인딩 + 초기 체력 (`SetNumericAttributeBase(GetHealthAttribute(), GetMaxHealth())`) 설정 + `Status_Death_*` tag clear.
 
 ### `ULyraAttributeSet` (베이스)
 
@@ -252,8 +252,8 @@ UCLASS() ULyraAbilityTagRelationshipMapping : UDataAsset {
 
 | Attribute | 종류 | 정책 |
 |-----------|------|------|
-| `Health` | 일반 | `ReplicatedUsing=OnRep_Health`, `HideFromModifiers` — execution 만 수정 가능 |
-| `MaxHealth` | 일반 | `ReplicatedUsing=OnRep_MaxHealth` — modifier 로 수정 가능 |
+| `Health` | 일반 | `ReplicatedUsing=OnRep_Health`, `HideFromModifiers` - execution 만 수정 가능 |
+| `MaxHealth` | 일반 | `ReplicatedUsing=OnRep_MaxHealth` - modifier 로 수정 가능 |
 | `Healing` | **메타** | execution 출력 → `Health` 에 `+` 매핑 |
 | `Damage` | **메타** | execution 출력 → `Health` 에 `-` 매핑, `HideFromModifiers` |
 
@@ -272,8 +272,8 @@ ASC 의 PostExecute 흐름에서 `Damage` / `Healing` 메타값이 `Health` 로 
 
 | Attribute | 종류 | 정책 |
 |-----------|------|------|
-| `BaseDamage` | 일반 | `ReplicatedUsing=OnRep_BaseDamage` — source 측이 damage execution 에서 capture |
-| `BaseHeal` | 일반 | `ReplicatedUsing=OnRep_BaseHeal` — source 측이 heal execution 에서 capture |
+| `BaseDamage` | 일반 | `ReplicatedUsing=OnRep_BaseDamage` - source 측이 damage execution 에서 capture |
+| `BaseHeal` | 일반 | `ReplicatedUsing=OnRep_BaseHeal` - source 측이 heal execution 에서 capture |
 
 ## Execution Calculation 2종
 
@@ -289,11 +289,11 @@ ASC 의 PostExecute 흐름에서 `Damage` / `Healing` 메타값이 `Health` 로 
 1. `BaseDamageDef` 로 source 의 `BaseDamage` capture (`EGameplayEffectAttributeCaptureSource::Source`, `bSnapshot=true`).
 2. `FLyraGameplayEffectContext::ExtractEffectContext` 로 라이라 컨텍스트 획득.
 3. `HitResult` 가 있으면 `HitActor` · `ImpactLocation` · `ImpactNormal` · `StartTrace` · `EndTrace` 추출. 없으면 target ASC 의 `AvatarActor_Direct` 로 fallback.
-4. `ULyraTeamSubsystem::CanCauseDamage(EffectCauser, HitActor)` → `DamageInteractionAllowedMultiplier` (0 또는 1) — 같은 팀 데미지 차단.
-5. Distance 계산 — context 의 `Origin` 우선, 없으면 `EffectCauser` 위치, 둘 다 없으면 `WORLD_MAX` + 에러 로그.
+4. `ULyraTeamSubsystem::CanCauseDamage(EffectCauser, HitActor)` → `DamageInteractionAllowedMultiplier` (0 또는 1) - 같은 팀 데미지 차단.
+5. Distance 계산 - context 의 `Origin` 우선, 없으면 `EffectCauser` 위치, 둘 다 없으면 `WORLD_MAX` + 에러 로그.
 6. `AbilitySource->GetDistanceAttenuation(Distance, ...)` + `GetPhysicalMaterialAttenuation(PhysMat, ...)` 적용 (`ILyraAbilitySourceInterface`).
 7. `DamageDone = max(BaseDamage * DistanceAttenuation * PhysMaterialAttenuation * TeamMultiplier, 0)`.
-8. `> 0` 이면 `OutExecutionOutput.AddOutputModifier(GetDamageAttribute(), Additive, DamageDone)` — `ULyraHealthSet::Damage` 메타에 양수 추가 (=Health 에 음수).
+8. `> 0` 이면 `OutExecutionOutput.AddOutputModifier(GetDamageAttribute(), Additive, DamageDone)` - `ULyraHealthSet::Damage` 메타에 양수 추가 (=Health 에 음수).
 
 ### `ULyraHealExecution`
 
@@ -309,22 +309,22 @@ ASC 의 PostExecute 흐름에서 `Damage` / `Healing` 메타값이 `Health` 로 
 
 | 오버라이드 | 정책 |
 |-----------|------|
-| `ShouldAsyncLoadRuntimeObjectLibraries` | 라이라 정책 — 콘솔/태그 변수로 토글 가능 |
+| `ShouldAsyncLoadRuntimeObjectLibraries` | 라이라 정책 - 콘솔/태그 변수로 토글 가능 |
 | `ShouldSyncLoadMissingGameplayCues` | 누락된 cue 의 sync 로드 정책 |
 | `ShouldAsyncLoadMissingGameplayCues` | async 로드 정책 |
 | `OnCreated` | delay-load delegate 등록, GarbageCollect post 처리 |
 
 ### Delay-Load + Always-Load
 
-- `LoadAlwaysLoadedCues()` — 항상 로드되어야 할 cue 미리 로드.
-- `PreloadedCues` (`TSet<TObjectPtr<UClass>>`) — content 에서 참조한 cue.
-- `AlwaysLoadedCues` — 코드 참조 또는 명시적 always-loaded.
-- `OnGameplayTagLoaded` / `ProcessTagToPreload` / `OnPreloadCueComplete` — tag 인덱스 갱신 시 cue async 로드 트리거.
-- `HandlePostLoadMap` — 맵 로드 시 delegate listener 갱신.
+- `LoadAlwaysLoadedCues()` - 항상 로드되어야 할 cue 미리 로드.
+- `PreloadedCues` (`TSet<TObjectPtr<UClass>>`) - content 에서 참조한 cue.
+- `AlwaysLoadedCues` - 코드 참조 또는 명시적 always-loaded.
+- `OnGameplayTagLoaded` / `ProcessTagToPreload` / `OnPreloadCueComplete` - tag 인덱스 갱신 시 cue async 로드 트리거.
+- `HandlePostLoadMap` - 맵 로드 시 delegate listener 갱신.
 
 ### 콘솔 명령
 
-`static void DumpGameplayCues(const TArray<FString>& Args)` — 디버그용 cue 목록 덤프.
+`static void DumpGameplayCues(const TArray<FString>& Args)` - 디버그용 cue 목록 덤프.
 
 ## `ULyraGlobalAbilitySystem`
 
@@ -345,7 +345,7 @@ ASC 의 PostExecute 흐름에서 `Damage` / `Healing` 메타값이 `Health` 로 
 
 ASC 의 `InitAbilityActorInfo` 가 `bHasNewPawnAvatar` 시점에 `RegisterASC` 호출. `EndPlay` 가 `UnregisterASC` 호출.
 
-내부 자료구조: `TMap<TSubclassOf<UGameplayAbility>, FGlobalAppliedAbilityList>` + 동일 패턴의 effect 맵. `FGlobalAppliedAbilityList::Handles` 는 `TMap<ASC, FGameplayAbilitySpecHandle>` — ASC 별 핸들 추적.
+내부 자료구조: `TMap<TSubclassOf<UGameplayAbility>, FGlobalAppliedAbilityList>` + 동일 패턴의 effect 맵. `FGlobalAppliedAbilityList::Handles` 는 `TMap<ASC, FGameplayAbilitySpecHandle>` - ASC 별 핸들 추적.
 
 ## `FLyraGameplayEffectContext`
 
@@ -436,7 +436,7 @@ virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial*, SourceTag
 - `LyraAbilityCost_ItemTagStack.h`
 - `LyraAbilityCost_PlayerTagStack.h`
 
-`ULyraAbilityCost` (베이스) — `DefaultToInstanced`, `EditInlineNew`, `Abstract`. `CheckCost` / `ApplyCost` 가상함수 + `bOnlyApplyCostOnHit` 옵션.
+`ULyraAbilityCost` (베이스) - `DefaultToInstanced`, `EditInlineNew`, `Abstract`. `CheckCost` / `ApplyCost` 가상함수 + `bOnlyApplyCostOnHit` 옵션.
 
 ### 파생 3종
 
@@ -448,16 +448,16 @@ virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial*, SourceTag
 
 `ULyraGameplayAbility::AdditionalCosts` 에 `Instanced` 로 추가 → `CheckCost` / `ApplyCost` 오버라이드가 순회 호출.
 
-## ASC 초기화 흐름 — 4개 경로
+## ASC 초기화 흐름 - 4개 경로
 
 `InitAbilityActorInfo` 호출 위치 (라이더 MCP 검증):
 
 | 위치 | owner | avatar | 용도 |
 |------|-------|--------|------|
-| `LyraPlayerState.cpp:172` | `this` (PS) | `GetPawn()` | 일반 플레이어 — 가장 흔한 경로 |
-| `LyraGameState.cpp:47` | `this` (GS) | `this` (GS) | GamePhase 용 — GS 자체가 owner+avatar |
-| `LyraCharacterWithAbilities.cpp:32` | `this` (Char) | `this` (Char) | 자기 ASC 캐릭터 변형 — 봇 등 |
-| `LyraPawnExtensionComponent.cpp:142` | `InOwnerActor` (PS) | `Pawn` | 새 pawn 이 들어올 때 avatar 갱신 — PS 의 ASC 가 새 pawn 을 가리키게 함 |
+| `LyraPlayerState.cpp:172` | `this` (PS) | `GetPawn()` | 일반 플레이어 - 가장 흔한 경로 |
+| `LyraGameState.cpp:47` | `this` (GS) | `this` (GS) | GamePhase 용 - GS 자체가 owner+avatar |
+| `LyraCharacterWithAbilities.cpp:32` | `this` (Char) | `this` (Char) | 자기 ASC 캐릭터 변형 - 봇 등 |
+| `LyraPawnExtensionComponent.cpp:142` | `InOwnerActor` (PS) | `Pawn` | 새 pawn 이 들어올 때 avatar 갱신 - PS 의 ASC 가 새 pawn 을 가리키게 함 |
 
 ## `ALyraTaggedActor`
 
@@ -467,7 +467,7 @@ virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial*, SourceTag
 
 `AActor` + `IGameplayTagAssetInterface`. `StaticGameplayTags` 컨테이너를 `GetOwnedGameplayTags` 로 노출. ASC 가 source/target tag 평가 시 actor 의 정적 태그를 함께 사용 (예: 환경 actor 의 surface type, 팀 태그 등).
 
-## 네이티브 게임플레이 태그 — `LyraGameplayTags.h`
+## 네이티브 게임플레이 태그 - `LyraGameplayTags.h`
 
 `UE_DECLARE_GAMEPLAY_TAG_EXTERN` 으로 선언된 GAS 관련 태그 (라이더 MCP 검증):
 
@@ -495,7 +495,7 @@ virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial*, SourceTag
 | `GA_*` BP (32개) | `ULyraGameplayAbility` 파생 | 실제 어빌리티 |
 | `GE_*` BP (36개) | `UGameplayEffect` 파생 | 데미지·힐·쿨다운·임시 태그 |
 | `GCN_*` BP (13개) | `UGameplayCueNotify_*` | cue 시각/음향 효과 |
-| `AS_InstantHeal` BP (이름 헷갈리게 `AS_` 접두어지만 실제는 LyraAbilitySet) | `ULyraAbilitySet` 인스턴스 — `GrantedGameplayEffects=[GE_Heal_Instant]` 만 보유 | 환경 actor (힐 패드 등) 가 overlap 대상에게 grant |
+| `AS_InstantHeal` BP (이름 헷갈리게 `AS_` 접두어지만 실제는 LyraAbilitySet) | `ULyraAbilitySet` 인스턴스 - `GrantedGameplayEffects=[GE_Heal_Instant]` 만 보유 | 환경 actor (힐 패드 등) 가 overlap 대상에게 grant |
 | `Phase_*` BP (6개) | `ULyraGamePhaseAbility` 파생 | 게임 페이즈 |
 | `TagRelationships_ShooterHero` | `ULyraAbilityTagRelationshipMapping` | hero 어빌리티의 block/cancel/require 관계 |
 
@@ -503,28 +503,28 @@ virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial*, SourceTag
 
 어빌리티가 활성되지 않을 때:
 
-1. ASC 가 초기화되었는지 (`InitAbilityActorInfo` 호출 여부) — 보통 PawnExtensionComponent 의 init state 가 `DataInitialized` 까지 진행됐는지 확인.
-2. 어빌리티가 grant 됐는지 — `LyraPawnData->AbilitySets[]` 에 포함된 `ULyraAbilitySet` 의 `GrantedGameplayAbilities` 에 들어 있는지.
-3. InputTag 매칭 — `FLyraAbilitySet_GameplayAbility::InputTag` 가 `ULyraInputConfig` 의 매핑과 일치하는지.
-4. `ELyraAbilityActivationGroup` 차단 — `IsActivationGroupBlocked` 가 true 면 다른 exclusive 어빌리티가 활성 중이라는 뜻. `Ability_ActivateFail_ActivationGroup` 실패 태그.
-5. `TagRelationshipMapping` 의 `ActivationBlockedTags` — ASC 에 있는 태그가 차단 조건에 걸리는지. `Ability_ActivateFail_TagsBlocked`.
-6. `AdditionalCosts` 의 `CheckCost` 실패 — 인벤토리/태그 스택 부족. `Ability_ActivateFail_Cost`.
-7. 죽음 상태 — `Status_Death_Dead` 태그가 ASC 에 있으면 대부분 어빌리티 차단. `Ability_ActivateFail_IsDead`.
+1. ASC 가 초기화되었는지 (`InitAbilityActorInfo` 호출 여부) - 보통 PawnExtensionComponent 의 init state 가 `DataInitialized` 까지 진행됐는지 확인.
+2. 어빌리티가 grant 됐는지 - `LyraPawnData->AbilitySets[]` 에 포함된 `ULyraAbilitySet` 의 `GrantedGameplayAbilities` 에 들어 있는지.
+3. InputTag 매칭 - `FLyraAbilitySet_GameplayAbility::InputTag` 가 `ULyraInputConfig` 의 매핑과 일치하는지.
+4. `ELyraAbilityActivationGroup` 차단 - `IsActivationGroupBlocked` 가 true 면 다른 exclusive 어빌리티가 활성 중이라는 뜻. `Ability_ActivateFail_ActivationGroup` 실패 태그.
+5. `TagRelationshipMapping` 의 `ActivationBlockedTags` - ASC 에 있는 태그가 차단 조건에 걸리는지. `Ability_ActivateFail_TagsBlocked`.
+6. `AdditionalCosts` 의 `CheckCost` 실패 - 인벤토리/태그 스택 부족. `Ability_ActivateFail_Cost`.
+7. 죽음 상태 - `Status_Death_Dead` 태그가 ASC 에 있으면 대부분 어빌리티 차단. `Ability_ActivateFail_IsDead`.
 8. `HasMatchingGameplayTag(TAG_Gameplay_AbilityInputBlocked)` 가 true 면 ASC 전체 입력 차단.
 
 데미지가 0 으로 들어올 때:
 
-1. `BaseDamage` capture — source ASC 의 `ULyraCombatSet::BaseDamage` 가 의도한 값인지.
-2. `ULyraTeamSubsystem::CanCauseDamage` 결과 — 같은 팀이면 `DamageInteractionAllowedMultiplier = 0`.
-3. `Distance` — `FLyraGameplayEffectContext::HasOrigin` / `EffectCauser` 가 없으면 `WORLD_MAX` 로 떨어져 distance attenuation 이 0 이 될 수 있음. 로그 확인.
-4. `AbilitySourceObject` 가 null 이면 attenuation 1.0 (default) — 무기 인스턴스가 `SetAbilitySource` 를 호출했는지.
-5. `OnOutOfHealth` 발화 후에도 데미지가 추가로 들어오는지 — `TAG_Gameplay_DamageImmunity` 가 적용되지 않았는지.
+1. `BaseDamage` capture - source ASC 의 `ULyraCombatSet::BaseDamage` 가 의도한 값인지.
+2. `ULyraTeamSubsystem::CanCauseDamage` 결과 - 같은 팀이면 `DamageInteractionAllowedMultiplier = 0`.
+3. `Distance` - `FLyraGameplayEffectContext::HasOrigin` / `EffectCauser` 가 없으면 `WORLD_MAX` 로 떨어져 distance attenuation 이 0 이 될 수 있음. 로그 확인.
+4. `AbilitySourceObject` 가 null 이면 attenuation 1.0 (default) - 무기 인스턴스가 `SetAbilitySource` 를 호출했는지.
+5. `OnOutOfHealth` 발화 후에도 데미지가 추가로 들어오는지 - `TAG_Gameplay_DamageImmunity` 가 적용되지 않았는지.
 
 GamePhase 가 안 바뀔 때:
 
 1. `StartPhase` 가 server (BlueprintAuthorityOnly) 에서 호출됐는지.
 2. GameState 의 ASC 가 init 됐는지 (`LyraGameState.cpp:47` 의 `InitAbilityActorInfo(this, this)`).
-3. 시작하려는 페이즈 태그가 현재 활성 페이즈의 부모면 형제 페이즈가 취소되지 않을 수 있음 — 헤더 주석의 예시 다시 확인.
+3. 시작하려는 페이즈 태그가 현재 활성 페이즈의 부모면 형제 페이즈가 취소되지 않을 수 있음 - 헤더 주석의 예시 다시 확인.
 
 ## 확장 시 권장 방식
 
@@ -534,4 +534,4 @@ GamePhase 가 안 바뀔 때:
 
 **새 GamePhase**: `ULyraGamePhaseAbility` 상속 BP 작성 → `GamePhaseTag` 설정 (예: `Game.Playing.SuddenDeath`) → `ULyraExperienceDefinition` 의 `Actions` 에 grant action 또는 `StartPhase` 직접 호출.
 
-**새 cosmetic ASC 효과 (전역)**: `ULyraGlobalAbilitySystem::ApplyEffectToAll` 또는 `ApplyAbilityToAll` 사용 — 모든 등록된 ASC 에 자동 적용/해제.
+**새 cosmetic ASC 효과 (전역)**: `ULyraGlobalAbilitySystem::ApplyEffectToAll` 또는 `ApplyAbilityToAll` 사용 - 모든 등록된 ASC 에 자동 적용/해제.

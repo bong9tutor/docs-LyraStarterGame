@@ -1,7 +1,7 @@
 # 분석·학습 다이나믹 HTML 문서 사양
 
 > 결정일: 2026-05-23
-> 갱신일: 2026-05-26 (학습 블록 표 4종에 `.table-wrap` 래퍼 의무화 — 본문 컬럼 760px 폭에서 5~6컬럼·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만드는 문제 차단)
+> 갱신일: 2026-05-26 (학습 블록 표 4종에 `.table-wrap` 래퍼 의무화 - 본문 컬럼 760px 폭에서 5~6컬럼·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만드는 문제 차단)
 > 목적: Unreal Engine 프로젝트의 분석·학습 결과를 다이나믹 HTML 로 표현할 때 모든 작업이 같은 규칙을 따르도록 한다. 모든 UE 프로젝트 분석에 재사용 가능하며, 이 저장소의 라이라는 현재 등록된 사례.
 > 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/project/*.md`) 자체에는 적용되지 않는다.
 
@@ -45,11 +45,11 @@
 | **모서리 처리** | **모든 박스 네모** (`border-radius: 0`). 배지·카드·다이얼로그 등 어떤 컴포넌트도 둥근 모서리 사용 안 함 |
 | 주 대상 환경 | 모바일 우선 (데스크탑 호환) |
 
-### 레이아웃 결정 — 단일 컬럼 → 3단 레이아웃 (2026-05-25 갱신)
+### 레이아웃 결정 - 단일 컬럼 → 3단 레이아웃 (2026-05-25 갱신)
 
-초기 사양 (2026-05-23) 은 "검색·단축키 없이 흐름 5개만 다루는 단순 학습 문서" 라는 전제에서 Medium · Substack 풍 **단일 컬럼 + 본문 안 목차** 를 선택했다. 그러나 라이라 분석 페이지가 19개 (애니메이션 12 + UI 7) 로 증가하면서 이 전제가 무너졌다 — 페이지 간 이동이 잦아지고, 학습자가 "지금 어디 있고 다음에 어디로 가야 하는가" 를 본문 안 목차 한 칸만으로 잡기 어려워졌다.
+초기 사양 (2026-05-23) 은 "검색·단축키 없이 흐름 5개만 다루는 단순 학습 문서" 라는 전제에서 Medium · Substack 풍 **단일 컬럼 + 본문 안 목차** 를 선택했다. 그러나 라이라 분석 페이지가 19개 (애니메이션 12 + UI 7) 로 증가하면서 이 전제가 무너졌다 - 페이지 간 이동이 잦아지고, 학습자가 "지금 어디 있고 다음에 어디로 가야 하는가" 를 본문 안 목차 한 칸만으로 잡기 어려워졌다.
 
-따라서 결정을 갱신한다 — 데스크탑 (≥1280px) 은 언리얼 공식 문서 사이트 (`dev.epicgames.com/documentation`) · MDN · Stripe 등이 채택한 **3단 레이아웃** (사이트 사이드바 + 본문 + 페이지 TOC) 으로 가고, 모바일 (<800px) 은 햄버거 drawer 사이드바로 폴백한다. 본문 컬럼은 그대로 `max-width: 760px` 가운데 정렬을 유지해 가독성을 보존한다.
+따라서 결정을 갱신한다 - 데스크탑 (≥1280px) 은 언리얼 공식 문서 사이트 (`dev.epicgames.com/documentation`) · MDN · Stripe 등이 채택한 **3단 레이아웃** (사이트 사이드바 + 본문 + 페이지 TOC) 으로 가고, 모바일 (<800px) 은 햄버거 drawer 사이드바로 폴백한다. 본문 컬럼은 그대로 `max-width: 760px` 가운데 정렬을 유지해 가독성을 보존한다.
 
 ### 시각 디자인 영감 - Linear Docs
 
@@ -96,8 +96,8 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 ```
 
 원칙:
-- **`docs/` 는 2 하위 폴더 분리.** [`common/`](.) 는 프로젝트 무관 정책 — 다른 UE 프로젝트 레포로 `docs/common/` 폴더 통째 카피해 그대로 재사용. [`../project/`](../project/) 는 라이라 종속 — 컨텍스트 2 + 시스템별 검증 원장. 한 레포 = 한 프로젝트 원칙은 유지 (`project/` 안은 단일 프로젝트 전용).
-- **시스템 = 디렉터리 아니라 파일명 접두어** (`<project>-<system>-<topic>.html`). `pages/` 안은 평면이고 분리는 파일명으로만 한다 — 시스템별 폴더는 만들지 않는다. 사용자가 `file://` 로 열 때 경로가 짧고 cross-link 가 단순해진다. 원장 (`docs/project/`) 도 파일명 접두어 규칙 (`<system>-<doctype>.md`) 을 따르되, 단일 프로젝트 레포라 파일명에 프로젝트 접두어는 두지 않는다.
+- **`docs/` 는 2 하위 폴더 분리.** [`common/`](.) 는 프로젝트 무관 정책 - 다른 UE 프로젝트 레포로 `docs/common/` 폴더 통째 카피해 그대로 재사용. [`../project/`](../project/) 는 라이라 종속 - 컨텍스트 2 + 시스템별 검증 원장. 한 레포 = 한 프로젝트 원칙은 유지 (`project/` 안은 단일 프로젝트 전용).
+- **시스템 = 디렉터리 아니라 파일명 접두어** (`<project>-<system>-<topic>.html`). `pages/` 안은 평면이고 분리는 파일명으로만 한다 - 시스템별 폴더는 만들지 않는다. 사용자가 `file://` 로 열 때 경로가 짧고 cross-link 가 단순해진다. 원장 (`docs/project/`) 도 파일명 접두어 규칙 (`<system>-<doctype>.md`) 을 따르되, 단일 프로젝트 레포라 파일명에 프로젝트 접두어는 두지 않는다.
 - 자산 (CSS/JS) 은 전역 공통 1세트. 시스템별로 분기하지 않는다.
 
 ## 다중 시스템 구조
@@ -108,7 +108,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 
 | 항목 | 규칙 |
 |------|------|
-| 식별자 (slug) | `animation`, `ui`, `gas`, `experience` 등 영문 소문자 단어 (kebab 이 자연스러우면 OK — `game-features` 등) |
+| 식별자 (slug) | `animation`, `ui`, `gas`, `experience` 등 영문 소문자 단어 (kebab 이 자연스러우면 OK - `game-features` 등) |
 | 원장 위치 | `docs/project/<system>-` |
 | HTML 페이지 접두어 | `dynamic-html/pages/<project>-<system>-` |
 | 인덱스 섹션 | `dynamic-html/index.html` 의 한 `<section>` |
@@ -116,9 +116,9 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 
 ### 인덱스 페이지 구조 (`dynamic-html/index.html`)
 
-진입점은 시스템별 `<section>` 으로 분리하고, 각 섹션 안에 카드 그리드 (`.entry-list`) 를 둔다. 페이지 번호는 카드 제목 안 (`1. ...` — 마침표 + 공백, "본문 특수문자 사용 규칙" 의 번호 ↔ 제목 구분자 절 참조) 에만 적되, 그 번호는 **해당 시스템 안의 순서** 다.
+진입점은 시스템별 `<section>` 으로 분리하고, 각 섹션 안에 카드 그리드 (`.entry-list`) 를 둔다. 페이지 번호는 카드 제목 안 (`1. ...` - 마침표 + 공백, "본문 특수문자 사용 규칙" 의 번호 ↔ 제목 구분자 절 참조) 에만 적되, 그 번호는 **해당 시스템 안의 순서** 다.
 
-다음 마크업은 일반 패턴이고, `href` 값은 이 저장소의 라이라 사례 (`<project>` = `lyra`) 다. 새 프로젝트는 같은 자리에 자기 프로젝트 접두어를 둔다 — `pages/<project>-<system>-overview.html`.
+다음 마크업은 일반 패턴이고, `href` 값은 이 저장소의 라이라 사례 (`<project>` = `lyra`) 다. 새 프로젝트는 같은 자리에 자기 프로젝트 접두어를 둔다 - `pages/<project>-<system>-overview.html`.
 
 ```html
 <main class="content">
@@ -170,7 +170,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 | 본문 블록 안 | 인용으로만 OK | `<a href="<project>-<other>-...html">` 자유 사용. 단 본문 흐름이 그 페이지에 강하게 의존하면 "선행 학습" 으로 옮겨라. |
 | 블록 안 `<code>` 식별자 | 텍스트로만 | 다른 시스템에 정의된 클래스·태그를 본문에서 인용할 때 링크 불필요. |
 
-원장 (`docs/project/*.md`) 사이 cross-reference 는 자유다 — 검증 추적성 목적.
+원장 (`docs/project/*.md`) 사이 cross-reference 는 자유다 - 검증 추적성 목적.
 
 ## HTML 페이지 표준 구조
 
@@ -244,10 +244,10 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 - 한국어 본문, 영문 식별자
 - `verified-at` 은 본문에 직접 적는다. **학습 페이지(`pages/*.html`)에만 적용**하며 진입점(`index.html`)은 사실 콘텐츠가 없는 페이지 목록 인덱스이므로 생략한다.
 - `<main class="content">` 는 `max-width: 760px` + `margin: 0 auto` 로 가운데 정렬
-- **좌측 사이트 사이드바** (`<aside class="sidebar" id="sidebar">`) — `js/app.js` 가 페이지 메타데이터 기반으로 시스템·페이지 트리 동적 생성. 현재 페이지는 `aria-current="page"` 로 강조. 모바일에서는 햄버거 drawer.
-- **우측 페이지 TOC** (`<aside class="page-toc" id="page-toc">`) — `js/app.js` 가 본문 학습 블록 헤더 (`section > .block-head h2` · `.flow-head h2` · `.learn-index > h2`) 를 추출해 동적 생성 + scrollspy 로 현재 보이는 블록 강조. 태블릿 이하에서는 숨김 (본문 안 `.learn-index` 가 대체).
-- **이전 / 다음 페이저** (`<nav class="page-pager">`) — `js/app.js` 가 같은 시스템 내 순서로 본문 끝에 자동 삽입.
-- 헤더는 sticky — 좌측 햄버거 (모바일) + 가운데 제목·검증일·홈 nav + 우측 다크모드 토글.
+- **좌측 사이트 사이드바** (`<aside class="sidebar" id="sidebar">`) - `js/app.js` 가 페이지 메타데이터 기반으로 시스템·페이지 트리 동적 생성. 현재 페이지는 `aria-current="page"` 로 강조. 모바일에서는 햄버거 drawer.
+- **우측 페이지 TOC** (`<aside class="page-toc" id="page-toc">`) - `js/app.js` 가 본문 학습 블록 헤더 (`section > .block-head h2` · `.flow-head h2` · `.learn-index > h2`) 를 추출해 동적 생성 + scrollspy 로 현재 보이는 블록 강조. 태블릿 이하에서는 숨김 (본문 안 `.learn-index` 가 대체).
+- **이전 / 다음 페이저** (`<nav class="page-pager">`) - `js/app.js` 가 같은 시스템 내 순서로 본문 끝에 자동 삽입.
+- 헤더는 sticky - 좌측 햄버거 (모바일) + 가운데 제목·검증일·홈 nav + 우측 다크모드 토글.
 - 모달 다이얼로그·backdrop 같은 무거운 인터랙션은 두지 않음. 모바일 햄버거의 backdrop 만 예외.
 
 ### 목차명 분기
@@ -519,7 +519,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 
 ### 표 마크업 표준 (모든 표 공통)
 
-학습 블록 4종 (`decision-section` · `comparison-section` · `reference-section` · `verification-section`) 이 사용하는 `<table>` 은 **반드시 `.table-wrap` 으로 감싼다**. 본문 컬럼은 `max-width: 760px` 인데 표는 5~6컬럼·긴 Unreal 경로·GameplayTag·C++ 식별자 셀을 자주 가져 가로 폭이 컬럼을 넘는다 — 래퍼 없이 두면 표 자체가 본문 → 레이아웃 → `body` 방향으로 넓어져 페이지 전체에 가로 스크롤이 생기고 3단 레이아웃 정렬이 깨진다.
+학습 블록 4종 (`decision-section` · `comparison-section` · `reference-section` · `verification-section`) 이 사용하는 `<table>` 은 **반드시 `.table-wrap` 으로 감싼다**. 본문 컬럼은 `max-width: 760px` 인데 표는 5~6컬럼·긴 Unreal 경로·GameplayTag·C++ 식별자 셀을 자주 가져 가로 폭이 컬럼을 넘는다 - 래퍼 없이 두면 표 자체가 본문 → 레이아웃 → `body` 방향으로 넓어져 페이지 전체에 가로 스크롤이 생기고 3단 레이아웃 정렬이 깨진다.
 
 **표준 마크업:**
 
@@ -536,13 +536,13 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 - `.table-wrap` 이 **수평 overflow 의 유일한 소유자** 다. 표가 넓어지면 래퍼 내부에서만 스크롤이 생기고, 페이지 전체 레이아웃에는 영향이 없다.
 - 기존 `.decision-table` / `.comparison-table` / `.verification-table` / `.reference-table` class 는 그대로 둔다. 래퍼는 추가 계층일 뿐 표 클래스를 대체하지 않는다.
 - 표 셀과 셀 안 `<code>` 는 `overflow-wrap: anywhere` 로 긴 토큰만 줄바꿈한다. 산문 본문에는 적용되지 않으므로 한글/영문 가독성에 영향 없다.
-- `word-break: break-all` 을 전역 적용하지 않는다 — 한국어 산문 가독성이 심하게 떨어진다.
-- `body` · `html` 에 `overflow-x: hidden` 으로 깨짐을 숨기지 않는다 — 내용이 잘릴 뿐 근본 해결이 아니다.
+- `word-break: break-all` 을 전역 적용하지 않는다 - 한국어 산문 가독성이 심하게 떨어진다.
+- `body` · `html` 에 `overflow-x: hidden` 으로 깨짐을 숨기지 않는다 - 내용이 잘릴 뿐 근본 해결이 아니다.
 - `.content` 의 `max-width` 를 키우는 방식 (760px → 900px 등) 은 보조책일 뿐이고 모바일·5~6컬럼 표 문제는 그대로 남는다.
 
 **본문 inline `<code>` 도 같은 줄바꿈 정책:**
 
-긴 Unreal 경로·GameplayTag·C++ 식별자 (예: `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext` · `Ability.ActivateFail.ActivationGroup`) 가 본문 문장 안 `<code>` 로 들어가면 표 셀과 같은 이유로 모바일 (375px) 폭을 넘는다. 표 셀 `<code>` 에만 `overflow-wrap: anywhere` 를 적용하면 본문은 여전히 깨진다 — 전역 `code` 셀렉터에 같은 규칙을 적용한다. (`word-break: break-all` 은 한글 산문 가독성을 해치므로 사용 금지, `overflow-wrap: anywhere` 만 사용.)
+긴 Unreal 경로·GameplayTag·C++ 식별자 (예: `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext` · `Ability.ActivateFail.ActivationGroup`) 가 본문 문장 안 `<code>` 로 들어가면 표 셀과 같은 이유로 모바일 (375px) 폭을 넘는다. 표 셀 `<code>` 에만 `overflow-wrap: anywhere` 를 적용하면 본문은 여전히 깨진다 - 전역 `code` 셀렉터에 같은 규칙을 적용한다. (`word-break: break-all` 은 한글 산문 가독성을 해치므로 사용 금지, `overflow-wrap: anywhere` 만 사용.)
 
 **Grid column 의 `minmax(0, 1fr)` 통일 규칙:**
 
@@ -561,7 +561,7 @@ CSS 만으로 해결하지 말아야 하는 표도 있다. 작성 단계에서 �
 
 **검증 (브라우저 콘솔):**
 
-페이지를 열고 다음을 확인한다. `true` 가 아니면 어떤 표가 본문을 밀어내고 있다 — 그 표의 컬럼 수·셀 콘텐츠를 위 가이드대로 재설계한다.
+페이지를 열고 다음을 확인한다. `true` 가 아니면 어떤 표가 본문을 밀어내고 있다 - 그 표의 컬럼 수·셀 콘텐츠를 위 가이드대로 재설계한다.
 
 ```js
 document.documentElement.scrollWidth <= document.documentElement.clientWidth
@@ -703,7 +703,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 | `class="note note-warning"` (CSS: `.note-warning`) | 주황 (`--warning`) | 실수하기 쉬운 부분·주의 |
 | `class="note note-debug"` (CSS: `.note-debug`) | 청록 (`--debug`) | 디버깅 팁·트러블슈팅 단서 |
 
-> 두 클래스 (`note` + `note-<kind>`) 를 같은 요소에 함께 둔다 (`<div class="note note-info">`). CSS 셀렉터는 `.note-info` 단일 클래스 — 자손 셀렉터 (`.note .note-info`) 가 아니다.
+> 두 클래스 (`note` + `note-<kind>`) 를 같은 요소에 함께 둔다 (`<div class="note note-info">`). CSS 셀렉터는 `.note-info` 단일 클래스 - 자손 셀렉터 (`.note .note-info`) 가 아니다.
 
 마크업:
 
@@ -726,75 +726,70 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 ### 본문 특수문자 사용 규칙
 
-본문에서 **의미를 전달하는 특수문자는 한글로 풀어 쓴다**. 이모지·기호로 의미를 줄여 쓰면 한국어 본문 가독성이 떨어지고 화면낭독·검색·번역 도구에서 의미가 사라진다.
+**원칙 (단순화):** 문서 본문은 한글과 ASCII 구두점으로 쓴다. 특수문자는 (1) UI 컴포넌트가 요구하는 그래픽, (2) 원문 식별자에 포함된 문자, (3) 수식처럼 ASCII 대체 시 의미가 달라지는 경우만 허용한다. em dash 와 en dash 는 일반 하이픈·콜론·문장 분리로 풀어 쓴다.
 
-#### 사용 가능한 글리프 (정의된 위치만)
+이 절은 2026-05-26 사용자 피드백 후 재정의됨. 이전 정책의 넓은 "허용되는 타이포그래피 separator" 목록 (em dash · en dash · ellipsis · 양방향 화살표 등) 이 자기 모순으로 작동해 본문에 특수문자가 누적된 결과를 차단하기 위함.
 
-| 글리프 | 사용 위치 | 의미 |
-|--------|-----------|------|
-| `✓` `◐` `△` | `.badge-verified` / `.badge-partial` / `.badge-unverified` 안 + 본문 텍스트의 검증 등급 표기 | 검증 등급 (예: "GA 21 ✓ · GE 36 ✓" 같은 인벤토리) |
-| `↓` | `.flow-steps .step-arrow .arrow` 안 | 흐름 진행 방향 |
-| `↑` | (정의된 경우만, 예: 위로 가는 흐름) | 역방향 진행 |
-| `→` `←` | 본문 흐름 화살표 (예: `Ability → Montage → Slot`, 페이지 nav `← 홈`) | 단방향 진행·관계 |
-| `↔` | 본문 양방향 매핑 (예: `tag ↔ 자산`, `source ↔ target`) | 양방향 대응·매핑 |
-| `◆` | `.step[data-type="conduit"] .step-name::before` (CSS `content`) | conduit 노드 미니 아이콘 |
-| `□` | `.recipe-section .checklist .check-mark` 안 | 체크리스트 마크 (컴포넌트 그래픽) |
-| `🌓` | `.theme-toggle` 버튼 자체 | 다크모드 토글 컴포넌트 그래픽 (예외 — 이모지지만 컴포넌트 정체성) |
-| `☰` | `.menu-toggle` 버튼 자체 | 햄버거 메뉴 컴포넌트 그래픽 (모바일 drawer 토글) |
-| `≥` `≤` `×` `Σ` `∑` | 본문 수식 (예: `Health ≤ 0`, `Σ(weight) / N`) | 수학 기호 — 의미 전달 명확하면 허용. `×N` 의 "개수 표기" 용도만 금지 (아래 표 참조). |
+#### 좁은 화이트리스트 (꼭 필요한 역할만)
 
-위에 정의되지 않은 이모지 (`✅`·`❌`·`⚠️`·`①`~`⑨` 같은 enclosed 숫자·`★`·임의 그림 글리프) 는 본문·배지·카드 어디에도 사용하지 않는다. OS 의존 색이 사이트 다크 토큰과 어긋나거나 의미 전달이 흐려진다.
+다음 위치·역할에서만 특수문자를 허용한다. 그 외 본문 어디에도 사용 금지.
 
-**대체 규칙 (일반 문자 우선):**
+| 글리프 | 허용 위치 (꼭 필요한 역할) | 정당화 |
+|--------|---------------------------|--------|
+| `✓` `◐` `△` | HTML 검증 배지 (`.badge-verified` / `.badge-partial` / `.badge-unverified`) 안 | 사양이 정의한 UI 상태 글리프 |
+| `↓` | HTML flow arrow 컴포넌트 (`.flow-steps .step-arrow .arrow`) 안 | 시각 컴포넌트 그래픽 |
+| `◆` | HTML conduit 노드 미니 아이콘 (CSS `content`) | 시각 컴포넌트 그래픽 |
+| `□` | HTML checklist 마크 (`.recipe-section .checklist .check-mark`) 안 | 시각 컴포넌트 그래픽 |
+| `🌓` | `.theme-toggle` 버튼 자체 | 다크모드 토글 버튼 그래픽 |
+| `☰` | `.menu-toggle` 버튼 자체 | 모바일 햄버거 버튼 그래픽 |
+| `≥` `≤` `×` `Σ` `∑` | 본문 수식 (예: `Health ≤ 0`, `Σ(weight)`) - ASCII 로 풀어 의미가 흐려지는 경우만 | 수식 |
+| 원문 식별자 안의 모든 글리프 | 코드 (`<code>`), GameplayTag, 에셋명, C++ 식별자 안 그대로 | 원문 보존 - 예: `Cosmetic.AnimationStyle.Feminine` 의 `.` |
 
-금지 글리프를 만나면 **(1) 일반 문자 (한글 텍스트)** 가 1순위 — 의미가 가장 명확하고 화면낭독·검색·번역 도구에서도 살아남는다. (2) 사양 정의 특수문자 (`✓` 등) 는 차순위 — 시각적 일관성이 필요할 때만. (3) HTML 구조 (`<strong>`·`note-warning` 박스·CSS 라벨) 는 강조 의도가 있는 경우.
+#### 금지 글리프 (FAIL - 정책 위반, 정적 검사로 차단)
 
-| 금지 글리프 | 1순위 — 일반 문자 (한글) | 2순위 — 사양 정의 글리프 | 3순위 — HTML 구조 |
-|------------|------------------------|----------------------|------------------|
-| `✅` | `완료` · `성공` · `확인` 같은 한글 텍스트 | `✓` (검증 등급 의미일 때만) | — |
-| `❌` | `실패` · `불가` · `금지` | `△` (검증 미완료 의미일 때만) | `note-warning` 박스 |
-| `⚠️` | `주의` · `경고` 한글 텍스트 | — | `note-warning` 박스 (강한 강조) |
-| `①` `②` ... `⑨` | `1.` `2.` ... + 공백 (마침표 separator) | — | 카드 자체로 시각 분리 또는 `<span class="struct-num">1</span>` CSS 라벨 |
-| `★` | `핵심` · `중요` · `우선` 한글 텍스트 | — | `<strong>` 또는 `note-info` 박스 |
-| `❗` `‼` `‽` | `중요` · `주의` 한글 텍스트 | — | `note-warning` 박스 |
-| 임의 이모지 (😀·🔥·💡 등) | 의미 그대로의 한글 명사·동사 | — | 의미 분류에 맞는 note 박스 |
+| 글리프 | 권장 대체 |
+|--------|-----------|
+| `—` (em dash, U+2014) | ` - ` (공백 + ASCII 하이픈 + 공백), 또는 `:` (콜론), 또는 새 문장 분리 |
+| `–` (en dash, U+2013) | `~` (범위), 또는 ` - ` (ASCII 하이픈) |
+| `✅` (U+2705) | `완료` · `검증 완료` · `확인` 한글 텍스트 |
+| `❌` (U+274C) | `실패` · `불가` · `금지` 한글 텍스트 |
+| `⚠️` (U+26A0) | `주의` · `경고` 한글 텍스트, 또는 `note-warning` 박스 |
+| `★` (U+2605) `❗` `‼` `‽` | `핵심` · `중요` · `우선` 한글 텍스트, 또는 `<strong>` 태그 |
+| `①` `②` ... `⑨` (U+2460~) | `1.` `2.` ... ASCII 숫자 + 마침표 + 공백 |
+| `§` `¶` `※` `† ‡` | `섹션 N` · `단락` · `주의` · 본문 풀어 쓰기 |
+| `×N` (개수 표기 용도) | `N개` |
+| 임의 이모지 (얼굴·불·전구·과녁 같은 그림 글리프) | 의미의 한글 명사·동사 |
 
-**원칙:**
+#### 경고 글리프 (WARN - 정당화 필요, 남용 금지)
 
-- 한글 텍스트가 가능하면 무조건 1순위. 글리프는 의미를 압축하지만 한국어 본문 톤과 어긋난다.
-- `✓`·`◐`·`△` 처럼 사양에 정의된 글리프도 "본문 인벤토리" (예: "GA 21 ✓ · GE 36 ✓") 같은 시각 압축이 필요할 때만 쓰고, 산문 안에서는 한글 ("21개 검증 완료") 이 자연스럽다.
-- HTML 구조 (note 박스·`<strong>`·CSS 라벨) 는 강조 의도가 명확한 곳만. 일반 문장에 남용 금지.
+다음 글리프는 좁은 역할에서는 허용하지만 본문 산문에서 남용하면 안 된다. 사용 전 "한글로 풀어 쓸 수 없는가" 점검 필수.
 
-#### 본문에서 한글로 풀어 쓰는 기호
+| 글리프 | 허용되는 좁은 용도 | 남용 사례 (금지) |
+|--------|---------------------|------------------|
+| `·` (가운뎃점) | 제목·표 셀 안의 짧은 키워드 병렬 ("A · B · C") | 산문 한 문장에 여러 번, 또는 "와/과" 로 풀 수 있는 곳 |
+| `→` `←` | 인과·진행 관계 (`Ability → Montage → Slot`), 페이지 nav (`← 홈`) | 단순 화살표 장식, 일반 관계 설명에 남발 |
+| `↔` | 대응 관계가 의미 핵심인 곳 (`tag ↔ 자산`) | "와/과" 로 풀 수 있는 곳 |
+| `…` (ellipsis) | 코드 예시의 생략 (`...`) | 산문의 말 줄임 - 마침표 또는 명시적 표현으로 |
 
-| 금지 표기 | 대신 |
-|-----------|------|
-| `§13`, `§14` | `섹션 13`, `섹션 14` |
-| `§1–§12` | `섹션 1–12` 또는 `섹션 1~12` |
-| `¶` | `단락` |
-| `※` | `주의` 또는 `참고` |
-| `† ‡` (각주 마커) | 본문 텍스트로 풀어 쓴다 |
-| `×N` (개수 표기) | `N개` (예: `Slot ×5` → `Slot 5개`, `flow ×3~5` → `flow 3~5개`, `note-design ×N` → `note-design N개`) |
-| `✅` `❌` `⚠️` (의미 이모지) | `완료` · `실패` · `주의` 한글 텍스트 (위 "대체 규칙" 표 참조 — 사양 정의 글리프나 HTML 구조도 옵션) |
-| `★` `❗` `‼` (강조 글리프) | `핵심` · `중요` · `우선` 한글 텍스트 또는 `<strong>` 태그 |
-| `①` `②` ... `⑨` (enclosed 숫자) | `1.` `2.` ... 마침표 + 공백 (번호 표기) |
-| 임의 emoji 로 의미 대체 | 명사·동사 한글 표기 우선, 시각 압축이 꼭 필요하면 사양 정의 글리프나 HTML 구조 |
+원칙: 위 글리프를 쓸 때마다 "한글 단어·접속사로 풀 수 있는가" 자문. 풀 수 있으면 풀어 쓴다.
 
-#### 허용되는 타이포그래피 separator
+#### 선행 학습 항목 구분자
 
-타이포그래피적 관습으로 사용된 다음 기호는 의미 대체가 아니므로 그대로 둔다.
+이전 정책은 "선행 학습 항목 뒤 em dash + 이유" 를 요구했으나, em dash 금지로 다음 형식으로 변경한다.
 
-| 기호 | 용도 | 사용하지 않는 곳 |
-|------|------|-----------------|
-| `·` (가운뎃점) | 한국어 병렬 ("A 와 B" 의미). 제목·헤딩 안에서 자유롭게 사용 | **번호 ↔ 제목 사이 구분자** (아래 참고) |
-| `—` `–` (em·en dash) | 부연 설명·범위 | — |
-| `…` (ellipsis) | 생략 | — |
-| `→` `←` | 흐름·관계 화살표 (위 "사용 가능한 글리프" 표 참조) | — |
-| `↔` | 양방향 매핑 (위 표 참조) | — |
+```html
+<!-- 권장 (1순위): 콜론 -->
+<li><a href="lyra-animation-runtime-state.html">런타임 상태 입력</a>: 본 페이지의 ABP 변수가 어디서 오는지 먼저 확인한다.</li>
+
+<!-- 권장 (2순위): ASCII 하이픈 -->
+<li><a href="lyra-animation-runtime-state.html">런타임 상태 입력</a> - 본 페이지의 ABP 변수가 어디서 오는지 먼저 확인한다.</li>
+```
+
+콜론이 더 선호됨 - 링크 제목과 이유가 문법적으로 분리되고 ASCII 하이픈도 늘리지 않는다.
 
 #### 번호 ↔ 제목 구분자는 `.` (마침표) 하나로 통일
 
-목록·카드·learn-index 의 항목 텍스트에서 **번호와 제목 사이 구분자는 마침표 (`.`) + 공백** 한 가지로 통일한다. 같은 줄 안에서 같은 기호 (`·`) 가 두 역할 (번호 구분자 + 제목 내 병렬) 을 동시에 하면 가독성·의미 일관성이 떨어진다.
+목록·카드·learn-index 의 항목 텍스트에서 **번호와 제목 사이 구분자는 마침표 (`.`) + 공백** 한 가지로 통일.
 
 | 위치 | 잘못된 표기 | 올바른 표기 |
 |------|------------|-------------|
@@ -802,7 +797,13 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 | 학습 목차 (`.learn-index ol li a`) | `1 · 다섯 계층과 책임 분리` | `1. 다섯 계층과 책임 분리` |
 | 흐름 목차의 항목 | `3 · Jump · Fall → 지상 복귀` | `3. Jump · Fall → 지상 복귀` |
 
-이 규칙에서 `·` 는 **제목 안 병렬 의미만** 갖는다 — 번호와의 경계 역할은 마침표가 맡는다.
+#### 빈 값 표기
+
+표 셀의 "값 없음" 을 `—` (em dash) 로 표기하던 관습은 금지. `(없음)` 한글로 명시.
+
+#### 정적 검사 (배포 차단)
+
+`tools/check-special-chars.cjs` 가 `CLAUDE.md` · `docs/**/*.md` · `dynamic-html/**/*.html` 본문에서 위 "금지 글리프" 발견 시 exit 1. "경고 글리프" 는 카운트만 출력. 위 화이트리스트 외 모든 BMP 외 글리프 (이모지 등) 도 FAIL. 작성 후 매번 실행 필수.
 
 ### 검증 등급 처리 규칙
 
@@ -813,7 +814,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 ## HTML 전역 컴포넌트
 
-학습 페이지에 두는 컴포넌트는 다음 한 가지로 한정. (제목의 "HTML 전역" 은 분석 대상 시스템의 UI 명칭과의 용어 충돌을 피하기 위한 것 — 이 저장소의 라이라 경우 CommonUI 시스템 (`ui`) — 여기서 다루는 컴포넌트는 HTML 사이트 자체의 UI 다.)
+학습 페이지에 두는 컴포넌트는 다음 한 가지로 한정. (제목의 "HTML 전역" 은 분석 대상 시스템의 UI 명칭과의 용어 충돌을 피하기 위한 것 - 이 저장소의 라이라 경우 CommonUI 시스템 (`ui`) - 여기서 다루는 컴포넌트는 HTML 사이트 자체의 UI 다.)
 
 ### 다크모드 토글
 
@@ -823,47 +824,47 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 ## 사용하지 않는 컴포넌트
 
-- ❌ **사이드바 검색** — 페이지 19개 규모에서는 사이드바 트리 한 번에 다 보임. 검색은 페이지 100개 이상일 때 도입 검토.
-- ❌ **키보드 단축키** — 모바일 우선이라 단축키 학습 부담을 강요하지 않음.
-- ❌ **모달 다이얼로그 (`<dialog>`)**
-- ❌ **헤더 도움말 버튼**
-- ❌ **툴팁 (`data-tooltip`)**
-- ❌ 노드 상세 다이얼로그
-- ❌ 노드 사전 카드 그리드·전이 표 부록
-- ❌ 인라인 JSON
-- ❌ 검증 등급·종류·그룹 필터
-- ❌ 그래프 라이브러리
-- ❌ 레이아웃 드롭다운
-- ❌ 토스트 노티피케이션
-- ❌ 사이드 detail-panel
+- 불가 **사이드바 검색** - 페이지 19개 규모에서는 사이드바 트리 한 번에 다 보임. 검색은 페이지 100개 이상일 때 도입 검토.
+- 불가 **키보드 단축키** - 모바일 우선이라 단축키 학습 부담을 강요하지 않음.
+- 불가 **모달 다이얼로그 (`<dialog>`)**
+- 불가 **헤더 도움말 버튼**
+- 불가 **툴팁 (`data-tooltip`)**
+- 불가 노드 상세 다이얼로그
+- 불가 노드 사전 카드 그리드·전이 표 부록
+- 불가 인라인 JSON
+- 불가 검증 등급·종류·그룹 필터
+- 불가 그래프 라이브러리
+- 불가 레이아웃 드롭다운
+- 불가 토스트 노티피케이션
+- 불가 사이드 detail-panel
 
 ## 메타 콘텐츠 최소화 원칙
 
 학습 페이지에는 **학습 본문과 직접 연결된 콘텐츠만** 둔다. 다음은 학습 동선을 끊으므로 학습 페이지(`dynamic-html/pages/*.html`)·진입점(`dynamic-html/index.html`)에 두지 않는다.
 
-- ❌ **사이트 자체 소개** ("이 사이트는 무엇인가" 류) - 헤더 제목으로 자명
-- ❌ **페이지 사용법 안내** ("이 페이지를 읽는 법" 류) - 단계 카드의 좌측 색 막대·종류 라벨로 자명
-- ❌ **시각 규약 본문 설명** ("검증 등급의 의미" 류) - 배지 시각 (`✓` 녹 / `◐` 황 / `△` 회) 만으로 자명
-- ❌ **외부 자료 위치 안내** ("사실 사전이 필요할 때" 류) - 외부 학습 자료가 필요하면 페이지 상단 챕터 브리프(`.chapter-brief`) 의 "보충 자료" 칸에 두고, 검증 원장 같은 내부 문서는 학습 페이지에 노출하지 않는다
+- 불가 **사이트 자체 소개** ("이 사이트는 무엇인가" 류) - 헤더 제목으로 자명
+- 불가 **페이지 사용법 안내** ("이 페이지를 읽는 법" 류) - 단계 카드의 좌측 색 막대·종류 라벨로 자명
+- 불가 **시각 규약 본문 설명** ("검증 등급의 의미" 류) - 배지 시각 (`✓` 녹 / `◐` 황 / `△` 회) 만으로 자명
+- 불가 **외부 자료 위치 안내** ("사실 사전이 필요할 때" 류) - 외부 학습 자료가 필요하면 페이지 상단 챕터 브리프(`.chapter-brief`) 의 "보충 자료" 칸에 두고, 검증 원장 같은 내부 문서는 학습 페이지에 노출하지 않는다
 
 이런 메타 정보는 본 사양 문서, `docs/README.md`, `docs/project/<system>-references.md` 에 두고 **HTML 학습 페이지에서는 반복하지 않는다**. 학습자가 처음 페이지에 들어왔을 때 메타 안내를 거치지 않고 곧장 학습 본문 (학습 목차 → 필요한 학습 블록) 으로 들어가는 동선을 우선한다.
 
 ## 금지 사항
 
-- ❌ 별도 이미지 파일 (`.png`, `.jpg`, `.gif`, 외부 `.svg`)
-- ❌ Mermaid·Cytoscape·D3 등 외부 시각화 라이브러리
-- ❌ MkDocs / Docusaurus / Astro 등 빌드 도구
-- ❌ `package.json` / `node_modules` / CDN 로드
-- ❌ `fetch()` 로 별도 데이터 파일 로드
-- ❌ 인라인 JSON `<script type="application/json">`
-- ❌ 무거운 SPA 프레임워크
-- ❌ 마크다운 원장에 없는 사실을 HTML 에서 새로 정의 - 원장 먼저 갱신
-- ❌ 마크다운 원장의 사실 사전·전체 노드 목록·전이 표를 HTML 에 반복
-- ❌ 호버 기반 UI (툴팁·hover-only) - 모바일에서 잘 동작 안 함
-- ❌ **`flow-section` 남용** - 인터페이스 함수 목록·CDO 값·variant 비교·작업 절차·테스트 케이스를 `flow-section` 으로 만들지 말 것. 학습 블록 7종에서 정보 형태에 맞는 종류를 선택한다.
-- ❌ **모든 페이지가 같은 개수의 `flow-section` 으로 채워지는 균일성** - 정책 포맷이 콘텐츠 판단을 압도한 신호. 페이지마다 정보 형태에 맞춰 블록 구성이 달라져야 정상.
-- ❌ **`.table-wrap` 없이 본문에 직접 둔 `<table>`** - 5~6컬럼 표·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만든다. "표 마크업 표준" 절 참고.
-- ❌ **레이아웃 깨짐 대응으로 `body { overflow-x: hidden }` / 전역 `word-break: break-all` / 표 폰트 극단 축소** - 증상을 숨기거나 가독성을 망가뜨릴 뿐 근본 해결이 아니다. 표 래퍼 + 셀 줄바꿈 + 컬럼 분할로 해결.
+- 불가 별도 이미지 파일 (`.png`, `.jpg`, `.gif`, 외부 `.svg`)
+- 불가 Mermaid·Cytoscape·D3 등 외부 시각화 라이브러리
+- 불가 MkDocs / Docusaurus / Astro 등 빌드 도구
+- 불가 `package.json` / `node_modules` / CDN 로드
+- 불가 `fetch()` 로 별도 데이터 파일 로드
+- 불가 인라인 JSON `<script type="application/json">`
+- 불가 무거운 SPA 프레임워크
+- 불가 마크다운 원장에 없는 사실을 HTML 에서 새로 정의 - 원장 먼저 갱신
+- 불가 마크다운 원장의 사실 사전·전체 노드 목록·전이 표를 HTML 에 반복
+- 불가 호버 기반 UI (툴팁·hover-only) - 모바일에서 잘 동작 안 함
+- 불가 **`flow-section` 남용** - 인터페이스 함수 목록·CDO 값·variant 비교·작업 절차·테스트 케이스를 `flow-section` 으로 만들지 말 것. 학습 블록 7종에서 정보 형태에 맞는 종류를 선택한다.
+- 불가 **모든 페이지가 같은 개수의 `flow-section` 으로 채워지는 균일성** - 정책 포맷이 콘텐츠 판단을 압도한 신호. 페이지마다 정보 형태에 맞춰 블록 구성이 달라져야 정상.
+- 불가 **`.table-wrap` 없이 본문에 직접 둔 `<table>`** - 5~6컬럼 표·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만든다. "표 마크업 표준" 절 참고.
+- 불가 **레이아웃 깨짐 대응으로 `body { overflow-x: hidden }` / 전역 `word-break: break-all` / 표 폰트 극단 축소** - 증상을 숨기거나 가독성을 망가뜨릴 뿐 근본 해결이 아니다. 표 래퍼 + 셀 줄바꿈 + 컬럼 분할로 해결.
 
 예외가 필요하면 본 사양을 먼저 수정한 뒤 반영한다.
 
@@ -875,24 +876,24 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 골격을 만드는 단계. 한 시스템당 한 번만 수행한다.
 
-1. **시스템 식별자 결정** — `<system>` slug 를 정한다 (예: `gas`, `experience`, `equipment`). 영문 소문자 단어, 필요 시 하이픈.
-2. **검증 원장 작성** — 다음 마크다운 문서를 `docs/project/` 에 둔다.
-   - `docs/project/<system>-code-analysis.md` (필수)
-   - `docs/project/<system>-blueprint-analysis.md` (블루프린트/CDO 가 있는 시스템이면 필수)
-   - `docs/project/<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
-   - `docs/project/<system>-references.md` (선택 — 공식 문서 링크가 많을 때)
-3. **`docs/README.md` 에 시스템 섹션 추가** — 공통 정책 / 시스템별 그룹 구조 안에 새 시스템 표를 추가.
-4. **`dynamic-html/index.html` 에 시스템 섹션 추가** — 새 `<section>` 을 시스템 학습 우선순위 위치에 삽입. 페이지가 없으면 `<p class="muted">(준비 중)</p>`.
-5. (이 시점에 시스템 골격 완성 — 페이지는 B 절차로 하나씩 추가)
+1. **시스템 식별자 결정** - `<system>` slug 를 정한다 (예: `gas`, `experience`, `equipment`). 영문 소문자 단어, 필요 시 하이픈.
+2. **검증 원장 작성** - 다음 마크다운 문서를 `docs/project/` 에 둔다.
+ - `docs/project/<system>-code-analysis.md` (필수)
+ - `docs/project/<system>-blueprint-analysis.md` (블루프린트/CDO 가 있는 시스템이면 필수)
+ - `docs/project/<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
+ - `docs/project/<system>-references.md` (선택 - 공식 문서 링크가 많을 때)
+3. **`docs/README.md` 에 시스템 섹션 추가** - 공통 정책 / 시스템별 그룹 구조 안에 새 시스템 표를 추가.
+4. **`dynamic-html/index.html` 에 시스템 섹션 추가** - 새 `<section>` 을 시스템 학습 우선순위 위치에 삽입. 페이지가 없으면 `<p class="muted">(준비 중)</p>`.
+5. (이 시점에 시스템 골격 완성 - 페이지는 B 절차로 하나씩 추가)
 
 ### B. 기존 시스템에 새 페이지 추가 (일상 작업)
 
-1. **원장 사실 확보** — 페이지가 인용할 사실이 모두 검증 원장 (`docs/project/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
-2. **정보 형태 분류** — 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
-3. **flow gate 통과 확인** — `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
-4. **페이지 파일 작성** — `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent — 이미 래핑된 표는 skip).
-5. **`dynamic-html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** — 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
-6. **시스템 간 cross-link 추가** (해당 시 only) — 다른 시스템의 overview 페이지를 chapter-brief 의 "선행 학습" 으로 등록할 만하면 추가. 다른 시스템 깊은 페이지로의 직접 링크는 본문 블록 안에서만.
+1. **원장 사실 확보** - 페이지가 인용할 사실이 모두 검증 원장 (`docs/project/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
+2. **정보 형태 분류** - 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
+3. **flow gate 통과 확인** - `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
+4. **페이지 파일 작성** - `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent - 이미 래핑된 표는 skip).
+5. **`dynamic-html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** - 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
+6. **시스템 간 cross-link 추가** (해당 시 only) - 다른 시스템의 overview 페이지를 chapter-brief 의 "선행 학습" 으로 등록할 만하면 추가. 다른 시스템 깊은 페이지로의 직접 링크는 본문 블록 안에서만.
 7. 본 사양 또는 `docs/README.md` 에 변경 필요가 있으면 함께 갱신한다.
 8. **정적 검사** 를 수행한다 (아래 "배포 전 체크리스트" 참조). 통과하지 못한 페이지는 배포·커밋하지 않는다.
 
@@ -904,7 +905,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 - **외부 링크 보안 속성** - 모든 외부 `<a>` 가 `target="_blank"` + `rel="noopener"` 를 함께 가지는가.
 - **검증 등급 일관성** - 페이지의 `data-validation` 과 배지 글리프(✓/◐/△) 가 마크다운 원장의 등급보다 높지 않은가. 본문 표현이 등급에 맞는가.
 - **표준 구조** - 학습 페이지(`pages/*.html`)는 `verified-at`(헤더), `chapter-brief` (4칸), `learn-index`(또는 흐름·항목 목차), **학습 블록 3~6개**(flow 만이 아니어도 됨) 를 모두 갖는가. 진입점(`index.html`)은 `verified-at`·`chapter-brief` 생략.
-- **표 래퍼 의무화** - 모든 `<table class="...">` (decision/comparison/reference/verification) 의 직속 부모가 `<div class="table-wrap">` 인가. 래퍼 없이 본문에 직접 둔 표가 한 개라도 있으면 배포 불가. 정적 검사 — `pages/*.html` 의 `<table` 직전 줄이 모두 `class="table-wrap"` 을 포함하는지 확인 (idempotent 한 일괄 래핑은 `tools/wrap-tables.cjs` 로 가능).
+- **표 래퍼 의무화** - 모든 `<table class="...">` (decision/comparison/reference/verification) 의 직속 부모가 `<div class="table-wrap">` 인가. 래퍼 없이 본문에 직접 둔 표가 한 개라도 있으면 배포 불가. 정적 검사 - `pages/*.html` 의 `<table` 직전 줄이 모두 `class="table-wrap"` 을 포함하는지 확인 (idempotent 한 일괄 래핑은 `tools/wrap-tables.cjs` 로 가능).
 - **뷰포트 가로 overflow 없음** - 데스크탑 (1280px) · 태블릿 (768px) · 모바일 (375px) 세 뷰포트에서 페이지 전체에 가로 스크롤이 생기지 않는가. 브라우저 콘솔에서 `document.documentElement.scrollWidth <= document.documentElement.clientWidth` 가 `true` 인가. `.table-wrap` 내부 로컬 가로 스크롤은 허용 (`true` 판정과 무관). 표가 본문을 밀어내면 컬럼 수·셀 콘텐츠를 사양의 "표 폭 설계 가이드" 대로 재설계한다.
 - **chapter-brief 4칸 완성** - "이 챕터의 질문" 과 "먼저 알아둘 것" 은 필수, "선행 학습" 과 "보충 자료" 는 페이지 성격에 맞게. `page-refs` 마크업이 남아 있지 않은가.
 - **flow gate 통과** - 모든 `flow-section` 이 위 5문에 3문 이상 "예" 답이 가능한가. 단순 목록·variant 비교·작업 절차·테스트 케이스가 `flow-section` 으로 잘못 표현돼 있지 않은가.
@@ -915,7 +916,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 - **특수문자 사용** - `§`·`¶`·`※`·`×N` 같은 의미 전달 기호가 본문에 남아 있지 않은가. 검증 배지·흐름 화살표·conduit 미니 아이콘은 정의된 위치에만 사용했는가.
 - **번호 ↔ 제목 구분자** - 목록 항목 (`.entry-list h3`, `.learn-index ol li a` 등) 의 번호와 제목 사이가 **마침표 (`.`) + 공백** 인가. `·` 가 번호 구분자로 쓰여 같은 줄에서 제목 내 병렬과 충돌하지 않는가.
 - **메타 콘텐츠 없음** - "이 사이트는 무엇인가", "이 페이지를 읽는 법", "사실 사전이 필요할 때" 류가 추가되지 않았는가.
-- **금지 요소 없음** - 외부 CDN/이미지, `fetch()`, 인라인 JSON `<script type="application/json">`, `<dialog>`, `data-tooltip`, 키보드 단축키, 사이드바 검색 등이 사양 위반으로 들어가지 않았는가. (sticky 헤더·fixed 사이드바·모바일 햄버거 drawer 는 본 사양의 표준 — 금지 대상 아님.)
+- **금지 요소 없음** - 외부 CDN/이미지, `fetch()`, 인라인 JSON `<script type="application/json">`, `<dialog>`, `data-tooltip`, 키보드 단축키, 사이드바 검색 등이 사양 위반으로 들어가지 않았는가. (sticky 헤더·fixed 사이드바·모바일 햄버거 drawer 는 본 사양의 표준 - 금지 대상 아님.)
 - **chapter-brief 규칙** - "선행 학습" 에 검증 원장·정책 문서 링크가 들어가지 않았는가. "보충 자료" 가 외부 학습 자료만 노출하는가. 시스템 간 cross-link 는 "선행 학습" 칸의 다른 시스템 **overview 페이지만** 허용한다.
 - **선행 학습 정당성** - "선행 학습" 항목마다 em dash (`—`) 와 함께 "왜 선행인가" 한 줄 이유가 붙어 있는가. 이유 없이 페이지 링크만 있는 항목은 없는가. 본 페이지 콘텐츠와 직접 의존이 없는 prerequisite (예: 큰 그림만 보여주는 overview 가 디테일 페이지의 prereq 로 들어감) 은 제거됐는가.
 - **새 사실 없음** - HTML 에 마크다운 원장에 없는 사실이 새로 등장하지 않았는가.

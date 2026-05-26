@@ -1,7 +1,7 @@
 # LyraStarterGame 프로젝트 검증 맵
 
-> 검증일: 2026-05-22  
-> 범위: 로컬 텍스트 설정, C++ 소스, 플러그인 메타데이터, 에셋 경로 존재 여부, Epic 공식 문서 링크.  
+> 검증일: 2026-05-22 
+> 범위: 로컬 텍스트 설정, C++ 소스, 플러그인 메타데이터, 에셋 경로 존재 여부, Epic 공식 문서 링크. 
 > 제한: `.uasset` / `.umap` 내부의 블루프린트 그래프, 기본값, 애니메이션 상태 머신은 파일 시스템만으로 검증할 수 없습니다. 해당 내용은 Unreal Editor 실행 후 Monolith MCP 로 재확인해야 합니다.
 > 관계: 시스템이 **어떻게 동작하고 왜 그렇게 설계되었는지** 의 산문 설명은 [`architecture-overview.md`](architecture-overview.md), 분석 도구 사용 정책은 [`analysis-tools.md`](../common/analysis-tools.md). 본 문서는 같은 시스템의 **파일 경로·메타데이터가 참인지** 검증 표만 둡니다.
 
@@ -118,11 +118,11 @@ GAS 관련 블루프린트 어빌리티, Gameplay Effect, Gameplay Cue 의 실�
 
 ## 환경·MCP 설정 (이 저장소)
 
-분석 도구가 이 저장소에 어떻게 등록·활성화되어 있는지 — 다른 프로젝트에서는 다를 수 있으니 그 프로젝트의 검증 맵을 참고하십시오. 도구의 역할·전제 조건·교차 검증 원칙은 공통 문서 [`analysis-tools.md`](../common/analysis-tools.md) 가 단일 출처입니다.
+분석 도구가 이 저장소에 어떻게 등록·활성화되어 있는지 - 다른 프로젝트에서는 다를 수 있으니 그 프로젝트의 검증 맵을 참고하십시오. 도구의 역할·전제 조건·교차 검증 원칙은 공통 문서 [`analysis-tools.md`](../common/analysis-tools.md) 가 단일 출처입니다.
 
 | 항목 | 위치 / 값 | 비고 |
 |------|-----------|------|
-| Monolith MCP 서버 등록 | `.mcp.json` | `monolith` 서버 항목 — `Plugins/Monolith/Scripts/monolith_proxy.bat` 호출 (Python 프록시, 에디터 재시작 시 세션 자동 유지) |
+| Monolith MCP 서버 등록 | `.mcp.json` | `monolith` 서버 항목 - `Plugins/Monolith/Scripts/monolith_proxy.bat` 호출 (Python 프록시, 에디터 재시작 시 세션 자동 유지) |
 | Monolith 서버 활성화 | `.claude/settings.local.json` | `enabledMcpjsonServers` 에 `monolith` 등록 |
 | Monolith 플러그인 설치 위치 | `Plugins/Monolith/` | 프로젝트에 포함 |
 | Rider `projectPath` | `D:\Projects\Sample\LyraStarterGame` | 모든 `jetbrains` 툴 호출 시 전달 |

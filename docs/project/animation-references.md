@@ -1,7 +1,7 @@
 # 라이라(Lyra) 애니메이션 - 온라인 참고 문서 모음
 
 > 라이라의 애니메이션 시스템을 **분석·학습**하고 메뉴얼을 작성할 때 참고할 공식·권위 있는 온라인 문서 목록입니다.
-> 작업 개요·분석 도구·아키텍처는 루트 [`CLAUDE.md`](../CLAUDE.md) 를, 실제 에셋/코드 조회는 Monolith·라이더 MCP 를 사용하십시오.
+> 작업 개요·분석 도구·아키텍처는 루트 [`CLAUDE.md`](../../CLAUDE.md) 를, 실제 에셋/코드 조회는 Monolith·라이더 MCP 를 사용하십시오.
 >
 > - 기준 엔진 버전: **UE 5.7** - `dev.epicgames.com` 문서는 페이지 우측 상단에서 버전 선택 가능
 > - 링크 최종 확인: **2026-05-24** (섹션 13·섹션 14 보충 — Copy Pose, Modular Characters, Post Process ABP, IK Retargeting 추가)

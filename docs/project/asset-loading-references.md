@@ -1,7 +1,7 @@
 # 라이라(Lyra) 에셋 비동기 로딩 — 온라인 참고 문서 모음
 
 > 라이라의 에셋 비동기 로딩 시스템 (`ULyraAssetManager` · `FLyraAssetManagerStartupJob` · `ULyraGameData` · `ULyraExperienceManagerComponent` · `UAsyncAction_ExperienceReady` · `ULyraLoadingScreenSubsystem` + AssetBundle 메타) 을 **분석·학습** 하고 다른 프로젝트로 이식할 때 참고할 공식·권위 있는 온라인 문서 목록입니다.
-> 작업 개요·분석 도구·아키텍처는 루트 [`../CLAUDE.md`](../CLAUDE.md) 를, 실제 에셋/코드 조회는 Monolith·라이더 MCP 를 사용하십시오.
+> 작업 개요·분석 도구·아키텍처는 루트 [`../CLAUDE.md`](../../CLAUDE.md) 를, 실제 에셋/코드 조회는 Monolith·라이더 MCP 를 사용하십시오.
 >
 > - 기준 엔진 버전: **UE 5.7** — `dev.epicgames.com` 문서는 페이지 우측 상단에서 버전 선택 가능
 > - 링크 최종 확인: **2026-05-25**

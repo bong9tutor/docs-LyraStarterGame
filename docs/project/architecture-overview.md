@@ -86,7 +86,7 @@ C++ 측은 **얇은 조율 계층**이고, 실제 로코모션 로직은 블루�
 
 ## 분석 시 알아둘 프로젝트 고유 사항
 
-분석 도구의 사용 정책은 [`analysis-tools.md`](analysis-tools.md), 파일 경로·메타데이터의 검증 표는 [`project-verification.md`](project-verification.md) 를 참고하십시오. 이 절은 두 문서에 들어가지 않는 **분석할 때 자주 발이 걸리는 프로젝트 고유 사실** 만 모았습니다.
+분석 도구의 사용 정책은 [`analysis-tools.md`](../common/analysis-tools.md), 파일 경로·메타데이터의 검증 표는 [`project-verification.md`](project-verification.md) 를 참고하십시오. 이 절은 두 문서에 들어가지 않는 **분석할 때 자주 발이 걸리는 프로젝트 고유 사실** 만 모았습니다.
 
 - **파일 도구로 안 보이는 것들:** `.claudeignore` 가 `Binaries`/`Intermediate`/`Saved`/`DerivedDataCache`/`*.sln`/`Plugins/Developer/*` 등을 제외합니다. `Content/` 는 제외하지 않으므로 `.uasset` 경로는 `Glob` 로 보이지만, 바이너리라서 내용은 Monolith 로만 조회할 수 있습니다.
 - **Content 폴더 출처:** 표준 Lyra 콘텐츠는 Epic Games Launcher / Fab 에서 받은 샘플 에셋입니다(루트 `README.md` 참조).

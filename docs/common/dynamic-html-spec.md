@@ -3,13 +3,13 @@
 > 결정일: 2026-05-23
 > 갱신일: 2026-05-26 (학습 블록 표 4종에 `.table-wrap` 래퍼 의무화 — 본문 컬럼 760px 폭에서 5~6컬럼·긴 코드 식별자 셀이 페이지 전체 가로 스크롤을 만드는 문제 차단)
 > 목적: Unreal Engine 프로젝트의 분석·학습 결과를 다이나믹 HTML 로 표현할 때 모든 작업이 같은 규칙을 따르도록 한다. 모든 UE 프로젝트 분석에 재사용 가능하며, 이 저장소의 라이라는 현재 등록된 사례.
-> 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/*.md`) 자체에는 적용되지 않는다.
+> 적용 범위: 본 저장소의 다이나믹 HTML 산출물 (`dynamic-html/`). 마크다운 검증 원장 (`docs/project/*.md`) 자체에는 적용되지 않는다.
 
 ## 역할 분담 (가장 중요)
 
 | 종류 | 위치 | 역할 |
 |------|------|------|
-| 마크다운 검증 원장 | `docs/*.md` | **사실의 단일 출처**. 노드 사전·전이 표·CDO 값 등 사전식 자료. |
+| 마크다운 검증 원장 | `docs/project/*.md` | **사실의 단일 출처**. 노드 사전·전이 표·CDO 값 등 사전식 자료. |
 | 다이나믹 HTML | `dynamic-html/` | **학습 동선 가이드**. 마크다운 원장의 사실을 학습자가 이해하기 쉬운 순서로 재배열한다 - 정보 형태에 맞춰 흐름·구조·결정·참조·비교·레시피·검증 블록을 조합한다. |
 
 두 산출물은 **목적이 다르며 같은 정보를 반복하지 않는다**.
@@ -70,31 +70,34 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 
 ```text
 <프로젝트 루트>/
-├── docs/                            # 분석·학습 문서 (한 레포 = 한 프로젝트 평면 구조)
-│   ├── README.md                    # 인덱스 (공통 / 이 프로젝트 그룹으로 구분)
-│   ├── analysis-tools.md            # (공통) 도구 정책 — 다른 UE 프로젝트 레포로 카피 가능
-│   ├── documentation-workflow.md    # (공통) 작업 절차
-│   ├── dynamic-html-spec.md         # (공통) 본 사양
-│   ├── architecture-overview.md     # (이 프로젝트) 시스템 아키텍처 산문
-│   ├── project-verification.md      # (이 프로젝트) 검증 표 + 환경·MCP 설정
-│   ├── <system>-code-analysis.md    # (이 프로젝트) 예: animation-code-analysis.md
-│   ├── <system>-blueprint-analysis.md
-│   ├── <system>-learning-section-plan.md
-│   └── (선택) <system>-references.md
-└── dynamic-html/                    # 다이나믹 HTML 학습 가이드
-    ├── index.html                   # 진입점 — 시스템별 섹션으로 그룹화
+├── CLAUDE.md                                  # Claude 작업 정책 + 정책 분류 인덱스
+├── docs/                                      # 분석·학습 문서 — 2개 하위 폴더로 분리
+│   ├── README.md                              # 마스터 인덱스
+│   ├── common/                                # 컨텐츠 생성 정책 — 다른 UE 프로젝트 레포로 폴더 통째 카피
+│   │   ├── analysis-tools.md                  # 도구 정책 (Monolith · 라이더 MCP)
+│   │   ├── documentation-workflow.md          # 분석 5단계 작업 절차
+│   │   └── dynamic-html-spec.md               # 본 사양
+│   └── project/                               # 프로젝트 종속 — 컨텍스트 + 시스템별 검증 원장
+│       ├── architecture-overview.md           # 시스템 아키텍처 산문
+│       ├── project-verification.md            # 검증 표 + 환경·MCP 설정
+│       ├── <system>-code-analysis.md          # 예: animation-code-analysis.md
+│       ├── <system>-blueprint-analysis.md
+│       ├── <system>-learning-section-plan.md
+│       └── (선택) <system>-references.md
+└── dynamic-html/                              # 다이나믹 HTML 학습 가이드
+    ├── index.html                             # 진입점 — 시스템별 섹션으로 그룹화
     ├── pages/
-    │   ├── <project>-<system>-...html   # 예: lyra-animation-overview.html, lyra-ui-overview.html
+    │   ├── <project>-<system>-...html         # 예: lyra-animation-overview.html, lyra-ui-overview.html
     │   └── ...
     ├── js/
-    │   └── app.js                   # 다크모드·nav 마커 (전역 공통)
+    │   └── app.js                             # 다크모드·nav 마커 (전역 공통)
     └── css/
-        └── style.css                # 공통 스타일·다크모드 토큰·블록 7종·노트 4종
+        └── style.css                          # 공통 스타일·다크모드 토큰·블록 7종·노트 4종
 ```
 
 원칙:
-- **한 레포 = 한 프로젝트.** `docs/` 안에 공통 문서와 이 프로젝트 종속 문서가 평면으로 함께 있고, README 인덱스로 그룹을 구분한다. 다른 UE 프로젝트를 분석할 때는 별도 레포에서 공통 3종을 카피해 시작.
-- **시스템 = 디렉터리 아니라 파일명 접두어** (`<project>-<system>-<topic>.html`). `pages/` 안은 평면이고 분리는 파일명으로만 한다 — 시스템별 폴더는 만들지 않는다. 사용자가 `file://` 로 열 때 경로가 짧고 cross-link 가 단순해진다. 원장 (`docs/`) 도 파일명 접두어 규칙 (`<system>-<doctype>.md`) 을 따르되, 단일 프로젝트 레포라 파일명에 프로젝트 접두어는 두지 않는다.
+- **`docs/` 는 2 하위 폴더 분리.** [`common/`](.) 는 프로젝트 무관 정책 — 다른 UE 프로젝트 레포로 `docs/common/` 폴더 통째 카피해 그대로 재사용. [`../project/`](../project/) 는 라이라 종속 — 컨텍스트 2 + 시스템별 검증 원장. 한 레포 = 한 프로젝트 원칙은 유지 (`project/` 안은 단일 프로젝트 전용).
+- **시스템 = 디렉터리 아니라 파일명 접두어** (`<project>-<system>-<topic>.html`). `pages/` 안은 평면이고 분리는 파일명으로만 한다 — 시스템별 폴더는 만들지 않는다. 사용자가 `file://` 로 열 때 경로가 짧고 cross-link 가 단순해진다. 원장 (`docs/project/`) 도 파일명 접두어 규칙 (`<system>-<doctype>.md`) 을 따르되, 단일 프로젝트 레포라 파일명에 프로젝트 접두어는 두지 않는다.
 - 자산 (CSS/JS) 은 전역 공통 1세트. 시스템별로 분기하지 않는다.
 
 ## 다중 시스템 구조
@@ -106,7 +109,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 | 항목 | 규칙 |
 |------|------|
 | 식별자 (slug) | `animation`, `ui`, `gas`, `experience` 등 영문 소문자 단어 (kebab 이 자연스러우면 OK — `game-features` 등) |
-| 원장 위치 | `docs/<system>-` |
+| 원장 위치 | `docs/project/<system>-` |
 | HTML 페이지 접두어 | `dynamic-html/pages/<project>-<system>-` |
 | 인덱스 섹션 | `dynamic-html/index.html` 의 한 `<section>` |
 | 페이지 번호 | **시스템 내에서만 1부터 매김**. 글로벌 번호 금지 (시스템이 추가되면 충돌). |
@@ -167,7 +170,7 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 | 본문 블록 안 | 인용으로만 OK | `<a href="<project>-<other>-...html">` 자유 사용. 단 본문 흐름이 그 페이지에 강하게 의존하면 "선행 학습" 으로 옮겨라. |
 | 블록 안 `<code>` 식별자 | 텍스트로만 | 다른 시스템에 정의된 클래스·태그를 본문에서 인용할 때 링크 불필요. |
 
-원장 (`docs/*.md`) 사이 cross-reference 는 자유다 — 검증 추적성 목적.
+원장 (`docs/project/*.md`) 사이 cross-reference 는 자유다 — 검증 추적성 목적.
 
 ## HTML 페이지 표준 구조
 
@@ -537,6 +540,14 @@ Linear 의 라임 그린(`#e4f222`) 시그니처와 Inter/Berkeley Mono 폰트�
 - `body` · `html` 에 `overflow-x: hidden` 으로 깨짐을 숨기지 않는다 — 내용이 잘릴 뿐 근본 해결이 아니다.
 - `.content` 의 `max-width` 를 키우는 방식 (760px → 900px 등) 은 보조책일 뿐이고 모바일·5~6컬럼 표 문제는 그대로 남는다.
 
+**본문 inline `<code>` 도 같은 줄바꿈 정책:**
+
+긴 Unreal 경로·GameplayTag·C++ 식별자 (예: `UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext` · `Ability.ActivateFail.ActivationGroup`) 가 본문 문장 안 `<code>` 로 들어가면 표 셀과 같은 이유로 모바일 (375px) 폭을 넘는다. 표 셀 `<code>` 에만 `overflow-wrap: anywhere` 를 적용하면 본문은 여전히 깨진다 — 전역 `code` 셀렉터에 같은 규칙을 적용한다. (`word-break: break-all` 은 한글 산문 가독성을 해치므로 사용 금지, `overflow-wrap: anywhere` 만 사용.)
+
+**Grid column 의 `minmax(0, 1fr)` 통일 규칙:**
+
+`.layout` 의 본문 column 은 모든 break-point 에서 `minmax(0, 1fr)` 를 써야 한다. 그냥 `1fr` 만 쓰면 grid item 의 default `min-width: auto` 가 자식의 intrinsic min-content (예: `table { min-width: 640px }`) 를 column 으로 전파해 viewport 보다 column 자체가 넓어진다. 3단·2단 레이아웃과 모바일 단일 컬럼 모두 동일 규칙 적용.
+
 **표 폭 설계 가이드 (콘텐츠 단계):**
 
 CSS 만으로 해결하지 말아야 하는 표도 있다. 작성 단계에서 다음 기준으로 미리 분기한다.
@@ -617,7 +628,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 - "먼저 알아둘 것" 은 이 페이지 안에서 **반복 설명하지 않을 전제** 만 둔다.
 - "선행 학습" 은 **내부 학습 페이지 링크만** - 검증 원장·정책 문서·README 같은 내부 문서는 노출 금지.
 - "선행 학습" **항목마다 "왜 선행인가" 한 줄 이유** 를 링크 뒤에 em dash (`—`) 로 붙여 적는다. 이유 없이 페이지 링크만 나열하지 않는다. 이유는 "본 페이지의 어떤 사실/개념이 그 선행 페이지의 어떤 사실/개념에 의존하는가" 를 한 문장으로 풀어 적는다. 정당성을 한 줄로 못 적는 prerequisite 은 해당 페이지의 선행 학습이 아니므로 **제거** 한다.
-- "보충 자료" 는 외부 공식/학습 자료만 - URL 은 `docs/<system>-references.md` 와 일치시킨다. 외부 링크는 `target="_blank"` + `rel="noopener"` 보안 속성.
+- "보충 자료" 는 외부 공식/학습 자료만 - URL 은 `docs/project/<system>-references.md` 와 일치시킨다. 외부 링크는 `target="_blank"` + `rel="noopener"` 보안 속성.
 - 박스에서 본문 내용을 요약하지 않는다 - 본문을 읽기 위해 필요한 준비만.
 - 색상은 중립 배경. `flow-*` 색 사용 금지 (아래 색상 정책 참조).
 
@@ -768,7 +779,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 - **HTML 배지는 마크다운 검증 원장의 등급보다 높은 값을 표시할 수 없다.** 원장이 `partial` 인 사실을 HTML 에서 `verified` 로 승격하지 않는다. 반대 방향(원장 `verified` → HTML `partial`) 은 보수적 표기이므로 허용.
 - **본문 표현도 등급에 맞춘다.** `partial` 항목은 "적용한다" 같은 확정형이 아니라 "적용 지점으로 추정", "에디터 확인 필요" 같은 보수 표현을 사용한다.
-- **등급 변경 순서**: 원장(`docs/<system>-*-analysis.md`) → 사양·계획 문서 → HTML 페이지 순. 역방향 금지.
+- **등급 변경 순서**: 원장(`docs/project/<system>-*-analysis.md`) → 사양·계획 문서 → HTML 페이지 순. 역방향 금지.
 - **새 사실 추가 금지**: 원장에 없는 사실을 HTML 에 새로 정의하지 않는다. 추가가 필요하면 원장을 먼저 갱신한 뒤 HTML 에 옮긴다.
 
 ## HTML 전역 컴포넌트
@@ -806,7 +817,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 - ❌ **시각 규약 본문 설명** ("검증 등급의 의미" 류) - 배지 시각 (`✓` 녹 / `◐` 황 / `△` 회) 만으로 자명
 - ❌ **외부 자료 위치 안내** ("사실 사전이 필요할 때" 류) - 외부 학습 자료가 필요하면 페이지 상단 챕터 브리프(`.chapter-brief`) 의 "보충 자료" 칸에 두고, 검증 원장 같은 내부 문서는 학습 페이지에 노출하지 않는다
 
-이런 메타 정보는 본 사양 문서, `docs/README.md`, `docs/<system>-references.md` 에 두고 **HTML 학습 페이지에서는 반복하지 않는다**. 학습자가 처음 페이지에 들어왔을 때 메타 안내를 거치지 않고 곧장 학습 본문 (학습 목차 → 필요한 학습 블록) 으로 들어가는 동선을 우선한다.
+이런 메타 정보는 본 사양 문서, `docs/README.md`, `docs/project/<system>-references.md` 에 두고 **HTML 학습 페이지에서는 반복하지 않는다**. 학습자가 처음 페이지에 들어왔을 때 메타 안내를 거치지 않고 곧장 학습 본문 (학습 목차 → 필요한 학습 블록) 으로 들어가는 동선을 우선한다.
 
 ## 금지 사항
 
@@ -836,18 +847,18 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 골격을 만드는 단계. 한 시스템당 한 번만 수행한다.
 
 1. **시스템 식별자 결정** — `<system>` slug 를 정한다 (예: `gas`, `experience`, `equipment`). 영문 소문자 단어, 필요 시 하이픈.
-2. **검증 원장 작성** — 다음 마크다운 문서를 `docs/` 에 둔다.
-   - `docs/<system>-code-analysis.md` (필수)
-   - `docs/<system>-blueprint-analysis.md` (블루프린트/CDO 가 있는 시스템이면 필수)
-   - `docs/<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
-   - `docs/<system>-references.md` (선택 — 공식 문서 링크가 많을 때)
+2. **검증 원장 작성** — 다음 마크다운 문서를 `docs/project/` 에 둔다.
+   - `docs/project/<system>-code-analysis.md` (필수)
+   - `docs/project/<system>-blueprint-analysis.md` (블루프린트/CDO 가 있는 시스템이면 필수)
+   - `docs/project/<system>-learning-section-plan.md` (HTML 페이지를 만들 계획이면 필수)
+   - `docs/project/<system>-references.md` (선택 — 공식 문서 링크가 많을 때)
 3. **`docs/README.md` 에 시스템 섹션 추가** — 공통 정책 / 시스템별 그룹 구조 안에 새 시스템 표를 추가.
 4. **`dynamic-html/index.html` 에 시스템 섹션 추가** — 새 `<section>` 을 시스템 학습 우선순위 위치에 삽입. 페이지가 없으면 `<p class="muted">(준비 중)</p>`.
 5. (이 시점에 시스템 골격 완성 — 페이지는 B 절차로 하나씩 추가)
 
 ### B. 기존 시스템에 새 페이지 추가 (일상 작업)
 
-1. **원장 사실 확보** — 페이지가 인용할 사실이 모두 검증 원장 (`docs/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
+1. **원장 사실 확보** — 페이지가 인용할 사실이 모두 검증 원장 (`docs/project/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
 2. **정보 형태 분류** — 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
 3. **flow gate 통과 확인** — `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
 4. **페이지 파일 작성** — `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent — 이미 래핑된 표는 skip).

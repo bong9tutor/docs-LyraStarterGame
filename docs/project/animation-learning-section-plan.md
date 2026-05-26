@@ -888,7 +888,7 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 
 ### 페이지별 학습 블록 구성
 
-페이지 성격에 따라 사용하는 블록 종류와 목차명을 분기한다. 자세한 사양은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "학습 블록 7종" 과 "flow gate" 참조.
+페이지 성격에 따라 사용하는 블록 종류와 목차명을 분기한다. 자세한 사양은 [`dynamic-html-spec.md`](../common/dynamic-html-spec.md) 의 "학습 블록 7종" 과 "flow gate" 참조.
 
 **구현 완료 (메커니즘 학습)** — 10페이지:
 
@@ -928,7 +928,7 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 | `lyra-animation-animbp-ali-tradeoffs.html` | (1) 7개 책임군의 존재·parent class·기본 구성은 [`animation-blueprint-analysis.md`](animation-blueprint-analysis.md) 에 모두 ✅. (2) "분배의 비용/이득" — 호출/캐스팅 횟수, 평가 frequency, post-process 분리 의도, retarget 분리 의도는 모두 **설계 추론** 이므로 `note-design` 으로만 표기하고 ✅ 로 승격하지 않는다. (3) "왜 무기 mesh ABP 가 분리되는가" 같은 의도 설명은 코드에 직접 적혀 있지 않으므로 `partial` 유지. **페이지에 적용 완료** — 사실/추론 분리 verification-section 표 보유. |
 | 그 외 페이지 | 별도 유지 항목 없음 (모두 `verified` 가능) |
 
-**규칙:** HTML 페이지의 `data-validation` 과 배지(✓/◐/△) 는 위 표의 "등급 유지 항목" 을 마크다운 원장과 같은 등급으로 표시해야 한다. HTML 에서 임의로 `verified` 로 승격하지 않는다. 자세한 규칙은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "검증 등급 처리 규칙" 절 참조.
+**규칙:** HTML 페이지의 `data-validation` 과 배지(✓/◐/△) 는 위 표의 "등급 유지 항목" 을 마크다운 원장과 같은 등급으로 표시해야 한다. HTML 에서 임의로 `verified` 로 승격하지 않는다. 자세한 규칙은 [`dynamic-html-spec.md`](../common/dynamic-html-spec.md) 의 "검증 등급 처리 규칙" 절 참조.
 
 **일관성 갱신 순서:** 새 사실이 확인되면 (예: 에디터에서 alias membership 확정) 마크다운 원장(`animation-blueprint-analysis.md`·`animation-code-analysis.md`) → 본 계획의 위 표 → HTML 페이지 순으로 갱신한다. 역방향 금지.
 
@@ -951,6 +951,6 @@ quote 사용 가이드 (섹션 14 HTML 작성 시):
 | `lyra-animation-invisible-copy-pose.html` | `SKM_*_Invis` 가 왜 invisible 인가? visible cosmetic mesh 는 어떻게 pose 를 따라가는가? `ABP_Mannequin_CopyPose` 와 `B_Manny`/`B_Quinn` 의 comment 가 직접 설명하는 의도는? 한 mesh 로 합치면 무엇이 안 되는가? | selection-rules |
 | `lyra-animation-animbp-ali-tradeoffs.html` | 7개 책임군은 각각 무엇을 책임지는가? 무기 추가는 어디서 멈추는가? cosmetic 교체는 어디서 멈추는가? post-process / retarget 이 별도인 이유는? 이 분배의 비용은? | base-abp · linked-layers · selection-rules · warping-ik |
 
-> **표의 "선행 학습" 칸은 간략 페이지명만 적었으나, 실제 HTML 의 `chapter-brief` 에는 각 항목 뒤에 em dash (`—`) + "왜 선행인가" 한 줄 이유를 함께 적는다.** 정당성을 한 줄로 못 적는 항목은 prerequisite 이 아니므로 제거한다. 자세한 규칙은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "선행 학습 정당성" 검사 항목.
+> **표의 "선행 학습" 칸은 간략 페이지명만 적었으나, 실제 HTML 의 `chapter-brief` 에는 각 항목 뒤에 em dash (`—`) + "왜 선행인가" 한 줄 이유를 함께 적는다.** 정당성을 한 줄로 못 적는 항목은 prerequisite 이 아니므로 제거한다. 자세한 규칙은 [`dynamic-html-spec.md`](../common/dynamic-html-spec.md) 의 "선행 학습 정당성" 검사 항목.
 
-자세한 4칸 작성 규칙은 [`dynamic-html-spec.md`](dynamic-html-spec.md) 의 "챕터 브리프 - `.chapter-brief`" 절 참조.
+자세한 4칸 작성 규칙은 [`dynamic-html-spec.md`](../common/dynamic-html-spec.md) 의 "챕터 브리프 - `.chapter-brief`" 절 참조.

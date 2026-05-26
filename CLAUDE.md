@@ -2,7 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-이 파일은 **매 turn 적용되는 행동 규칙** 과 **작업 유형별 시작 문서 인덱스** 만 둡니다. 시스템 아키텍처·분석 도구 사용 정책·작업 절차 같은 분량 있는 사실은 `docs/` 의 단일 출처 문서로 분리되어 있습니다 — 이 레포는 단일 프로젝트 (라이라) 전용이라 `docs/` 가 평면 구조이고, **다른 UE 프로젝트로 카피해 재사용 가능한 공통 문서** 와 **이 프로젝트 종속 분석 문서** 가 한 폴더에 함께 있으며 [`docs/README.md`](docs/README.md) 인덱스가 두 그룹을 구분합니다.
+이 파일은 **매 turn 적용되는 행동 규칙** 과 **작업 유형별 시작 문서 인덱스** 만 둡니다. 분량 있는 정책·사실은 `docs/` 의 단일 출처 문서로 분리되어 있고 [`docs/README.md`](docs/README.md) 가 마스터 인덱스입니다.
+
+### 정책 분류
+
+| 분류 | 위치 | 범위 |
+|------|------|------|
+| **Claude 작업 정책 (B)** | 본 파일 (`CLAUDE.md`) + `~/.claude/.../memory/*` | 이 레포에서 Claude 가 어떻게 행동할지 — 언어·자율 실행·sub-question 회피·커밋 단위 등 |
+| **컨텐츠 생성 정책 (A)** | [`docs/common/`](docs/common/) — `analysis-tools.md` · `documentation-workflow.md` · `dynamic-html-spec.md` | 분석·학습 문서를 어떻게 만들고 표현할지 — 도구 사용·작업 절차·HTML 사양. **다른 UE 프로젝트 레포로 폴더 통째 카피 가능.** |
+| **프로젝트 컨텍스트 (참조)** | [`docs/project/`](docs/project/) — `architecture-overview.md` · `project-verification.md` | 라이라 시스템 아키텍처 산문 + 파일 경로·플러그인 메타데이터 검증 표. 정책 아닌 참조 자료. |
+| **시스템별 검증 원장 (HTML 의 단일 출처)** | [`docs/project/`](docs/project/) — `<system>-code-analysis.md` · `<system>-blueprint-analysis.md` · `<system>-learning-section-plan.md` · (선택) `<system>-references.md` | A 정책으로 만든 분석 결과. HTML 학습 페이지가 인용. 정책 아닌 입력. |
+| **공통 보조 도구** | [`tools/`](tools/) — `check-doc-links.cjs` (md 링크 정적 검사) · `wrap-tables.cjs` (표 `.table-wrap` 일괄 보정) | A 정책이 안내하는 검사·보정 스크립트. `docs/common/` 와 함께 카피해 재사용. `tools/generate-dynamic-html.cjs` 는 legacy (재실행 금지) 라 카피 대상 아님. |
+
+> **한 줄 규칙:** 정책은 `docs/common/`, 사실은 `docs/project/`, 학습 표현은 `dynamic-html/`, 작업 습관은 `CLAUDE.md` 에 둔다. 어느 방향으로도 섞지 않는다.
 
 ---
 
@@ -16,7 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 엔진: UE 5.7 (`LyraStarterGame.uproject` 의 `EngineAssociation: "5.7"`)
 - C++ 모듈: `LyraGame`(Runtime), `LyraEditor`(Editor) — `Source/` 하위
-- 게임 자체는 C++ 골격 + 대량의 블루프린트/데이터 에셋으로 구성됩니다. **게임플레이 로직의 상당 부분은 `.uasset` 블루프린트 안에 존재** 하므로, 분석에는 전용 MCP 도구가 필요합니다 — [`docs/analysis-tools.md`](docs/analysis-tools.md) 참고.
+- 게임 자체는 C++ 골격 + 대량의 블루프린트/데이터 에셋으로 구성됩니다. **게임플레이 로직의 상당 부분은 `.uasset` 블루프린트 안에 존재** 하므로, 분석에는 전용 MCP 도구가 필요합니다 — [`docs/common/analysis-tools.md`](docs/common/analysis-tools.md) 참고.
 
 ---
 
@@ -42,16 +54,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 작업 유형 | 먼저 읽을 문서 |
 |-----------|----------------|
-| 분석 도구 (Monolith / Rider MCP) 사용 정책·전제 조건·핵심 네임스페이스·블루프린트 분석 워크플로우 | [`docs/analysis-tools.md`](docs/analysis-tools.md) |
-| 분석 5단계 (C++ → 블루프린트 → 교차 검증 → 문서화 → HTML) · HTML 산출물 품질 규칙 요약 | [`docs/documentation-workflow.md`](docs/documentation-workflow.md) |
-| HTML 산출물 작성·갱신 사양 (확장 절차 A/B · flow gate · chapter-brief · 색 의미 · 검증 등급 처리) | [`docs/dynamic-html-spec.md`](docs/dynamic-html-spec.md) |
+| 분석 도구 (Monolith / Rider MCP) 사용 정책·전제 조건·핵심 네임스페이스·블루프린트 분석 워크플로우 | [`docs/common/analysis-tools.md`](docs/common/analysis-tools.md) |
+| 분석 5단계 (C++ → 블루프린트 → 교차 검증 → 문서화 → HTML) · HTML 산출물 품질 규칙 요약 | [`docs/common/documentation-workflow.md`](docs/common/documentation-workflow.md) |
+| HTML 산출물 작성·갱신 사양 (확장 절차 A/B · flow gate · chapter-brief · 색 의미 · 검증 등급 처리) | [`docs/common/dynamic-html-spec.md`](docs/common/dynamic-html-spec.md) |
 
 ### 이 저장소 (LyraStarterGame) 종속
 
 | 작업 유형 | 먼저 읽을 문서 |
 |-----------|----------------|
-| 라이라 시스템 아키텍처 (Experience · Game Features · Pawn 초기화 · GAS · Animation + 그 외 + 분석 시 알아둘 프로젝트 고유 사항) | [`docs/architecture-overview.md`](docs/architecture-overview.md) |
-| 라이라 파일 경로·플러그인 메타데이터·핵심 시스템 검증 표 | [`docs/project-verification.md`](docs/project-verification.md) |
+| 라이라 시스템 아키텍처 (Experience · Game Features · Pawn 초기화 · GAS · Animation + 그 외 + 분석 시 알아둘 프로젝트 고유 사항) | [`docs/project/architecture-overview.md`](docs/project/architecture-overview.md) |
+| 라이라 파일 경로·플러그인 메타데이터·핵심 시스템 검증 표 | [`docs/project/project-verification.md`](docs/project/project-verification.md) |
 | 라이라 시스템별 분석 문서 목록 (애니메이션 · CommonUI · …) | [`docs/README.md`](docs/README.md) (시스템별 그룹화된 인덱스) |
 
 전체 문서 목록과 새 프로젝트 추가 절차는 [`docs/README.md`](docs/README.md) 가 단일 인덱스입니다.

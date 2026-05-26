@@ -663,7 +663,7 @@ LoadingScreenWidget=/Game/UI/W_MyLoadingHost.W_MyLoadingHost_C
 
 ## HTML 산출물 대응표
 
-위 8개 학습 섹션 + 1개 포팅 가이드 = **HTML 9페이지** 권장. 사양 ([`dynamic-html-spec.md`](dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-asset-loading-`, 시스템 내 번호.
+위 8개 학습 섹션 + 1개 포팅 가이드 = **HTML 9페이지** 권장. 사양 ([`dynamic-html-spec.md`](../common/dynamic-html-spec.md)) 의 "확장 절차 B" 와 "다중 시스템 구조" 를 따라야 한다 — 파일명 접두어 `lyra-asset-loading-`, 시스템 내 번호.
 
 | 페이지 번호 | HTML 파일 | 포함 섹션 | 목차명 | 권장 학습 블록 |
 |-------------|-----------|-----------|--------|----------------|

@@ -19,6 +19,10 @@ Epic Games 의 **LyraStarterGame** (Unreal Engine 5.7 공식 샘플) 코드와 �
 
 사이트는 3 단 반응형 (사이드바 + 본문 + 페이지 TOC), 다크모드 토글, 모바일 햄버거 drawer 를 지원합니다. 빌드 도구·CDN·외부 폰트 의존 없이 vanilla HTML / CSS / JS 만으로 동작.
 
+## 수강생 공지 (태그별 추적)
+
+수강생 / 팀 프로젝트 대상으로 슬랙에 발송한 안내 문구는 git tag 단위로 [`docs/student-notices.md`](docs/student-notices.md) 에 보관합니다. 최신 tag 가 맨 위.
+
 ## 시스템별 핵심 주제
 
 | 시스템 | 핵심 주제 |

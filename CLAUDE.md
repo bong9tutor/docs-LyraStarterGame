@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **컨텐츠 생성 정책 (A)** | [`docs/common/`](docs/common/) - `analysis-tools.md` · `documentation-workflow.md` · `dynamic-html-spec.md` | 분석·학습 문서를 어떻게 만들고 표현할지 - 도구 사용·작업 절차·HTML 사양. **다른 UE 프로젝트 레포로 폴더 통째 카피 가능.** |
 | **프로젝트 컨텍스트 (참조)** | [`docs/project/`](docs/project/) - `architecture-overview.md` · `project-verification.md` | 라이라 시스템 아키텍처 산문 + 파일 경로·플러그인 메타데이터 검증 표. 정책 아닌 참조 자료. |
 | **시스템별 검증 원장 (HTML 의 단일 출처)** | [`docs/project/`](docs/project/) - `<system>-code-analysis.md` · `<system>-blueprint-analysis.md` · `<system>-learning-section-plan.md` · (선택) `<system>-references.md` | A 정책으로 만든 분석 결과. HTML 학습 페이지가 인용. 정책 아닌 입력. |
-| **공통 보조 도구** | [`tools/`](tools/) - `check-doc-links.cjs` (md 링크 정적 검사) · `wrap-tables.cjs` (표 `.table-wrap` 일괄 보정) | A 정책이 안내하는 검사·보정 스크립트. `docs/common/` 와 함께 카피해 재사용. `tools/generate-dynamic-html.cjs` 는 legacy (재실행 금지) 라 카피 대상 아님. |
+| **공통 보조 도구** | [`docs/tools/`](docs/tools/) - `check-doc-links.cjs` (md 링크) · `check-special-chars.cjs` (특수문자 화이트리스트) · `wrap-tables.cjs` (표 래퍼 일괄 보정) · `verify-html.cjs` (헤드리스 브라우저 검증) | A 정책이 안내하는 검사·보정 스크립트. `docs/common/` 와 함께 카피해 재사용. `docs/tools/node_modules/` 와 `verify-shots/` 는 gitignore. |
 
 > **한 줄 규칙:** 정책은 `docs/common/`, 사실은 `docs/project/`, 학습 표현은 `dynamic-html/`, 작업 습관은 `CLAUDE.md` 에 둔다. 어느 방향으로도 섞지 않는다.
 
@@ -46,7 +46,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 문서 작성 시 특수문자 정책 (요약)
 
-본 레포의 모든 마크다운·HTML 본문은 **한글과 ASCII 구두점** 으로 씁니다. em dash `—` · en dash `–` · `✅` · `❌` · `★` · `①`~`⑨` 는 정적 검사 FAIL (`tools/check-special-chars.cjs`). 콜론 `:` · ASCII 하이픈 `-` · 새 문장 분리로 풀어 씁니다. 좁은 화이트리스트 (HTML 컴포넌트 그래픽 · 원문 식별자 · 수식) 만 허용. 자세한 규칙은 [`docs/common/dynamic-html-spec.md`](docs/common/dynamic-html-spec.md) 의 "본문 특수문자 사용 규칙" 절.
+본 레포의 모든 마크다운·HTML 본문은 **한글과 ASCII 구두점** 으로 씁니다. em dash `—` · en dash `–` · `✅` · `❌` · `★` · `①`~`⑨` 는 정적 검사 FAIL (`node docs/tools/check-special-chars.cjs`). 콜론 `:` · ASCII 하이픈 `-` · 새 문장 분리로 풀어 씁니다. 좁은 화이트리스트 (HTML 컴포넌트 그래픽 · 원문 식별자 · 수식) 만 허용. 자세한 규칙은 [`docs/common/dynamic-html-spec.md`](docs/common/dynamic-html-spec.md) 의 "본문 특수문자 사용 규칙" 절.
 
 ---
 

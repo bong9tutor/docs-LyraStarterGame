@@ -803,7 +803,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 
 #### 정적 검사 (배포 차단)
 
-`tools/check-special-chars.cjs` 가 `CLAUDE.md` · `docs/**/*.md` · `dynamic-html/**/*.html` 본문에서 위 "금지 글리프" 발견 시 exit 1. "경고 글리프" 는 카운트만 출력. 위 화이트리스트 외 모든 BMP 외 글리프 (이모지 등) 도 FAIL. 작성 후 매번 실행 필수.
+`docs/tools/check-special-chars.cjs` 가 `CLAUDE.md` · `docs/**/*.md` · `dynamic-html/**/*.html` 본문에서 위 "금지 글리프" 발견 시 exit 1. "경고 글리프" 는 카운트만 출력. 위 화이트리스트 외 모든 BMP 외 글리프 (이모지 등) 도 FAIL. 작성 후 매번 실행 필수.
 
 ### 검증 등급 처리 규칙
 
@@ -891,7 +891,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 1. **원장 사실 확보** - 페이지가 인용할 사실이 모두 검증 원장 (`docs/project/<system>-*.md`) 에 있는지 확인. 없으면 **원장을 먼저 갱신**하고 그것을 인용. HTML 에서 새 사실을 정의하지 않는다.
 2. **정보 형태 분류** - 각 학습 블록이 어떤 종류인지 결정한다 (flow / structure / decision / reference / comparison / recipe / verification).
 3. **flow gate 통과 확인** - `flow-section` 으로 표현하려는 블록은 5문에 3문 이상 "예" 답이 가능해야 한다. 아니면 다른 블록 종류로 변경한다.
-4. **페이지 파일 작성** - `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent - 이미 래핑된 표는 skip).
+4. **페이지 파일 작성** - `dynamic-html/pages/<project>-<system>-<topic>.html` 을 본 사양의 "HTML 페이지 표준 구조" + "학습 블록 7종" + **"표 마크업 표준"** 에 따라 작성. 본문 안 학습 목차 (또는 흐름·항목 목차) 카드 + 학습 블록 3~6개. 첫 페이지 (시스템 입문) 라면 파일명을 `<project>-<system>-overview.html` 로 둔다. 표 4종 (decision/comparison/reference/verification) 은 작성 시점에 직접 `<div class="table-wrap">` 으로 감싸거나, 작성 후 `node docs/tools/wrap-tables.cjs` 로 일괄 보정한다 (idempotent - 이미 래핑된 표는 skip).
 5. **`dynamic-html/index.html` 의 해당 시스템 `<section>` 에 카드 등록** - 페이지 번호는 시스템 내 순서. 새 페이지가 흐름상 중간에 들어가면 뒤 카드의 번호도 함께 갱신한다.
 6. **시스템 간 cross-link 추가** (해당 시 only) - 다른 시스템의 overview 페이지를 chapter-brief 의 "선행 학습" 으로 등록할 만하면 추가. 다른 시스템 깊은 페이지로의 직접 링크는 본문 블록 안에서만.
 7. 본 사양 또는 `docs/README.md` 에 변경 필요가 있으면 함께 갱신한다.
@@ -905,7 +905,7 @@ document.documentElement.scrollWidth <= document.documentElement.clientWidth
 - **외부 링크 보안 속성** - 모든 외부 `<a>` 가 `target="_blank"` + `rel="noopener"` 를 함께 가지는가.
 - **검증 등급 일관성** - 페이지의 `data-validation` 과 배지 글리프(✓/◐/△) 가 마크다운 원장의 등급보다 높지 않은가. 본문 표현이 등급에 맞는가.
 - **표준 구조** - 학습 페이지(`pages/*.html`)는 `verified-at`(헤더), `chapter-brief` (4칸), `learn-index`(또는 흐름·항목 목차), **학습 블록 3~6개**(flow 만이 아니어도 됨) 를 모두 갖는가. 진입점(`index.html`)은 `verified-at`·`chapter-brief` 생략.
-- **표 래퍼 의무화** - 모든 `<table class="...">` (decision/comparison/reference/verification) 의 직속 부모가 `<div class="table-wrap">` 인가. 래퍼 없이 본문에 직접 둔 표가 한 개라도 있으면 배포 불가. 정적 검사 - `pages/*.html` 의 `<table` 직전 줄이 모두 `class="table-wrap"` 을 포함하는지 확인 (idempotent 한 일괄 래핑은 `tools/wrap-tables.cjs` 로 가능).
+- **표 래퍼 의무화** - 모든 `<table class="...">` (decision/comparison/reference/verification) 의 직속 부모가 `<div class="table-wrap">` 인가. 래퍼 없이 본문에 직접 둔 표가 한 개라도 있으면 배포 불가. 정적 검사 - `pages/*.html` 의 `<table` 직전 줄이 모두 `class="table-wrap"` 을 포함하는지 확인 (idempotent 한 일괄 래핑은 `docs/tools/wrap-tables.cjs` 로 가능).
 - **뷰포트 가로 overflow 없음** - 데스크탑 (1280px) · 태블릿 (768px) · 모바일 (375px) 세 뷰포트에서 페이지 전체에 가로 스크롤이 생기지 않는가. 브라우저 콘솔에서 `document.documentElement.scrollWidth <= document.documentElement.clientWidth` 가 `true` 인가. `.table-wrap` 내부 로컬 가로 스크롤은 허용 (`true` 판정과 무관). 표가 본문을 밀어내면 컬럼 수·셀 콘텐츠를 사양의 "표 폭 설계 가이드" 대로 재설계한다.
 - **chapter-brief 4칸 완성** - "이 챕터의 질문" 과 "먼저 알아둘 것" 은 필수, "선행 학습" 과 "보충 자료" 는 페이지 성격에 맞게. `page-refs` 마크업이 남아 있지 않은가.
 - **flow gate 통과** - 모든 `flow-section` 이 위 5문에 3문 이상 "예" 답이 가능한가. 단순 목록·variant 비교·작업 절차·테스트 케이스가 `flow-section` 으로 잘못 표현돼 있지 않은가.

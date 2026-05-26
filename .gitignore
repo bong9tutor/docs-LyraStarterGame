@@ -39,5 +39,6 @@ Platforms/*
 Config/*
 Source/*
 
-# 분석·학습 보조 도구 (HTML 산출물 읽기에 불필요 — 정책 검사·검증·일괄 보정 스크립트만 들어 있음)
-tools/
+# 분석·학습 보조 도구 — 정책 검사 스크립트는 docs/tools/ 로 옮겨 추적, 자동 생성·검증 산출물만 ignore
+docs/tools/node_modules/
+docs/tools/verify-shots/

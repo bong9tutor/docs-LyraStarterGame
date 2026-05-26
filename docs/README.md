@@ -6,7 +6,7 @@
 |-----------|------|------------------------|
 | [`common/`](common/) | **컨텐츠 생성 정책 (A)** - 분석·학습 문서를 어떻게 만들고 표현할지 (도구 사용·작업 절차·HTML 사양) | 검증 완료 폴더 통째로 카피 가능 |
 | [`project/`](project/) | **프로젝트 컨텍스트 + 시스템별 검증 원장** - 라이라 아키텍처 산문·검증 표 + 시스템 분석 결과 (HTML 의 단일 출처) | 불가 라이라 종속 |
-| [`../tools/`](../tools/) - `check-doc-links.cjs` · `wrap-tables.cjs` | **공통 보조 도구** - `common/` 정책이 안내하는 정적 검사·일괄 보정 스크립트 | 검증 완료 `common/` 와 함께 카피 (선택 - `tools/generate-dynamic-html.cjs` 는 legacy 라 제외) |
+| [`tools/`](tools/) - `check-doc-links.cjs` · `check-special-chars.cjs` · `wrap-tables.cjs` · `verify-html.cjs` | **공통 보조 도구** - `common/` 정책이 안내하는 정적 검사·일괄 보정·헤드리스 브라우저 검증 스크립트 | `common/` 와 함께 카피. `node_modules/` 와 `verify-shots/` 는 gitignore. |
 
 Claude 작업 정책 (이 레포에서 Claude 가 어떻게 행동할지) 은 본 폴더가 아니라 루트 [`../CLAUDE.md`](../CLAUDE.md) + `~/.claude/.../memory/*` 에 있습니다. `CLAUDE.md` 는 표 **구조** 만 템플릿으로 재사용하고, 프로젝트 개요·엔진 버전·핵심 시스템 목록·사용자 선호·시작 문서 경로는 새 레포에 맞게 본문을 갱신해야 합니다 (그대로 복사 금지).
 
@@ -96,7 +96,7 @@ Claude 작업 정책 (이 레포에서 Claude 가 어떻게 행동할지) 은 �
 
 1. 새 레포에 빈 `docs/` 폴더를 만들고 `docs/common/` + `docs/project/` 두 하위 폴더를 만든다.
 2. 본 레포의 `docs/common/` 폴더를 통째로 카피한다 (3 파일) - 본문은 일반 placeholder (`<프로젝트 핵심 심볼>` · `<프로젝트 루트 절대 경로>` · `<project>-<system>-...html`) 와 "예시 (라이라)" 라벨로 작성돼 있어 그대로 적용 가능. 라이라 예시 문장은 새 프로젝트의 예시로 교체하면 된다 (정책 본문은 수정 불필요).
-3. (선택) `common/` 의 정책이 안내하는 보조 스크립트를 쓰려면 `tools/check-doc-links.cjs` 와 `tools/wrap-tables.cjs` 도 함께 카피한다. `tools/generate-dynamic-html.cjs` 는 legacy 라 제외.
+3. `docs/tools/` 의 정책 검사 스크립트 (`check-doc-links.cjs`, `check-special-chars.cjs`, `wrap-tables.cjs`, `verify-html.cjs`) 와 `package.json` 도 함께 카피한다. `verify-html.cjs` 사용 시 `cd docs/tools && npm install` 로 puppeteer-core 설치 필요.
 4. 자기 프로젝트의 `docs/project/architecture-overview.md` · `docs/project/project-verification.md` 를 새로 작성한다 - 라이라 본문을 참고 템플릿으로 쓰되 내용은 새 프로젝트 사실로 교체.
 5. 위 "시스템 추가 절차" 를 따라 시스템별 분석을 `docs/project/` 에 추가한다.
 6. 본 인덱스 패턴을 참고해 그 레포의 `docs/README.md` 를 작성한다.

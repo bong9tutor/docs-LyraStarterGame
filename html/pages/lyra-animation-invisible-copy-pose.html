@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invisible Mesh + Copy Pose 아키텍처 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-invisible-copy-pose">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>12. Invisible Mesh + Copy Pose 아키텍처</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>왜 <code>SKM_Manny_Invis</code> 가 메인 mesh 이고 <code>SKM_Manny</code> 가 visible 이 아닌가?</li>
+              <li>visible mesh 는 어디에 attach 되고 어떻게 pose 를 따라가는가?</li>
+              <li><code>ABP_Mannequin_CopyPose</code> 는 어떻게 동작하는가?</li>
+              <li>이 3단 구성을 단일 mesh 로 합치면 무엇이 안 되는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>"driving mesh" = pawn 의 main mesh, animation 평가 주체.</li>
+              <li>"visible mesh" = cosmetic actor 의 mesh, pose 를 복제만 함.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-selection-rules.html">장비·Cosmetic 선택 규칙</a>: invisible mesh 가 어떻게 선택되는지.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-components-in-unreal-engine" target="_blank" rel="noopener">Skeletal Mesh Components</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-3-tier">1. 3단 구성도</a></li>
+          <li><a href="#flow-pose-copy">2. 한 frame pose 복제 흐름</a></li>
+          <li><a href="#reference-bp-comments">3. B_Manny / B_Quinn comment 인용</a></li>
+          <li><a href="#comparison-single-vs-tier">4. 단일 mesh vs 3단 trade-off</a></li>
+          <li><a href="#recipe-add-cosmetic-part">5. 새 cosmetic part 추가 레시피</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-3-tier">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>3단 구성도</h2>
+          <p class="block-desc">라이라 캐릭터 mesh 구성. invisible driving mesh 가 평가 주체, visible cosmetic mesh 들이 복제.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>Invisible driving mesh</h3>
+            <p><code>SKM_Manny_Invis</code>, <code>SKM_Quinn_Invis</code>. pawn 의 main mesh component 에 적용. <code>ABP_Mannequin_Base</code> 가 평가 주체.</p>
+            <ul class="struct-meta"><li>화면에 안 보임</li><li>animation 평가 주체</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>Visible cosmetic actor</h3>
+            <p><code>B_Manny</code>, <code>B_Quinn</code>. 단일 root <code>MeshComponent</code> (<code>SkeletalMeshComponent</code>) 만 갖는 actor. <code>UChildActorComponent</code> 로 pawn 의 mesh 에 attach.</p>
+            <ul class="struct-meta"><li>visible mesh <code>SKM_Manny</code> 또는 <code>SKM_Quinn</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>Copy Pose ABP</h3>
+            <p><code>ABP_Mannequin_CopyPose</code>. parent = <code>AnimInstance</code>. AnimGraph 3 노드, "Copy Pose From Mesh" 노드 사용. SourceMeshComponent 핀 미연결, attached parent mesh 사용.</p>
+            <ul class="struct-meta"><li>cosmetic actor 의 mesh 에 적용</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-pose-copy">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>한 frame pose 복제 흐름</h2>
+          <p class="flow-desc">main ABP 가 invisible mesh 의 pose 를 결정, visible cosmetic mesh 들이 CopyPose ABP 로 그 pose 를 복제.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ABP_Mannequin_Base 평가</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">pawn 의 main mesh (<code>SKM_*_Invis</code>) 에 적용된 base ABP 가 ThreadSafe Update, AnimGraph, output pose 산출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">invisible mesh 의 bone transform 갱신 완료.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">CopyPose ABP 가 attached parent mesh 의 pose 읽기</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">cosmetic actor 의 mesh 에 적용된 <code>ABP_Mannequin_CopyPose</code> 의 "Copy Pose From Mesh" 노드가 SourceMeshComponent 미연결 상태에서 attached parent (invisible mesh) 의 pose 를 읽음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">visible mesh 의 bone 에 복제</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">skeleton 호환이므로 bone transform 을 그대로 복사. visible cosmetic mesh 가 화면에 표시.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-bp-comments">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>B_Manny / B_Quinn comment 인용</h2>
+          <p class="block-desc">design intent 가 BP 안 comment 로 직접 적혀 있음. 확인 위치: <code>B_Manny</code>, <code>B_Quinn</code> Blueprint 내부 comment.</p>
+        </header>
+        <blockquote class="quote-block">
+          <p><em>"copy the pose across from the invisible 'driving' mesh component since the skeletons are directly compatible"</em></p>
+          <footer>출처: <code>B_Manny</code>, <code>B_Quinn</code> BP 내부 comment (Monolith 검증 완료)</footer>
+        </blockquote>
+        <p>해석: visible mesh 는 invisible driving mesh 와 skeleton 이 직접 호환되므로 pose 를 복사한다.</p>
+        <p>같은 의미로 <code>ABP_Mannequin_CopyPose</code> 의 comment: <em>"copy the pose from the parent mesh component that our mesh component is attached to"</em> (attached parent 의 pose 를 복사).</p>
+        <div class="note note-info">
+          <strong>원본 comment 전문:</strong> 검증 원장 <a href="../../docs/project/animation-blueprint-analysis.md">animation-blueprint-analysis.md</a> 에 보존. 본 페이지는 학습에 필요한 핵심 구절만 인용.
+        </div>
+      </section>
+
+      <section class="comparison-section" id="comparison-single-vs-tier">
+        <header class="block-head">
+          <span class="block-kind">비교</span>
+          <h2>단일 mesh vs 3단 trade-off</h2>
+          <p class="block-desc">visible mesh 한 개만 쓰는 패턴과 라이라의 invisible+visible+CopyPose 3단 패턴 비교.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr><th>측면</th><th>단일 visible mesh</th><th>3단 (invisible + visible + CopyPose)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>mesh 개수</td><td>1</td><td>1 invisible + N visible cosmetic</td></tr>
+              <tr><td>animation 평가 횟수</td><td>1 회</td><td>1 회 (CopyPose 는 복사만, 평가 안 함)</td></tr>
+              <tr><td>draw call</td><td>1</td><td>N (visible mesh 마다 1)</td></tr>
+              <tr><td>cosmetic 교체</td><td>전체 mesh 교체 + 재바인딩</td><td>cosmetic actor 만 교체, invisible mesh 그대로</td></tr>
+              <tr><td>modular part (head / jacket)</td><td>같은 mesh 안에 통합 필요</td><td>각각 별 cosmetic actor 로 추가</td></tr>
+              <tr><td>retarget 호환</td><td>visible mesh skeleton 의존</td><td>invisible mesh skeleton 하나로 모든 cosmetic 호환</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-design">
+          <strong>설계 의도:</strong> draw call 과 메모리는 비용이지만, cosmetic 교체와 modular part 가 자유로워지는 이득이 더 큼. 라이라는 캐릭터 외형을 게임플레이와 격리해 다루는 것이 핵심.
+        </div>
+      </section>
+
+      <section class="recipe-section" id="recipe-add-cosmetic-part">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>새 cosmetic part 추가 레시피</h2>
+          <p class="block-desc">head, jacket, hands 같은 modular cosmetic part 추가 순서.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>1. Cosmetic 태그 정의</h3><p><code>Cosmetic.*</code> 네임스페이스 아래 새 tag 등록 (예: <code>Cosmetic.Helmet.Soldier</code>).</p></li>
+          <li class="recipe-step"><h3>2. mesh rule 등록</h3><p>CharacterParts 컴포넌트의 mesh entry 배열에 RequiredTags = {새 tag}, mesh = <code>SKM_Helmet_Soldier</code> 추가.</p></li>
+          <li class="recipe-step"><h3>3. cosmetic actor BP 작성</h3><p><code>B_Manny</code> 패턴 따라 단일 root <code>MeshComponent</code> 만 갖는 actor. <code>ABP_Mannequin_CopyPose</code> 또는 part 전용 CopyPose ABP 적용.</p></li>
+          <li class="recipe-step"><h3>4. spawn 흐름 확인</h3><p>cosmetic tag set 에 새 tag 추가 시 <code>SpawnActorForEntry</code> 가 <code>UChildActorComponent</code> 로 새 actor 생성하고 owner mesh 에 attach 되는지 in-editor 확인.</p></li>
+          <li class="recipe-step"><h3>5. pose 복제 확인</h3><p>캐릭터 idle / cycle 에서 part 가 driving mesh 의 pose 를 따라가는지 시각 확인.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

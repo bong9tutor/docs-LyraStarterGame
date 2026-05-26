@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HUD 액터 · UI 매니저 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-hud-manager">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>3. HUD 액터 · UI 매니저</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>ALyraHUD</code> 가 BeginPlay 에서 무엇을 알리는가?</li>
+              <li><code>ULyraUIManagerSubsystem</code> 이 <code>bShowHUD</code> 와 어떻게 동기화하는가?</li>
+              <li><code>UI.Layer.*</code> 4 종은 무엇이고 어디서 등록되는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>HUD 는 PlayerController 마다 1 개. AddWidgets 가 HUD 등장에 구독해 widget 주입.</li>
+              <li>Layer 는 z-order 그룹. Game / GameMenu / Menu / Modal 4 종.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-ui-input-activation.html">입력 라우팅과 활성화</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/common-ui-quickstart-guide-for-unreal-engine" target="_blank" rel="noopener">CommonUI Quickstart</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#flow-hud-beginplay">1. ALyraHUD BeginPlay 에서 AddWidgets 호출 흐름</a></li>
+          <li><a href="#reference-ui-layers">2. UI.Layer 4 종</a></li>
+          <li><a href="#decision-show-hud">3. bShowHUD 동기화 규칙</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-hud-beginplay">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>ALyraHUD BeginPlay 에서 AddWidgets 호출 흐름</h2>
+          <p class="flow-desc">HUD 가 spawn 되고 NAME_GameActorReady 가 발송되어 AddWidgets 가 위젯을 주입하는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ALyraHUD spawn</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">PlayerController 가 HUD 클래스 인스턴스 생성.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>PreInitializeComponents</code> 에서 <code>AddGameFrameworkComponentReceiver(this)</code>.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">BeginPlay</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>NAME_GameActorReady</code> 이벤트 발송.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UGameFeatureAction_AddWidgets::HandleActorExtension</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">extension handler 가 <code>NAME_GameActorReady</code> 를 받아 <code>AddWidgets</code> 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Layer push + Slot register</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>Layout[]</code> 의 entry 마다 layer push, <code>Widgets[]</code> 의 entry 마다 slot register.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-ui-layers">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>UI.Layer 4 종</h2>
+          <p class="block-desc"><code>Config/DefaultGameplayTags.ini</code> 에 등록된 4 layer. z-order 와 input priority 가 layer 순서로 결정.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>Layer 태그</th><th>z-order</th><th>전형적 콘텐츠</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>UI.Layer.Game</code></td><td>가장 아래</td><td>HUD layout (in-game)</td></tr>
+              <tr><td><code>UI.Layer.GameMenu</code></td><td>중간</td><td>game menu (inventory, scoreboard)</td></tr>
+              <tr><td><code>UI.Layer.Menu</code></td><td>위</td><td>escape menu, settings</td></tr>
+              <tr><td><code>UI.Layer.Modal</code></td><td>가장 위</td><td>controller disconnect, error dialog</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-show-hud">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>bShowHUD 동기화 규칙</h2>
+          <p class="block-desc"><code>ULyraUIManagerSubsystem::SyncRootLayoutVisibilityToShowHUD</code> 가 <code>AHUD::bShowHUD</code> 와 root layout 가시성을 양방향 동기화.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. bShowHUD == true</h3><p>root layout visible. 일반 게임 상태.</p></li>
+          <li class="decision-item"><h3>2. bShowHUD == false</h3><p>root layout collapsed. 콘솔 명령 <code>ShowHUD</code> 또는 cinematic 진입 시.</p></li>
+          <li class="decision-item"><h3>3. 동기화 시점</h3><p>매 frame 또는 변경 이벤트 시. AHUD 측 toggle 과 UI subsystem 측 toggle 이 일치 유지.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

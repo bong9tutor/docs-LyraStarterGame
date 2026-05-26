@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>런타임 상태 입력 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-runtime-state">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>2. 런타임 상태 입력</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>ASC tag 가 어떻게 ABP 변수로 미러링되는가?</li>
+              <li>ThreadSafe Update Animation 은 무엇이 다른가?</li>
+              <li>Property Access 는 왜 쓰는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li><code>FGameplayTagBlueprintPropertyMap</code> 가 ASC tag → ABP 변수 자동 동기화.</li>
+              <li>ThreadSafe Update 는 Game Thread 가 아닌 worker thread 에서 실행 가능.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-overview.html">전체 지도</a>: 본 페이지의 ABP 변수가 어디로 흘러가는지 알아야 한다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-optimization-in-unreal-engine" target="_blank" rel="noopener">Animation Optimization</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="흐름 목차">
+        <h2>흐름 목차</h2>
+        <ol>
+          <li><a href="#flow-tag-mirror">1. ASC tag → ABP 변수 미러링 초기화</a></li>
+          <li><a href="#flow-threadsafe-update">2. 매 frame ThreadSafe Update 10 단계</a></li>
+          <li><a href="#flow-event-graph">3. Event Graph 미사용 정책</a></li>
+          <li><a href="#flow-property-access">4. Property Access 사용 이유</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-tag-mirror">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>ASC tag → ABP 변수 미러링 초기화</h2>
+          <p class="flow-desc">ASC 의 GameplayTag 가 ABP 변수에 자동 미러링되도록 NativeInitialize 에서 매핑 등록.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ULyraAnimInstance::NativeInitializeAnimation</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">AnimInstance 가 처음 owner pawn 에 부착될 때 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">FGameplayTagBlueprintPropertyMap.Initialize</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ABP 변수 ↔ ASC tag 매핑 등록. tag 변경 시 변수 자동 갱신.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">CharacterMovement / Pawn 컴포넌트 캐싱.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">컴포넌트 ptr 캐싱 완료</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">매 frame 의 ThreadSafe Update 가 cached ptr 로 안전 접근.</p></li>
+        </ol>
+      </section>
+
+      <section class="flow-section" id="flow-threadsafe-update">
+        <header class="flow-head">
+          <span class="flow-num">흐름 2</span>
+          <h2>매 frame ThreadSafe Update 10 단계</h2>
+          <p class="flow-desc"><code>BlueprintThreadSafeUpdateAnimation</code> 가 Update*Data 10 함수를 순차 호출해 ABP 변수 일괄 갱신.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UpdateLocationData</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">world location, world rotation 캐시.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UpdateVelocityData</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>WorldVelocity</code>, <code>LocalVelocity2D</code> 산출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UpdateAccelerationData</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>PivotDirection2D</code> 같은 가속 기반 변수.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UpdateCharacterStateData · UpdateRotationData</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">crouch, movement mode, yaw delta.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">SelectCardinalDirectionFromAngle</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">속도 방향을 8방위 cardinal direction enum 으로 매핑.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UpdateJumpFallData 등 나머지</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">점프 시작 시간, 낙하 거리, ground distance 등 나머지 데이터.</p></li>
+        </ol>
+      </section>
+
+      <section class="flow-section" id="flow-event-graph">
+        <header class="flow-head">
+          <span class="flow-num">흐름 3</span>
+          <h2>Event Graph 미사용 정책</h2>
+          <p class="flow-desc">Base ABP 의 Event Graph 는 주석 1개만 있고 비어 있음. Game Thread 의존 회피.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">EventGraph 검사</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ABP_Mannequin_Base</code> 의 EventGraph 가 <code>AnimBP Tour #1</code> 주석 1 개만 보유.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">has_tick == false</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">두 ABP (base + layer base) 모두 tick 비활성. ThreadSafe Update 만 매 frame 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Game Thread 부하 회피</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ABP 평가가 worker thread 에서 병렬 실행 가능.</p></li>
+        </ol>
+      </section>
+
+      <section class="flow-section" id="flow-property-access">
+        <header class="flow-head">
+          <span class="flow-num">흐름 4</span>
+          <h2>Property Access 사용 이유</h2>
+          <p class="flow-desc"><code>K2Node_PropertyAccess</code> 13 개. ThreadSafe 함수가 안전하게 ASC / pawn 의 속성을 읽도록.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ThreadSafe 함수 안에서 직접 BP 호출 금지</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">worker thread 에서 일반 BP 함수 호출은 안전 보장 없음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Property Access node 사용</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">엔진이 Game Thread 에서 미리 값을 읽어 thread-safe cache 에 둠. ThreadSafe 함수는 cache 에서만 읽음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AnimBP Tour #2 주석</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ABP 안 주석이 이 패턴의 사용 이유를 직접 설명.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

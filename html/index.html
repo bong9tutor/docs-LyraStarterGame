@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lyra 분석·학습 인덱스</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>Lyra 분석·학습 인덱스</h1>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+      <p class="muted">LyraStarterGame (Unreal Engine 5.7) 의 4 시스템 학습 트랙. 시스템 안 페이지 번호는 학습 순서.</p>
+
+      <section>
+        <h2>애니메이션</h2>
+        <p class="muted">ASC tag 미러링부터 Base ABP, LocomotionSM, Linked Layers, IK / Post Process 까지.</p>
+        <ul class="entry-list">
+          <li><a href="pages/lyra-animation-overview.html"><h3>1. 전체 지도</h3><p>5 책임군과 cold-start 흐름.</p></a></li>
+          <li><a href="pages/lyra-animation-runtime-state.html"><h3>2. 런타임 상태 입력</h3><p>ASC tag → ABP 변수 미러링과 ThreadSafe.</p></a></li>
+          <li><a href="pages/lyra-animation-base-abp.html"><h3>3. Base ABP pose graph</h3><p>cached pose 2, slot 5, linked layer 4.</p></a></li>
+          <li><a href="pages/lyra-animation-locomotion-sm.html"><h3>4. Locomotion 상태 머신</h3><p>Idle · Start · Cycle · Stop · Pivot · Jump / Fall.</p></a></li>
+          <li><a href="pages/lyra-animation-linked-layers.html"><h3>5. Linked Item Layers</h3><p>ALI 14 함수 인터페이스 와 무기별 layer.</p></a></li>
+          <li><a href="pages/lyra-animation-selection-rules.html"><h3>6. 장비·cosmetic 선택 규칙</h3><p>SelectBestLayer, body style rule.</p></a></li>
+          <li><a href="pages/lyra-animation-actions-montage.html"><h3>7. Ability 와 Montage Slot</h3><p>FullBody / UpperBody slot 매핑.</p></a></li>
+          <li><a href="pages/lyra-animation-aiming-additives.html"><h3>8. Aiming · Additives</h3><p>AimPitch / Yaw, ADS, raise weapon.</p></a></li>
+          <li><a href="pages/lyra-animation-warping-ik.html"><h3>9. Warping · IK</h3><p>Distance Matching, Stride Warp, Control Rig.</p></a></li>
+          <li><a href="pages/lyra-animation-effects-tests-recipes.html"><h3>10. Effects · Tests · Recipes</h3><p>Notify → Context Effect, ShooterTests.</p></a></li>
+          <li><a href="pages/lyra-animation-animbp-ali-tradeoffs.html"><h3>11. ABP/ALI 분배 트레이드오프</h3><p>7 책임군 설계 의도.</p></a></li>
+          <li><a href="pages/lyra-animation-invisible-copy-pose.html"><h3>12. 보이지 않는 mesh + Copy Pose</h3><p>3단 mesh 아키텍처.</p></a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>CommonUI</h2>
+        <p class="muted">CommonUI · CommonGame · UIExtension · AddWidgets · 라이라 정책.</p>
+        <ul class="entry-list">
+          <li><a href="pages/lyra-ui-overview.html"><h3>1. 전체 지도</h3><p>5 책임군과 위젯 표시 흐름.</p></a></li>
+          <li><a href="pages/lyra-ui-input-activation.html"><h3>2. 입력 라우팅 · 활성화</h3><p>Activatable lifecycle, input mode 4.</p></a></li>
+          <li><a href="pages/lyra-ui-hud-manager.html"><h3>3. HUD 액터 · UI 매니저</h3><p>ALyraHUD + ULyraUIManagerSubsystem.</p></a></li>
+          <li><a href="pages/lyra-ui-hud-layout.html"><h3>4. HUDLayout · 메뉴 · 컨트롤러 분리</h3><p>Escape menu, controller disconnect.</p></a></li>
+          <li><a href="pages/lyra-ui-widget-injection.html"><h3>5. 위젯 주입</h3><p>AddWidgets + UIExtension 매칭.</p></a></li>
+          <li><a href="pages/lyra-ui-tagged-widget-visibility.html"><h3>6. Tagged Widget · 가시성</h3><p>HiddenByTags 미구현과 대안.</p></a></li>
+          <li><a href="pages/lyra-ui-styles-widgets.html"><h3>7. Common Style · 위젯 라이브러리</h3><p>Quickstart 5 단계 + 라이라 위젯.</p></a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>에셋 비동기 로딩</h2>
+        <p class="muted">AssetManager 부팅 → Experience 7 단계 → GameFeature 활성화 → 포팅 가이드.</p>
+        <ul class="entry-list">
+          <li><a href="pages/lyra-asset-loading-overview.html"><h3>1. 전체 지도</h3><p>3 층 구조와 부팅 → Experience 흐름.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-assetmanager-bootstrap.html"><h3>2. AssetManager 부팅</h3><p>ini 3 종 + StartInitialLoading.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-startup-jobs.html"><h3>3. StartupJob · 진행률</h3><p>STARTUP_JOB 매크로 + 가중치.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-gamedata.html"><h3>4. ULyraGameData 전역 자산</h3><p>UPrimaryDataAsset + soft class.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-primary-asset-types.html"><h3>5. Primary Asset Type 8 종</h3><p>DefaultGame.ini 의 type 등록.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-experience-state-machine.html"><h3>6. Experience 7 단계 state</h3><p>ELyraExperienceLoadState.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-asset-bundles.html"><h3>7. AssetBundle 메타</h3><p>9 사용처와 Client / Server 분리.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-bp-async-loading-screen.html"><h3>8. BP Async · Loading Screen</h3><p>AsyncAction_ExperienceReady 4 step.</p></a></li>
+          <li><a href="pages/lyra-asset-loading-porting-guide.html"><h3>9. 포팅 가이드</h3><p>옵션 A / B / C 레시피.</p></a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>GAS</h2>
+        <p class="muted">ASC 초기화 → AbilitySet 부여 → 활성 정책 → 데미지 → Cue / Phase / Globals.</p>
+        <ul class="entry-list">
+          <li><a href="pages/lyra-gas-overview.html"><h3>1. 전체 지도</h3><p>부여 / 활성 / 적용의 3 단.</p></a></li>
+          <li><a href="pages/lyra-gas-asc-init.html"><h3>2. ASC 초기화 4 경로</h3><p>PS / GS / CharacterWithAbilities.</p></a></li>
+          <li><a href="pages/lyra-gas-ability-set.html"><h3>3. AbilitySet · Grant</h3><p>GiveToAbilitySystem 4 단계.</p></a></li>
+          <li><a href="pages/lyra-gas-ability-policy.html"><h3>4. 활성 정책</h3><p>Policy · Group · Cost.</p></a></li>
+          <li><a href="pages/lyra-gas-tag-relationships.html"><h3>5. 태그 관계 매핑</h3><p>4 컨테이너 + ShooterHero 9 entry.</p></a></li>
+          <li><a href="pages/lyra-gas-damage-pipeline.html"><h3>6. 데미지 파이프라인</h3><p>CombatSet → DamageExecution → HealthSet.</p></a></li>
+          <li><a href="pages/lyra-gas-cues.html"><h3>7. GameplayCue 시스템</h3><p>delay-load + 21 GCN.</p></a></li>
+          <li><a href="pages/lyra-gas-game-phase.html"><h3>8. Game Phase</h3><p>Phase ability + 6 자산.</p></a></li>
+          <li><a href="pages/lyra-gas-globals-context.html"><h3>9. Globals · Context 확장</h3><p>GlobalAbilitySystem + CartridgeID.</p></a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

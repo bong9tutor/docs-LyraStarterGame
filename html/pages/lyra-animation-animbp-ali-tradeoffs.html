@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnimBP / ALI 책임 분담과 설계 트레이드오프 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-animbp-ali-tradeoffs" data-validation="partial">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>11. AnimBP / ALI 책임 분담과 설계 트레이드오프</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>왜 거대한 단일 ABP 가 아니라 7 종으로 분리됐는가?</li>
+              <li>무기 교체의 단위가 왜 layer ABP 인가?</li>
+              <li>post-process / retarget 이 별도인 이유는?</li>
+              <li>이 분배의 비용은 무엇인가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>본 페이지는 종합 설계 페이지. 메커니즘은 앞 페이지에서 학습됐다는 전제.</li>
+              <li>"트레이드오프" 는 fact 가 아니라 설계 추론. note-design 으로 표시.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-base-abp.html">Base ABP</a> · <a href="lyra-animation-linked-layers.html">Linked Layers</a> · <a href="lyra-animation-selection-rules.html">Selection Rules</a> · <a href="lyra-animation-warping-ik.html">Warping / IK</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-blueprints-in-unreal-engine" target="_blank" rel="noopener">Animation Blueprints</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-7-responsibilities">1. 7 책임군 지도</a></li>
+          <li><a href="#comparison-responsibilities">2. 책임 / 입력 / 교체 단위 비교</a></li>
+          <li><a href="#decision-where-to-add">3. 새 기능 어디에 두는가</a></li>
+          <li><a href="#verification-grades">4. 사실 vs 추론 등급</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-7-responsibilities">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>7 책임군 지도</h2>
+          <p class="block-desc">라이라 애니메이션의 BP / interface 책임 분배. 7 카드로 압축. <code>ABP_Mannequin_CopyPose</code> 는 별도 페이지 (<a href="lyra-animation-invisible-copy-pose.html">invisible-copy-pose</a>) 에서 다룸.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>ABP_Mannequin_Base</h3>
+            <p>state machine, slot, additive, root rotation, Control Rig 호출. pose graph 의 골격.</p>
+            <ul class="struct-meta"><li>교체 단위: 캐릭터</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>ABP_ItemAnimLayersBase</h3>
+            <p>sequence 변수, Distance Matching, Stride / Orientation Warping, hand IK alpha, 14 함수 구현 골격.</p>
+            <ul class="struct-meta"><li>교체 단위: 무기 카테고리</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>무기별 layer ABP</h3>
+            <p>Unarmed / Pistol / Rifle / Shotgun (변형 _Feminine). sequence 세트만 보유.</p>
+            <ul class="struct-meta"><li>교체 단위: 무기 인스턴스</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>ABP_Weap_*</h3>
+            <p>weapon mesh self-animation. 별도 skeleton 이라 캐릭터 ABP 와 분리.</p>
+            <ul class="struct-meta"><li>교체 단위: weapon mesh</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">5</span>ABP_*_PostProcess</h3>
+            <p>mesh 별 final-pose 보정. main ABP 출력 위에 한 번 더 평가.</p>
+            <ul class="struct-meta"><li>교체 단위: mesh</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">6</span>ABP_Mannequin_Retarget</h3>
+            <p>UE4 mannequin 호환. UE4 skeleton 자산을 UE5 skeleton 에 retarget.</p>
+            <ul class="struct-meta"><li>교체 단위: skeleton 호환</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">7</span>ALI_ItemAnimLayers</h3>
+            <p>14 함수 interface. base 와 layer 간 호출 규약. base 가 함수 이름만 알고 호출.</p>
+            <ul class="struct-meta"><li>교체 단위: 없음 (계약)</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="comparison-section" id="comparison-responsibilities">
+        <header class="block-head">
+          <span class="block-kind">비교</span>
+          <h2>책임 / 입력 / 교체 단위 비교</h2>
+          <p class="block-desc">7 책임군의 책임, 주 입력, 출력, 교체 단위, 평가 frequency 비교.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr><th>책임군</th><th>주 입력</th><th>출력</th><th>교체 단위</th><th>평가 frequency</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ABP_Mannequin_Base</td><td>velocity, gameplay tag, controller</td><td>pose graph 구조 + slot 합성</td><td>캐릭터 클래스</td><td>매 frame</td></tr>
+              <tr><td>ABP_ItemAnimLayersBase</td><td>sequence 변수, distance curve</td><td>full-body state 와 보정</td><td>무기 카테고리</td><td>매 frame</td></tr>
+              <tr><td>무기별 layer ABP</td><td>없음 (부모로부터 상속)</td><td>sequence 세트</td><td>무기 인스턴스</td><td>매 frame</td></tr>
+              <tr><td>ABP_Weap_*</td><td>weapon state (fire / reload 트리거)</td><td>weapon mesh pose</td><td>weapon mesh</td><td>매 frame (독립)</td></tr>
+              <tr><td>ABP_*_PostProcess</td><td>main pose</td><td>보정 pose</td><td>mesh</td><td>매 frame (mesh 마다 1)</td></tr>
+              <tr><td>ABP_Mannequin_Retarget</td><td>UE4 sequence</td><td>UE5 호환 pose</td><td>skeleton 호환</td><td>retarget 대상 sequence 평가 시</td></tr>
+              <tr><td>ALI_ItemAnimLayers</td><td>(인터페이스)</td><td>(인터페이스)</td><td>(없음)</td><td>(없음)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-where-to-add">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>새 기능 어디에 두는가</h2>
+          <p class="block-desc">새 기능을 추가할 때 어느 책임군에 배치할지 결정 기준.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. 새 무기 카테고리</h3><p>무기별 layer ABP + weapon instance BP 신규. base 와 ALI 는 건드리지 않음.</p></li>
+          <li class="decision-item"><h3>2. 새 sequence (기존 무기 fire / reload 등 교체)</h3><p>무기별 layer ABP 의 sequence 변수만 교체. layer 구조는 그대로.</p></li>
+          <li class="decision-item"><h3>3. 새 montage slot</h3><p>base ABP 의 AnimGraph 에 slot node 추가 + 모든 layer 가 영향 없는지 확인.</p></li>
+          <li class="decision-item"><h3>4. 새 보정 (Distance / Warping 류)</h3><p><code>ABP_ItemAnimLayersBase</code> 의 ThreadSafe Update 에 새 update 함수 추가. 모든 자식 layer 가 자동 상속.</p></li>
+          <li class="decision-item"><h3>5. 새 cosmetic body style</h3><p>CharacterParts BodyMeshes entry + cosmetic actor BP. base ABP / layer 는 건드리지 않음.</p></li>
+          <li class="decision-item"><h3>6. 새 효과 (footstep / surface)</h3><p>sequence 에 notify 추가 + <code>DT_AnimEffectTags</code> entry. base / layer 코드는 변경 없음.</p></li>
+        </ol>
+        <div class="note note-design">
+          <strong>설계 의도:</strong> "교체 단위" 가 책임 분배의 핵심 기준. 자주 교체되는 단위 (무기 / cosmetic / sequence) 가 작은 BP 로 분리되고, 변하지 않는 골격 (state machine / slot) 이 base 에 남는다. 이 원칙은 새 시스템을 분석하거나 설계할 때도 같은 질문 ("이 부분은 얼마나 자주 교체되는가?") 으로 환원 가능.
+        </div>
+      </section>
+
+      <section class="verification-section" id="verification-grades">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>사실 vs 추론 등급</h2>
+          <p class="block-desc">본 페이지 항목의 검증 등급. fact 는 원장에서 확인, 트레이드오프는 추론.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>7 BP / interface 의 존재와 parent class</strong><p><a href="../../docs/project/animation-blueprint-analysis.md">animation-blueprint-analysis.md</a> 원장에 검증 완료.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>무기 교체 단위 = layer ABP</strong><p>weapon instance CDO 의 <code>EquippedAnimSet</code> 매핑이 원장에 확인.</p></div></li>
+          <li class="verify-item"><span class="badge-partial">부분</span><div><strong>평가 frequency 정량값</strong><p>"매 frame" 은 일반적 사실이지만 평가 횟수 비용은 측정 안 됨. <em>추론.</em></p></div></li>
+          <li class="verify-item"><span class="badge-partial">부분</span><div><strong>분배의 비용 / 이득</strong><p>설계 의도 추론. note-design 으로 표시한 항목들.</p></div></li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Base ABP pose graph · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-base-abp">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>3. ABP_Mannequin_Base pose graph</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>AnimGraph 의 노드 구성은 어떻게 되는가?</li>
+              <li>cached pose 2 개는 왜 필요한가?</li>
+              <li>slot 5 개는 무엇이 어디에 합성되는가?</li>
+              <li>linked layer 와 Control Rig 는 그래프의 어디에 있는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>AnimGraph 는 위에서 아래로 pose 가 흐른다 (state machine, cached, split, slot, control rig, output).</li>
+              <li>Cached pose 는 같은 pose 를 여러 곳에서 재사용할 때 평가 비용을 1 회로 줄인다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-runtime-state.html">런타임 상태 입력</a>: 본 페이지의 ABP 변수가 어디서 오는지 알아야 그래프 노드가 어떤 데이터를 읽는지 보인다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-blueprints-in-unreal-engine" target="_blank" rel="noopener">Animation Blueprints</a></li>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/using-layered-animations-in-unreal-engine" target="_blank" rel="noopener">Layered Animations (Blend Per Bone)</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-pose-stack">1. Pose graph 5 계층 스택</a></li>
+          <li><a href="#reference-slots">2. Slot 5 개와 LinkedAnimLayer 4 개</a></li>
+          <li><a href="#flow-pose-output">3. 한 frame pose 가 만들어지는 흐름</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-pose-stack">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>Pose graph 5 계층 스택</h2>
+          <p class="block-desc">최종 pose 가 통과하는 큰 블록. 위쪽이 입력 (state machine 으로 만든 locomotion pose), 아래쪽이 출력 (mesh 로 보내는 pose).</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>LocomotionSM</h3>
+            <p>이동 상태 머신으로 locomotion pose 생성.</p>
+            <ul class="struct-meta"><li>Idle · Start · Cycle · Stop · Pivot · Jump / Fall</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>Cached pose: Locomotion</h3>
+            <p>locomotion pose 를 캐시해 여러 곳에서 재사용.</p>
+            <ul class="struct-meta"><li>cached pose 첫 번째</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>Cached pose: UpperbodyLowerbodySplit</h3>
+            <p>Layered Blend Per Bone 으로 상하체 분리한 결과 캐시.</p>
+            <ul class="struct-meta"><li>cached pose 두 번째</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>Slot 합성과 Linked layers</h3>
+            <p>slot 5 종 (montage 재생 지점) 과 linked layer 4 종 (aiming, additive, skel control, 손 pose) 가 cached pose 위에 합성.</p>
+            <ul class="struct-meta"><li>FullBody · UpperBody · Additive · LeftHandPose</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">5</span>Rotate Root Bone, Control Rig, Output</h3>
+            <p>최종 보정. turn in place 의 root yaw 회전, Control Rig 절차적 보정, Inertialization, output pose.</p>
+            <ul class="struct-meta"><li>Rotate Root Bone</li><li>Control Rig node</li><li>Inertialization</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-slots">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>Slot 5 개와 LinkedAnimLayer 4 개</h2>
+          <p class="block-desc">Base ABP 가 노출하는 slot 과 호출하는 linked layer 함수의 위치. montage 와 layer 가 어디로 들어가는지 학습 시 이 표가 단일 출처.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>이름</th><th>종류</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>FullBody</code></td><td>slot</td><td>전신 montage 재생 위치 (jump, death, 발 동작 등).</td></tr>
+              <tr><td><code>UpperBody</code></td><td>slot</td><td>상체 전용 montage 재생 위치 (재장전, grenade toss 등).</td></tr>
+              <tr><td><code>AdditiveHitReact</code></td><td>slot</td><td>피격 반응 additive 재생.</td></tr>
+              <tr><td><code>FullBodyAdditivePreAim</code></td><td>slot</td><td>aim offset 적용 전 전신 additive.</td></tr>
+              <tr><td><code>UpperBodyAdditive</code></td><td>slot</td><td>상체 전용 additive.</td></tr>
+              <tr><td><code>FullBody_Aiming</code></td><td>LinkedAnimLayer</td><td>무기별 layer 의 aim offset, ADS 합성.</td></tr>
+              <tr><td><code>FullBodyAdditives</code></td><td>LinkedAnimLayer</td><td>무기별 layer 의 추가 additive 합성.</td></tr>
+              <tr><td><code>FullBody_SkeletalControls</code></td><td>LinkedAnimLayer</td><td>무기별 layer 의 skeletal control (사격 자세, 손가락).</td></tr>
+              <tr><td><code>LeftHandPose_OverrideState</code></td><td>LinkedAnimLayer</td><td>왼손 grip pose override.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-pose-output">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>한 frame pose 가 만들어지는 흐름</h2>
+          <p class="flow-desc">state machine 결과부터 출력 pose 까지의 평가 순서. 각 단계가 위 스택의 한 계층에 대응.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">LocomotionSM 평가</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc">현재 state (Idle, Cycle, Jump 등) 가 자기 pose 출력.</p>
+          </li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">cached pose 첫 번째 (<code>Locomotion</code>) 에 저장.</p></li>
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">Layered Blend Per Bone</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc">상하체 본 가중치로 분리. cached pose 두 번째 (<code>UpperbodyLowerbodySplit</code>) 저장.</p>
+          </li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">slot 과 linked layer 합성.</p></li>
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">Slot 과 LinkedAnimLayer 합성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc">위 참조 표의 slot 5 와 linked layer 4 가 cached pose 위에 순서대로 얹힘.</p>
+          </li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">root yaw 와 IK 보정.</p></li>
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">Rotate Root Bone, Control Rig, Inertialization 후 Output</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc">turn in place 회전 적용, Control Rig 로 IK 및 보정, 마지막 Inertialization 으로 전이 부드럽게.</p>
+          </li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

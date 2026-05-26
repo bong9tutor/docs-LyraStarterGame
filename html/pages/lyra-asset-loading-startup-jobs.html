@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StartupJob · 진행률 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-startup-jobs">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>3. StartupJob · 진행률</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>STARTUP_JOB</code> 매크로는 무엇을 하는가?</li>
+              <li>진행률 가중치 (weight) 가 어떻게 누적되는가?</li>
+              <li><code>WaitUntilComplete(0.0f, false)</code> 가 의미하는 것은?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>StartupJob 은 부팅 시 비동기 작업의 단위.</li>
+              <li>각 job 은 weight 를 가짐. 진행률은 weight 비율로 누적.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-assetmanager-bootstrap.html">AssetManager 부팅</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/streamable-manager-and-async-loading-in-unreal-engine" target="_blank" rel="noopener">Streamable Manager</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-macros">1. STARTUP_JOB 매크로 2 종</a></li>
+          <li><a href="#flow-execution">2. DoAllStartupJobs 실행 흐름</a></li>
+          <li><a href="#decision-progress-weight">3. 진행률 가중치 결정</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-macros">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>STARTUP_JOB 매크로 2 종</h2>
+          <p class="block-desc">라이라 AssetManager 가 정의하는 매크로. 람다 캡처와 weight 부여.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>매크로</th><th>weight</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>STARTUP_JOB(JobFunc)</code></td><td>1.f (default)</td><td>일반 가벼운 작업</td></tr>
+              <tr><td><code>STARTUP_JOB_WEIGHTED(JobFunc, JobWeight)</code></td><td>지정값</td><td>무거운 작업 (예: GameData 로드 25.f)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-info">
+          <strong>구현:</strong> 매크로는 람다로 <code>JobFunc</code> 를 캡처해 <code>FLyraAssetManagerStartupJob</code> USTRUCT 로 큐에 등록.
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-execution">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>DoAllStartupJobs 실행 흐름</h2>
+          <p class="flow-desc">큐에 등록된 작업이 순차 실행되며 진행률을 누적 보고.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">StartupJobs[] 순회</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">등록된 job 을 index 순서로 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Job::DoJob 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">람다 실행. async load 시 <code>FStreamableHandle</code> 반환.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">handle 이 있으면 <code>WaitUntilComplete(0.0f, false)</code> 로 폴링.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">SubstepProgressDelegate broadcast</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">60Hz throttle 로 진행률 broadcast. UI 가 progress bar 갱신.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">완료 시 누적 progress 갱신</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">완료된 job 의 weight 만큼 progress 증가. 다음 job 진행.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-progress-weight">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>진행률 가중치 결정</h2>
+          <p class="block-desc">job 별 weight 를 어떻게 정할지.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. 가벼운 자산 인덱싱</h3><p>weight = 1.f. <code>STARTUP_JOB</code> 매크로의 default.</p></li>
+          <li class="decision-item"><h3>2. 무거운 자산 비동기 로드</h3><p>weight = 측정된 비례값 (예: GameData 25.f). 진행률 bar 가 단계 별로 멈추지 않게.</p></li>
+          <li class="decision-item"><h3>3. Dedicated server 분기</h3><p><code>IsRunningDedicatedServer()</code> 검사. server 에는 UI 자산 로드 생략 가능.</p></li>
+          <li class="decision-item"><h3>4. UpdateInitialGameContentLoadPercent 후크</h3><p>커스텀 UI 가 진행률에 연결. 라이라는 비워둠, 사용자 채움.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

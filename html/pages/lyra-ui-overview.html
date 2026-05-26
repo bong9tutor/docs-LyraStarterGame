@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CommonUI 전체 지도 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-overview">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>1. 라이라 CommonUI 전체 지도</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>라이라 UI 의 다섯 책임군은 무엇인가?</li>
+              <li>한 위젯이 화면에 뜨기까지 어떤 인과를 거치는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>CommonUI 는 입력·활성화·스타일의 인프라.</li>
+              <li>라이라 C++ 는 그 인프라에 정책 (input mode, escape, 컨트롤러 분리) 을 얹는 조율 계층.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li>(없음. 시스템 진입점)</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/common-ui-for-cross-platform-ui-in-unreal-engine" target="_blank" rel="noopener">CommonUI</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-responsibilities">1. 다섯 책임군</a></li>
+          <li><a href="#flow-widget-on-screen">2. 위젯이 화면에 뜨기까지의 흐름</a></li>
+          <li><a href="#reference-pages">3. 시스템 페이지 경로</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-responsibilities">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>다섯 책임군</h2>
+          <p class="block-desc">라이라 UI 의 다섯 시스템과 책임 경계.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>CommonUI</h3>
+            <p>Epic 플러그인. 입력 라우팅 + activatable widget + 스타일 + 입력 액션 매핑.</p>
+            <ul class="struct-meta"><li><code>CommonGameViewportClient</code></li><li><code>UCommonActivatableWidget</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>CommonGame GameUI Manager</h3>
+            <p><code>UGameUIPolicy</code> 가 <code>UPrimaryGameLayout</code> 의 <code>UI.Layer.*</code> 4 종을 관리.</p>
+            <ul class="struct-meta"><li><code>UGameUIManagerSubsystem</code></li><li><code>ULyraUIManagerSubsystem</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>UIExtension 플러그인</h3>
+            <p><code>HUD.Slot.*</code> 태그 와 activatable widget 매칭. layout 내부 slot 채우기 메커니즘.</p>
+            <ul class="struct-meta"><li><code>UUIExtensionSubsystem</code></li><li><code>UUIExtensionPointWidget</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>GameFeatureAction_AddWidgets</h3>
+            <p>Experience 활성화 시 layer 와 slot 에 위젯을 데이터로 주입.</p>
+            <ul class="struct-meta"><li><code>FLyraHUDLayoutRequest</code></li><li><code>FLyraHUDElementEntry</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">5</span>GameSettings 플러그인</h3>
+            <p>설정 화면. 라이라 코어 UI 와 분리된 위성 시스템 (본 학습 트랙은 코어 6 페이지에 집중).</p>
+            <ul class="struct-meta"><li><code>UGameSetting</code></li><li><code>ULyraSettingScreen</code></li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-widget-on-screen">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>위젯이 화면에 뜨기까지의 흐름</h2>
+          <p class="flow-desc">Experience 선택부터 위젯이 화면에 표시되기까지의 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Experience 선택</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraExperienceDefinition</code> 결정 후 ActionSet 활성화.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">ActionSet 의 <code>Actions[]</code> 중 <code>UGameFeatureAction_AddWidgets</code> 발견.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AddToWorld → extension handler 등록</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>UGameFrameworkComponentManager::AddExtensionHandler(ALyraHUD::StaticClass(), ...)</code> 로 HUD 등장 구독.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>ALyraHUD::BeginPlay</code> 가 <code>NAME_GameActorReady</code> 발송.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Layout push + Widget register</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>PushContentToLayer_ForPlayer(LayerID, LayoutClass)</code> 로 layer 에 layout 띄우고, <code>RegisterExtensionAsWidgetForContext(SlotID, Player, WidgetClass, -1)</code> 로 slot 등록.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UIExtensionPointWidget 이 slot 매칭</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">layout 안의 <code>UUIExtensionPointWidget</code> 이 자기 SlotID 와 매칭된 widget 을 표시.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-pages">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>시스템 페이지 경로</h2>
+          <p class="block-desc">위 책임군과 흐름을 깊이 학습하는 페이지들.</p>
+        </header>
+        <ul class="ref-list">
+          <li><a href="lyra-ui-input-activation.html"><code>input-activation</code></a>: 입력 라우팅, activatable lifecycle, input mode 4 종.</li>
+          <li><a href="lyra-ui-hud-manager.html"><code>hud-manager</code></a>: <code>ALyraHUD</code> + <code>ULyraUIManagerSubsystem</code>.</li>
+          <li><a href="lyra-ui-hud-layout.html"><code>hud-layout</code></a>: HUD layout 4 BP + escape menu + 컨트롤러 분리.</li>
+          <li><a href="lyra-ui-widget-injection.html"><code>widget-injection</code></a>: <code>AddWidgets</code> + UIExtension 매칭.</li>
+          <li><a href="lyra-ui-tagged-widget-visibility.html"><code>tagged-widget-visibility</code></a>: tag 가시성 게이팅과 미구현 사실.</li>
+          <li><a href="lyra-ui-styles-widgets.html"><code>styles-widgets</code></a>: Common Style + 라이라 위젯 라이브러리.</li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

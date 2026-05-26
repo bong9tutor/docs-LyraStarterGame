@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ULyraGameData 전역 자산 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-gamedata">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>4. ULyraGameData 전역 자산</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>왜 <code>UPrimaryDataAsset</code> 파생인가?</li>
+              <li><code>TSoftClassPtr</code> 가 hard reference 와 어떻게 다른가?</li>
+              <li>새 전역 데이터를 추가하는 절차는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li><code>UPrimaryDataAsset</code> 은 AssetManager 가 indexing 하는 자산 유형.</li>
+              <li>Soft pointer 는 자산 경로만 들고 실제 로드는 지연.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-startup-jobs.html">StartupJob</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/data-assets-in-unreal-engine" target="_blank" rel="noopener">Data Assets</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-members">1. ULyraGameData 멤버 3 종</a></li>
+          <li><a href="#flow-lazy-load">2. Get static 의 lazy 로드 흐름</a></li>
+          <li><a href="#recipe-add-global-data">3. 새 전역 데이터 추가 레시피</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-members">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ULyraGameData 멤버 3 종</h2>
+          <p class="block-desc">전역 데이터 자산의 멤버. soft class pointer 로 hard reference 회피.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>멤버</th><th>타입</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>DamageGameplayEffect_SetByCaller</code></td><td><code>TSoftClassPtr&lt;UGameplayEffect&gt;</code></td><td>SetByCaller 데미지 GE 클래스</td></tr>
+              <tr><td><code>HealGameplayEffect_SetByCaller</code></td><td><code>TSoftClassPtr&lt;UGameplayEffect&gt;</code></td><td>SetByCaller 회복 GE 클래스</td></tr>
+              <tr><td><code>DummyGameplayEffect</code></td><td><code>TSoftClassPtr&lt;UGameplayEffect&gt;</code></td><td>placeholder GE</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-lazy-load">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>Get static 의 lazy 로드 흐름</h2>
+          <p class="flow-desc"><code>ULyraGameData::Get()</code> 호출 시 AssetManager 가 자산을 동기 로드 (첫 호출 시).</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ULyraGameData::Get() 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">코드 어디서든 <code>ULyraGameData::Get()</code> 으로 접근.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ULyraAssetManager::GetGameData 위임</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>GetOrLoadTypedGameData&lt;ULyraGameData&gt;(LyraGameDataPath)</code> 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">캐시 hit 면 반환, miss 면 로드.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">LoadGameDataOfClass 동기 로드</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">에디터 (<code>GIsEditor</code>) 면 즉시 동기 로드. cooked build 에서는 startup job 으로 미리 로드 권장.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">캐시 + 반환</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>GameDataMap</code> 에 캐시. 이후 호출은 캐시 hit. 로드 실패 시 Fatal log (복구 불가).</p></li>
+        </ol>
+      </section>
+
+      <section class="recipe-section" id="recipe-add-global-data">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>새 전역 데이터 추가 레시피</h2>
+          <p class="block-desc">예: <code>DefaultCameraSettings</code> 같은 전역 자산 추가.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>1. 새 DataAsset 클래스</h3><p><code>UPrimaryDataAsset</code> 파생 <code>UDefaultCameraSettings</code>. 멤버 정의.</p></li>
+          <li class="recipe-step"><h3>2. AssetManager 에 path + getter 추가</h3><p><code>UPROPERTY(Config) TSoftObjectPtr&lt;UDefaultCameraSettings&gt; DefaultCameraSettingsPath;</code> + <code>const UDefaultCameraSettings&amp; GetDefaultCameraSettings();</code>.</p></li>
+          <li class="recipe-step"><h3>3. DefaultGame.ini 에 경로 등록</h3><p><code>[/Script/LyraGame.LyraAssetManager]</code> 절에 <code>DefaultCameraSettingsPath=/Game/System/DefaultCameraSettings.DefaultCameraSettings</code>.</p></li>
+          <li class="recipe-step"><h3>4. 자산 생성</h3><p>에디터에서 <code>Content/System/DefaultCameraSettings.uasset</code> 생성.</p></li>
+          <li class="recipe-step"><h3>5. (선택) StartupJob 등록</h3><p>첫 사용 시 hitch 가 싫으면 <code>STARTUP_JOB</code> 으로 부팅 시 preload.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

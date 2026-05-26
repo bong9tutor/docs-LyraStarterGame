@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linked Item Layers · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-linked-layers">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>5. Linked Item Layers</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>base 가 무기별 layer 를 어떻게 바꿔 끼우는가?</li>
+              <li><code>ALI_ItemAnimLayers</code> 14 함수는 base 의 어디와 대응되는가?</li>
+              <li>무기별 layer 의 차이는 무엇인가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Linked Anim Layer 는 AnimGraph 의 한 섹션을 별도 ABP 클래스로 분리해 런타임 교체 가능하게 한다.</li>
+              <li>Interface (<code>ALI_*</code>) 가 함수 시그니처를 정의. 무기별 ABP 가 구현.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-base-abp.html">Base ABP pose graph</a>: base 의 LinkedAnimLayer 호출 위치를 알아야 layer 가 어디에 끼워지는지 보인다.</li>
+              <li><a href="lyra-animation-locomotion-sm.html">LocomotionSM</a>: base 의 state 가 layer 의 14 함수 중 어느 것을 호출하는지 매핑된다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/using-animation-blueprint-linking-in-unreal-engine" target="_blank" rel="noopener">Animation Blueprint Linking</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-ali-functions">1. ALI_ItemAnimLayers 14 함수 인터페이스</a></li>
+          <li><a href="#structure-inheritance">2. 상속 관계 (base 에서 child layer)</a></li>
+          <li><a href="#comparison-weapons">3. 무기별 layer 차이</a></li>
+          <li><a href="#flow-layer-swap">4. 런타임 layer 교체 흐름</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-ali-functions">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ALI_ItemAnimLayers 14 함수 인터페이스</h2>
+          <p class="block-desc"><code>ALI_ItemAnimLayers</code> 는 base ABP 가 무기별 layer 에게 호출하는 14 개 함수의 시그니처를 정의. state 별로 layer 가 자기 무기에 맞는 pose 를 제공.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>함수</th><th>대응 base state</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>FullBody_IdleState</code></td><td>LocomotionSM Idle</td><td>정지 시 무기별 idle pose.</td></tr>
+              <tr><td><code>FullBody_StartState</code></td><td>LocomotionSM Start</td><td>정지 에서 이동 전환 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_CycleState</code></td><td>LocomotionSM Cycle</td><td>이동 사이클 무기별 pose (jog 또는 walk).</td></tr>
+              <tr><td><code>FullBody_StopState</code></td><td>LocomotionSM Stop</td><td>정지 시퀀스 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_PivotState</code></td><td>LocomotionSM Pivot</td><td>방향 전환 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_JumpStartState</code></td><td>LocomotionSM JumpStart</td><td>점프 시작 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_JumpApexState</code></td><td>LocomotionSM JumpApex</td><td>점프 정점 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_FallLoopState</code></td><td>LocomotionSM FallLoop</td><td>낙하 루프 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_FallLandState</code></td><td>LocomotionSM FallLand</td><td>착지 무기별 pose.</td></tr>
+              <tr><td><code>FullBody_Aiming</code></td><td>base AnimGraph slot</td><td>aim offset 과 ADS 합성.</td></tr>
+              <tr><td><code>FullBodyAdditives</code></td><td>base AnimGraph slot</td><td>추가 additive 합성.</td></tr>
+              <tr><td><code>FullBody_SkeletalControls</code></td><td>base AnimGraph slot</td><td>skeletal control (사격 자세, 손가락).</td></tr>
+              <tr><td><code>LeftHandPose_OverrideState</code></td><td>base AnimGraph slot</td><td>왼손 grip pose override.</td></tr>
+              <tr><td><code>UpdateBlendWeightData</code> 등 보조</td><td>linked layer ThreadSafe</td><td>매 frame blend weight 갱신 (1 함수가 14 카운트 중 1).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="structure-section" id="structure-inheritance">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>상속 관계 (base 에서 child layer)</h2>
+          <p class="block-desc">모든 무기 layer 는 공통 <code>ABP_ItemAnimLayersBase</code> 를 상속. Shotgun 만 Rifle layer 를 부모로 가짐 (변형 layer).</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3>ABP_ItemAnimLayersBase</h3>
+            <p>공통 부모. 14 인터페이스 함수의 기본 구현, ThreadSafe Update 골격, blend weight 데이터.</p>
+            <ul class="struct-meta"><li>implements <code>ALI_ItemAnimLayers</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3>ABP_UnarmedAnimLayers</h3>
+            <p>맨손. Unarmed locomotion set 사용.</p>
+            <ul class="struct-meta"><li>109 시퀀스 (Locomotion/Unarmed)</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3>ABP_PistolAnimLayers</h3>
+            <p>권총. Pistol locomotion set.</p>
+            <ul class="struct-meta"><li>107 시퀀스 (Locomotion/Pistol)</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3>ABP_RifleAnimLayers</h3>
+            <p>소총. Rifle locomotion set. 가장 큰 세트로 기준 역할.</p>
+            <ul class="struct-meta"><li>118 시퀀스 (Locomotion/Rifle)</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3>ABP_ShotgunAnimLayers</h3>
+            <p>샷건. <strong>ABP_RifleAnimLayers 를 부모</strong>로 갖는 변형. 일부 sequence 만 override.</p>
+            <ul class="struct-meta"><li>5 시퀀스 (Locomotion/Shotgun override)</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="comparison-section" id="comparison-weapons">
+        <header class="block-head">
+          <span class="block-kind">비교</span>
+          <h2>무기별 layer 차이</h2>
+          <p class="block-desc">parent, override 패턴, sequence 규모 비교.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr><th>layer</th><th>parent</th><th>override 패턴</th><th>주 sequence 폴더</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ABP_UnarmedAnimLayers</code></td><td><code>ABP_ItemAnimLayersBase</code></td><td>맨손 전용 sequence set</td><td>Locomotion/Unarmed (109)</td></tr>
+              <tr><td><code>ABP_PistolAnimLayers</code></td><td><code>ABP_ItemAnimLayersBase</code></td><td>권총 grip, 사격 stance</td><td>Locomotion/Pistol (107)</td></tr>
+              <tr><td><code>ABP_RifleAnimLayers</code></td><td><code>ABP_ItemAnimLayersBase</code></td><td>양손 grip, 어깨 견착</td><td>Locomotion/Rifle (118)</td></tr>
+              <tr><td><code>ABP_ShotgunAnimLayers</code></td><td><code>ABP_RifleAnimLayers</code></td><td>Rifle 재사용 + 일부 sequence 만 교체</td><td>Locomotion/Shotgun (5)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-layer-swap">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>런타임 layer 교체 흐름</h2>
+          <p class="flow-desc">무기 변경 시 base ABP 의 LinkedAnimLayer node 가 새 layer class 로 교체되고 다음 frame 부터 새 sequence set 을 사용.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">무기 장착 이벤트</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraWeaponInstance</code> 의 <code>EquippedAnimSet</code> 이 새 무기로 결정.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">SelectBestLayer 호출 (선택 규칙 페이지 참조).</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">SelectBestLayer 결과 → LinkAnimClassLayers</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">base ABP 의 LinkedAnimLayer node 가 <code>LinkAnimClassLayers</code> API 로 layer class 교체.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">다음 frame 에 새 layer 가 ALI 14 함수 호출에 응답</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">base 의 state 마다 새 layer 의 <code>FullBody_*State</code> 함수가 새 sequence 를 출력.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

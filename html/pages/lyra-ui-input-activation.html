@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CommonUI 입력 라우팅과 활성화 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-input-activation">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>2. CommonUI 입력 라우팅과 활성화</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>activatable widget 의 lifecycle 은 어떻게 되는가?</li>
+              <li>라이라의 <code>ELyraWidgetInputMode</code> 4 종은 무엇이 다른가?</li>
+              <li>desired focus target 이 컴파일 시점에 강제되는 이유는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>activatable widget 은 활성화 / 비활성화 상태를 갖는 위젯.</li>
+              <li>활성 위젯만 입력을 받는다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-ui-overview.html">UI 전체 지도</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/common-ui-activatable-widgets-in-unreal-engine" target="_blank" rel="noopener">Activatable Widgets</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#flow-activation-lifecycle">1. Activatable widget lifecycle</a></li>
+          <li><a href="#reference-input-mode">2. ELyraWidgetInputMode 4 종</a></li>
+          <li><a href="#decision-focus-target">3. desired focus target 강제 검증</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-activation-lifecycle">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>Activatable widget lifecycle</h2>
+          <p class="flow-desc">위젯이 활성화되면서 input config 가 적용되고 비활성화 시 복원되는 흐름.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">위젯 활성화 요청</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">layer 또는 stack 에 push 또는 <code>ActivateWidget()</code> 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">NativeOnActivated</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>UCommonActivatableWidget::NativeOnActivated</code> 호출, <code>BP_OnActivated</code> 이벤트 발생.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>ULyraActivatableWidget::GetDesiredInputConfig</code> 호출.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">FUIInputConfig 적용</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ELyraWidgetInputMode</code> 가 <code>FUIInputConfig</code> 로 변환되어 input mode, mouse capture, cursor 결정.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">NativeOnDeactivated</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">위젯 종료 시 input config 복원, <code>BP_OnDeactivated</code> 이벤트.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-input-mode">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ELyraWidgetInputMode 4 종</h2>
+          <p class="block-desc">라이라가 정의한 입력 모드. activatable widget 이 활성화될 때 자기 모드에 맞는 <code>FUIInputConfig</code> 적용.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>모드</th><th>input mode</th><th>커서</th><th>전형적 위젯</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Default</code></td><td>GameAndUI</td><td>visible</td><td>HUD 일반</td></tr>
+              <tr><td><code>GameAndMenu</code></td><td>GameAndUI</td><td>visible</td><td>game menu (escape menu)</td></tr>
+              <tr><td><code>Game</code></td><td>Game</td><td>hidden</td><td>in-game HUD only</td></tr>
+              <tr><td><code>Menu</code></td><td>UIOnly</td><td>visible</td><td>full-screen menu</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-focus-target">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>desired focus target 강제 검증</h2>
+          <p class="block-desc">라이라는 컴파일 시점에 <code>BP_GetDesiredFocusTarget</code> 미구현 시 경고를 표시.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. ValidateCompiledWidgetTree 검사</h3><p><code>ULyraActivatableWidget::ValidateCompiledWidgetTree</code> 가 <code>BP_GetDesiredFocusTarget</code> override 여부 확인.</p></li>
+          <li class="decision-item"><h3>2. 미구현 시 컴파일 경고</h3><p>BP 컴파일 시 경고 표시. 게임패드 navigation 의 첫 focus 가 정해지지 않아 입력 도달이 끊길 수 있음.</p></li>
+          <li class="decision-item"><h3>3. modal 위젯의 경우 필수</h3><p><code>bIsModal == true</code> 위젯은 다른 위젯으로 focus 가 빠질 수 없으므로 desired focus target 이 반드시 필요.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

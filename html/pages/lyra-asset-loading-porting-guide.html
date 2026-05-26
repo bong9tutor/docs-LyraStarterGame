@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>다른 프로젝트로 포팅 가이드 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-porting-guide">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>9. 다른 프로젝트로 포팅 가이드</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>라이라 비동기 로딩을 새 프로젝트에 옮기려면 어디까지 가져와야 하는가?</li>
+              <li>옵션 A / B / C 의 작업량과 적합한 경우는?</li>
+              <li>포팅 시 자주 빠지는 함정은?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>핵심 ini 절은 <code>DefaultGame.ini</code> 에 있음 (<code>AssetManagerClassName</code> 제외).</li>
+              <li>Experience definition 자체는 동기 로드. 비동기는 bundle + GameFeature 부터.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-overview.html">전체 지도</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/asset-management-in-unreal-engine" target="_blank" rel="noopener">Asset Management</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#verification-pitfalls">1. 포팅 전 사전 경고 4 가지</a></li>
+          <li><a href="#comparison-options">2. 포팅 옵션 A / B / C</a></li>
+          <li><a href="#recipe-option-a">3. 옵션 A 레시피 (1 시간)</a></li>
+          <li><a href="#recipe-option-b">4. 옵션 B 레시피 (4 시간)</a></li>
+          <li><a href="#recipe-option-c">5. 옵션 C 레시피 (1-2 일)</a></li>
+        </ol>
+      </nav>
+
+      <section class="verification-section" id="verification-pitfalls">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>포팅 전 사전 경고 4 가지</h2>
+          <p class="block-desc">자주 빠지는 함정. 포팅 시작 전 반드시 확인.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>ini 절 위치</strong><p>핵심 4 절 (<code>LyraAssetManager</code> / <code>AssetManagerSettings</code> / <code>GameFeaturesSubsystemSettings</code> / <code>CommonLoadingScreenSettings</code>) 은 <code>DefaultGame.ini</code> 에. <code>AssetManagerClassName</code> 만 <code>DefaultEngine.ini</code> 에.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>Experience definition 자체는 동기 로드</strong><p><code>SetCurrentExperience(FPrimaryAssetId)</code> 의 <code>AssetPath.TryLoad()</code> 가 blocking. 소스 주석 <code>//@TODO: Async load the experience definition itself</code>.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>DefaultGameData 의 soft class 는 즉시 로드 보장 없음</strong><p><code>TSoftClassPtr&lt;UGameplayEffect&gt;</code> 이라 GameData 자산 로드 와 GE 클래스 로드 가 다름. 첫 호출 hitch 가능.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>AssetBundleData 수집은 2 메커니즘</strong><p>자동 (<code>meta=(AssetBundles)</code>) + 수동 (<code>AddAdditionalAssetBundleData</code> override). 커스텀 GameFeatureAction 의 배열 자산은 override 필요.</p></div></li>
+        </ul>
+      </section>
+
+      <section class="comparison-section" id="comparison-options">
+        <header class="block-head">
+          <span class="block-kind">비교</span>
+          <h2>포팅 옵션 A / B / C</h2>
+          <p class="block-desc">작업량과 적합한 경우 비교.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr><th>옵션</th><th>가져갈 부분</th><th>작업 시간</th><th>적합한 경우</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>A (최소)</td><td>AssetManager 파생 + Primary Asset Type 등록</td><td>1 시간</td><td>전역 데이터 자산 1 개만 필요</td></tr>
+              <tr><td>B (중간)</td><td>A + GameData 패턴 + StartupJob 큐</td><td>4 시간</td><td>부팅 시 비동기 로드 + 진행률 보고 필요</td></tr>
+              <tr><td>C (전체)</td><td>B + Experience 시스템 + GameFeature 통합 + Loading Screen</td><td>1-2 일</td><td>라이라 풍의 데이터 주도 게임 모드 시스템 필요</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="recipe-section" id="recipe-option-a">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>옵션 A 레시피 (1 시간)</h2>
+          <p class="block-desc">최소 포팅. AssetManager 파생 + Primary Asset Type 등록.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>A.1 Build.cs 의존성</h3><p><code>PublicDependencyModuleNames</code> 에 <code>"GameplayTags"</code> 확인 (대부분 기본 포함).</p></li>
+          <li class="recipe-step"><h3>A.2 AssetManager 파생 클래스</h3><p><code>UAssetManager</code> 파생 <code>U{Prefix}AssetManager</code>. <code>UCLASS(Config = Game)</code>. <code>StartInitialLoading</code> override.</p></li>
+          <li class="recipe-step"><h3>A.3 DefaultEngine.ini 등록</h3><p><code>[/Script/Engine.Engine]</code> 절에 <code>AssetManagerClassName=/Script/{프로젝트}.{Prefix}AssetManager</code>.</p></li>
+          <li class="recipe-step"><h3>A.4 (선택) Primary Asset Type 1 개 등록</h3><p><code>DefaultGame.ini</code> 의 <code>[/Script/Engine.AssetManagerSettings]</code> 절에 <code>+PrimaryAssetTypesToScan=(...)</code>.</p></li>
+        </ol>
+      </section>
+
+      <section class="recipe-section" id="recipe-option-b">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>옵션 B 레시피 (4 시간)</h2>
+          <p class="block-desc">A + 전역 데이터 자산 + StartupJob + 진행률.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>B.1 StartupJob 패턴 복사</h3><p><code>LyraAssetManagerStartupJob.h/.cpp</code> 그대로 복사, 클래스명 prefix 교체.</p></li>
+          <li class="recipe-step"><h3>B.2 AssetManager 에 startup job 추가</h3><p><code>STARTUP_JOB_WEIGHTED</code> 매크로 정의 + <code>StartInitialLoading</code> 안에 등록 + <code>DoAllStartupJobs()</code> 호출.</p></li>
+          <li class="recipe-step"><h3>B.3 GameData 전역 자산 패턴</h3><p><code>UPrimaryDataAsset</code> 파생 + <code>GetOrLoadTypedGameData&lt;T&gt;</code> template + <code>LoadGameDataOfClass</code> 헬퍼.</p></li>
+          <li class="recipe-step"><h3>B.4 DefaultGame.ini 에 GameData 경로</h3><p><code>[/Script/{프로젝트}.{Prefix}AssetManager]</code> 절에 <code>MyGameDataPath=...</code>.</p></li>
+          <li class="recipe-step"><h3>B.5 자산 생성 + 검증</h3><p>에디터에서 자산 생성. 부팅 로그에 <code>Startup job "GetMyGameData()" took N.NN seconds</code> 확인.</p></li>
+        </ol>
+      </section>
+
+      <section class="recipe-section" id="recipe-option-c">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>옵션 C 레시피 (1-2 일)</h2>
+          <p class="block-desc">B + Experience + GameFeature + Loading Screen 통합.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>C.1 ExperienceManagerComponent 골격 복사</h3><p>7 단계 state machine 그대로. NetMode 분기와 <code>NumGameFeaturePluginsLoading</code> 카운트다운 패턴.</p></li>
+          <li class="recipe-step"><h3>C.2 ExperienceDefinition + ActionSet 자산 정의</h3><p><code>UPrimaryDataAsset</code> 파생 + <code>Actions[]</code> + <code>GameFeaturesToEnable[]</code>.</p></li>
+          <li class="recipe-step"><h3>C.3 AssetBundleData 메타 부여</h3><p>모든 soft pointer 자산에 <code>meta=(AssetBundles="Client,Server")</code> 또는 <code>"Client"</code>.</p></li>
+          <li class="recipe-step"><h3>C.4 GameFeature plugin 등록</h3><p><code>DefaultGame.ini</code> 의 <code>[/Script/GameFeatures.GameFeaturesSubsystemSettings]</code> 절에 plugin 경로 등록.</p></li>
+          <li class="recipe-step"><h3>C.5 Loading Screen 통합</h3><p>CommonLoadingScreen plugin 활성화 + <code>[/Script/CommonLoadingScreen.CommonLoadingScreenSettings]</code> 의 host widget 경로 등록.</p></li>
+          <li class="recipe-step"><h3>C.6 AsyncAction_ExperienceReady BP 노드</h3><p>BP 가 Experience 완료를 기다리도록 <code>UBlueprintAsyncActionBase</code> 파생 4 step 패턴 복사.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

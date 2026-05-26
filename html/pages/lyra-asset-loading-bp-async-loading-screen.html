@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BP Async · Loading Screen · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-bp-async-loading-screen">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>8. BP Async · Loading Screen</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>BP 코드가 Experience 로딩 완료를 어떻게 기다리는가?</li>
+              <li><code>AsyncAction_ExperienceReady</code> 의 4 step 은 왜 필요한가?</li>
+              <li>Loading Screen 이 어떻게 map 전환을 가로질러 표시되는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li><code>UBlueprintAsyncActionBase</code> 는 BP 에서 async node 를 만드는 표준 패턴.</li>
+              <li><code>UGameInstanceSubsystem</code> 은 map 전환을 살아남음.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-experience-state-machine.html">Experience 7 단계</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/asynchronous-asset-loading-in-unreal-engine" target="_blank" rel="noopener">Async Loading</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#flow-async-action">1. AsyncAction_ExperienceReady 4 step</a></li>
+          <li><a href="#flow-loading-screen">2. Loading Screen 표시 흐름</a></li>
+          <li><a href="#decision-host-vs-content">3. Host widget vs Content widget</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-async-action">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>AsyncAction_ExperienceReady 4 step</h2>
+          <p class="flow-desc">BP 의 <code>WaitForExperienceReady</code> 노드가 GameState 가 늦게 spawn 될 수 있어 4 step state machine 으로 처리.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Step 1: WaitForExperienceReady factory</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">BP 가 노드 활성화. <code>UAsyncAction_ExperienceReady</code> 인스턴스 생성, <code>RegisterWithGameInstance</code> 로 GC 방지.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="decision"><div class="step-head"><strong class="step-name">Step 2: GameState 존재 확인</strong><span class="badge-verified">검증</span><span class="step-kind">Decision</span></div><p class="step-desc">GameState 가 이미 있으면 step 3 으로. 없으면 <code>GameStateSetEvent.AddUObject</code> 로 spawn 대기.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Step 3: ExperienceManagerComponent 조회</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">GameState 에서 component 가져옴. <code>CallOrRegister_OnExperienceLoaded</code> 등록.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">이미 로드된 경우 1 frame 지연 (BP delegate 안정성).</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Step 4: OnReady BP delegate fire</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">BP 의 <code>OnReady</code> 출력 핀 실행. <code>SetReadyToDestroy()</code> 호출.</p></li>
+        </ol>
+      </section>
+
+      <section class="flow-section" id="flow-loading-screen">
+        <header class="flow-head">
+          <span class="flow-num">흐름 2</span>
+          <h2>Loading Screen 표시 흐름</h2>
+          <p class="flow-desc">CommonLoadingScreen 이 매 tick <code>ILoadingProcessInterface</code> 를 polling 해 화면 표시 / 숨김.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ILoadingProcessInterface 등록</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>LyraExperienceManagerComponent</code> 가 <code>ShouldShowLoadingScreen</code> 구현.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">CommonLoadingScreen polling</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">매 tick 모든 <code>ILoadingProcessInterface</code> 구현체에 <code>ShouldShowLoadingScreen</code> 질의.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">하나라도 true 면 host widget 표시.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Host widget 표시</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>W_LoadingScreen_Host</code> 가 viewport 에 띄워짐. host 안에 content widget (<code>LoadingScreenWidget</code>) 표시.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">로딩 완료 시 host 제거</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ShouldShowLoadingScreen</code> 가 false 반환 시 host widget 제거.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-host-vs-content">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>Host widget vs Content widget</h2>
+          <p class="block-desc">로딩 화면을 두 widget 으로 분리한 이유.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. Host widget</h3><p>viewport 에 직접 붙는 컨테이너. map 전환을 가로질러 항상 떠 있음.</p></li>
+          <li class="decision-item"><h3>2. Content widget</h3><p>host 안에 차지하는 실제 그림 / 텍스트. 게임마다 다른 디자인 적용 가능.</p></li>
+          <li class="decision-item"><h3>3. 분리 이점</h3><p>host 가 안정성 (생명 주기 보장), content 가 디자인 (교체 가능). <code>OnLoadingScreenWidgetChanged</code> delegate 로 content 만 교체.</p></li>
+          <li class="decision-item"><h3>4. ULyraLoadingScreenSubsystem API</h3><p><code>SetLoadingScreenContentWidget(WidgetClass)</code> 로 content 교체. host 는 그대로 유지.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

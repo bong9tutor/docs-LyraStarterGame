@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>효과, 테스트, 확장 레시피 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-effects-tests-recipes">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>10. 효과, 테스트, 확장 레시피</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>Anim Notify 가 Context Effect 까지 어떻게 흐르는가?</li>
+              <li>weapon mesh ABP 와 캐릭터 ABP 가 어떻게 분리되어 평가되는가?</li>
+              <li>ShooterTests 의 animation matrix 는 무엇을 자동 검증하는가?</li>
+              <li>새 무기 · cosmetic · sequence 추가 절차는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Anim Notify 는 sequence timeline 의 marker. 재생 시 ABP 의 receive 함수 호출.</li>
+              <li>Context Effect 는 surface tag 와 effect tag 의 매칭 테이블로 audio / VFX 분기.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-actions-montage.html">상체 액션과 Montage Slot</a>: notify 가 montage 의 어디에 박히는지.</li>
+              <li><a href="lyra-animation-selection-rules.html">장비·Cosmetic 선택 규칙</a>: 새 cosmetic 추가 레시피의 전제.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-notifications-in-unreal-engine" target="_blank" rel="noopener">Animation Notifications</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#flow-notify-context-effect">1. Anim Notify 에서 Context Effect 흐름</a></li>
+          <li><a href="#structure-weapon-mesh-abp">2. Weapon Mesh ABP 분리 구조</a></li>
+          <li><a href="#verification-shootertests">3. ShooterTests Animation matrix</a></li>
+          <li><a href="#recipe-add-weapon">4. 새 무기 추가 레시피</a></li>
+          <li><a href="#recipe-add-cosmetic">5. 새 cosmetic / body style 추가 레시피</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-notify-context-effect">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>Anim Notify 에서 Context Effect 흐름</h2>
+          <p class="flow-desc">발자국 notify 가 surface 와 매칭되어 audio / VFX 재생까지 도달하는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">sequence timeline 의 notify hit</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">locomotion sequence 의 발 접지 frame 에서 <code>UAnimNotify_LyraContextEffects</code> 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">notify 가 <code>EffectTag</code> 와 bone name 을 들고 있음.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ULyraContextEffectComponent 로 위임</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">pawn 의 effect component 가 trace 로 surface tag 결정.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>DT_AnimEffectTags</code> + <code>CFX_DefaultSkin</code> 매핑 lookup.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">audio / Niagara 재생</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">매칭된 entry 의 sound / VFX 가 bone 위치에서 재생.</p></li>
+        </ol>
+      </section>
+
+      <section class="structure-section" id="structure-weapon-mesh-abp">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>Weapon Mesh ABP 분리 구조</h2>
+          <p class="block-desc">캐릭터 ABP 와 별도로 무기 mesh 가 자체 ABP 를 갖는다. 무기 mesh skeleton 이 캐릭터와 다르기 때문.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>ABP_Weap_Pistol</h3>
+            <p>권총 slide / hammer / trigger 자체 애니메이션.</p>
+            <ul class="struct-meta"><li>pistol skeleton</li><li><code>AM_Weap_Pistol_*</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>ABP_Weap_Rifle</h3>
+            <p>소총 bolt / magazine / trigger.</p>
+            <ul class="struct-meta"><li>rifle skeleton</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>ABP_Weap_Shotgun</h3>
+            <p>샷건 pump / shell eject.</p>
+            <ul class="struct-meta"><li>shotgun skeleton</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>동기 montage 페어</h3>
+            <p>캐릭터의 <code>AM_MM_Rifle_Reload</code> 와 weapon mesh 의 <code>AM_Weap_Rifle_Reload</code> 가 같은 길이로 동시 재생.</p>
+            <ul class="struct-meta"><li>ability 가 두 montage 를 함께 trigger</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="verification-section" id="verification-shootertests">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>ShooterTests Animation matrix</h2>
+          <p class="block-desc">자동 회귀 테스트가 animation 관련해서 잡는 시나리오.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>InputCrouchAnimationTest</strong><p><code>ACTOR_ANIMATION_TEST</code> 매크로. crouch input 시 crouch sequence 가 실제로 재생되는지 확인.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>WeaponMeleeAnimationTest</strong><p><code>ACTOR_ANIMATION_TEST</code> 매크로. melee montage 가 slot 매칭과 길이 검증.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>InputAnimationTest</strong><p><code>ACTOR_ANIMATION_NETWORK_TEST</code> 매크로. client / server 양쪽에서 같은 animation 이 재생되는지 검증.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>FShooterTestsAnimationTestHelper</strong><p><code>FindAnimationAsset</code>, <code>IsAnimationPlaying</code> 등 헬퍼 함수. 새 테스트 작성 시 이 헬퍼 사용.</p></div></li>
+        </ul>
+      </section>
+
+      <section class="recipe-section" id="recipe-add-weapon">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>새 무기 추가 레시피</h2>
+          <p class="block-desc">기존 라이라 무기 (Pistol / Rifle / Shotgun) 을 모델로 새 무기 카테고리를 추가하는 순서.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>1. weapon mesh + skeleton 임포트</h3><p>새 무기의 skeletal mesh 와 skeleton 준비. bone 이름 표준 (예: <code>b_gun_root</code>) 맞추기.</p></li>
+          <li class="recipe-step"><h3>2. ABP_Weap_NewWeapon 생성</h3><p>기존 <code>ABP_Weap_Rifle</code> 복제, 새 skeleton 으로 reparent.</p></li>
+          <li class="recipe-step"><h3>3. ABP_NewWeaponAnimLayers 생성</h3><p><code>ABP_ItemAnimLayersBase</code> 부모. 14 인터페이스 함수 override, 새 sequence set 연결.</p></li>
+          <li class="recipe-step"><h3>4. B_WeaponInstance_NewWeapon 생성</h3><p><code>B_WeaponInstance_Base</code> 부모. <code>EquippedAnimSet</code> = <code>ABP_NewWeaponAnimLayers</code>, <code>UneuippedAnimSet</code> = <code>ABP_UnarmedAnimLayers</code>.</p></li>
+          <li class="recipe-step"><h3>5. fire / reload montage 페어 작성</h3><p>캐릭터용 <code>AM_MM_NewWeapon_Fire</code> 와 weapon mesh 용 <code>AM_Weap_NewWeapon_Fire</code> 동시 재생되도록 길이 맞춤.</p></li>
+          <li class="recipe-step"><h3>6. ability 등록</h3><p><code>ULyraGameplayAbility_RangedWeapon</code> 파생 ability 가 새 무기를 인식하도록 input → ability 매핑 설정.</p></li>
+          <li class="recipe-step"><h3>7. ShooterTests 추가</h3><p><code>ACTOR_ANIMATION_TEST</code> 또는 <code>ACTOR_ANIMATION_NETWORK_TEST</code> 매크로로 새 무기의 fire / reload sequence 회귀 확인.</p></li>
+        </ol>
+      </section>
+
+      <section class="recipe-section" id="recipe-add-cosmetic">
+        <header class="block-head">
+          <span class="block-kind">레시피</span>
+          <h2>새 cosmetic / body style 추가 레시피</h2>
+          <p class="block-desc">새 캐릭터 외형을 cosmetic tag 와 함께 추가하는 순서.</p>
+        </header>
+        <ol class="recipe-steps">
+          <li class="recipe-step"><h3>1. Cosmetic tag 정의</h3><p><code>Cosmetic.*</code> 네임스페이스 아래 새 tag 등록 (예: <code>Cosmetic.AnimationStyle.NewStyle</code>).</p></li>
+          <li class="recipe-step"><h3>2. invisible driving mesh 임포트</h3><p>새 body style 의 invisible skeletal mesh (<code>SKM_NewBody_Invis</code>) 임포트. 표준 mannequin skeleton 호환 확인.</p></li>
+          <li class="recipe-step"><h3>3. visible cosmetic mesh + actor</h3><p><code>SKM_NewBody</code> visible mesh, <code>B_NewBody</code> actor BP. <code>ABP_Mannequin_CopyPose</code> 적용.</p></li>
+          <li class="recipe-step"><h3>4. CharacterParts 컴포넌트의 BodyMeshes entry 등록</h3><p>새 entry 의 RequiredTags = {새 cosmetic tag}, mesh = <code>SKM_NewBody_Invis</code>.</p></li>
+          <li class="recipe-step"><h3>5. 무기 layer 의 RequiredTags 확장 (선택)</h3><p>새 cosmetic 에만 적용할 layer 가 있으면 weapon instance 의 <code>EquippedAnimSet</code> 배열 앞쪽에 RequiredTags 매칭 entry 추가.</p></li>
+          <li class="recipe-step"><h3>6. cosmetic 적용 테스트</h3><p>pawn 의 cosmetic tag set 에 새 tag 추가 시 invisible mesh 와 layer 가 교체되는지 in-editor 확인.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

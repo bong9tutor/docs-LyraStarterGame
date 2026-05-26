@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Common Style · 위젯 라이브러리 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-styles-widgets" data-validation="partial">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>7. Common Style · 위젯 라이브러리</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>CommonUI Quickstart 5 단계는 무엇인가?</li>
+              <li>라이라가 만든 CommonUI 파생 위젯은 무엇이 있는가?</li>
+              <li>style 자산이 어떻게 일괄 테마를 만드는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>CommonUI 의 입력 액션은 데이터 테이블로 관리.</li>
+              <li>style 자산은 위젯 외형의 단일 출처 (button, text, border 별 자산).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-ui-input-activation.html">입력 라우팅과 활성화</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/common-ui-quickstart-guide-for-unreal-engine" target="_blank" rel="noopener">CommonUI Quickstart</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-quickstart">1. CommonUI Quickstart 5 단계</a></li>
+          <li><a href="#reference-lyra-widgets">2. 라이라 CommonUI 파생 위젯</a></li>
+          <li><a href="#reference-input-actions">3. UI.Action 입력 태그</a></li>
+          <li><a href="#reference-styles">4. Common Style 자산</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-quickstart">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>CommonUI Quickstart 5 단계</h2>
+          <p class="block-desc">CommonUI 를 새 프로젝트에 활성화하는 5 단계 절차. 라이라도 같은 패턴.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>단계</th><th>설정 위치</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1. viewport routing</td><td>Project Settings, General, <code>Game Viewport Client Class</code> = <code>CommonGameViewportClient</code></td><td>입력을 CommonUI 로 라우팅</td></tr>
+              <tr><td>2. input action data table</td><td>Common Input Settings 의 <code>Input Data</code></td><td>액션 (Confirm / Cancel / ...) 정의</td></tr>
+              <tr><td>3. default nav</td><td>navigation 설정</td><td>focus 이동 규칙</td></tr>
+              <tr><td>4. controller data</td><td><code>CommonInputBaseControllerData</code></td><td>platform 별 input 매핑</td></tr>
+              <tr><td>5. styles</td><td><code>CommonButtonStyle</code> 등 style 자산</td><td>위젯 외형 일괄 적용</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-lyra-widgets">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>라이라 CommonUI 파생 위젯</h2>
+          <p class="block-desc">라이라가 CommonUI 위 추가한 파생 위젯. 파일 존재만 검증 완료, 구체 BP 사용 위치는 부분 검증.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>라이라 클래스</th><th>parent (CommonUI)</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ULyraButtonBase</code></td><td><code>UCommonButtonBase</code></td><td>라이라 공통 버튼 base</td></tr>
+              <tr><td><code>ULyraActionWidget</code></td><td><code>UCommonActionWidget</code></td><td>action prompt (예: "X to interact")</td></tr>
+              <tr><td><code>ULyraBoundActionButton</code></td><td><code>UCommonBoundActionButton</code></td><td>액션 binding 버튼</td></tr>
+              <tr><td><code>ULyraTabButtonBase</code></td><td><code>UCommonTabButtonBase</code></td><td>탭 버튼</td></tr>
+              <tr><td><code>ULyraTabListWidgetBase</code></td><td><code>UCommonTabListWidgetBase</code></td><td>탭 리스트</td></tr>
+              <tr><td><code>ULyraWidgetFactory</code></td><td><code>UWidgetFactory</code></td><td>데이터 와 위젯 생성 factory</td></tr>
+              <tr><td><code>ULyraListView</code></td><td><code>UCommonListView</code></td><td>리스트 뷰</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-input-actions">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>UI.Action 입력 태그</h2>
+          <p class="block-desc">CommonUI 입력 액션의 라이라 tag. 데이터 테이블이 키 / 버튼 매핑 보유.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>태그</th><th>역할</th><th>대표 사용</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>UI.Action.Confirm</code></td><td>확인 / 진행</td><td>대화 박스, 선택</td></tr>
+              <tr><td><code>UI.Action.Cancel</code></td><td>취소 / 닫기</td><td>back, 메뉴 닫기</td></tr>
+              <tr><td><code>UI.Action.NextTab</code></td><td>다음 탭</td><td>설정 화면 탭 이동</td></tr>
+              <tr><td><code>UI.Action.PreviousTab</code></td><td>이전 탭</td><td>설정 화면 탭 이동</td></tr>
+              <tr><td><code>UI.Action.Escape</code></td><td>escape menu 호출</td><td><code>ULyraHUDLayout</code> 의 escape menu</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-styles">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>Common Style 자산</h2>
+          <p class="block-desc">위젯 외형을 자산으로 분리해 일괄 테마. 라이라 CDO 는 부분 검증.</p>
+        </header>
+        <ul class="ref-list">
+          <li><code>CommonButtonStyle</code>: 버튼의 normal / hovered / pressed / disabled state 별 brush + sound.</li>
+          <li><code>CommonTextStyle</code>: 텍스트의 font / size / color / shadow.</li>
+          <li><code>CommonBorderStyle</code>: 박스 / panel 의 background brush + padding.</li>
+        </ul>
+        <div class="note note-info">
+          <strong>활용:</strong> style 자산을 변경하면 그 자산을 참조하는 모든 위젯이 일괄 갱신. 디자인 시스템의 단일 출처.
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

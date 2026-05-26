@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aiming, ADS, Upper-body Additive · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-aiming-additives">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>8. Aiming, ADS, Upper-body Additive</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>aim pitch / yaw 가 어떤 blend weight 와 노드로 흐르는가?</li>
+              <li>ADS 와 hipfire 가 어떻게 분기되는가?</li>
+              <li>사격 직후 무기가 다시 들리는 동작은 어디서 결정되는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Aim offset 자산 (<code>AO_MM_*</code>, <code>AO_MF_*</code>) 은 pitch / yaw 두 축의 sample pose 세트.</li>
+              <li>blend weight 변수는 <code>ABP_ItemAnimLayersBase</code> 의 <code>Update Blend Weight Data</code> 에서 산출.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-linked-layers.html">Linked Item Layers</a>: <code>FullBody_Aiming</code>, <code>FullBodyAdditives</code> 인터페이스 함수의 의미.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/aim-offset-in-unreal-engine" target="_blank" rel="noopener">Aim Offset</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-blend-weights">1. Blend weight 변수와 영향 범위</a></li>
+          <li><a href="#flow-aim-pipeline">2. AimPitch / AimYaw 가 pose 까지 흐르는 과정</a></li>
+          <li><a href="#decision-ads-vs-hipfire">3. ADS / hipfire / raise 분기 규칙</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-blend-weights">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>Blend weight 변수와 영향 범위</h2>
+          <p class="block-desc"><code>Update Blend Weight Data</code> 에서 매 frame 산출되는 변수와 어느 노드에 영향을 주는지. 학습 시 이 표가 단일 출처.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>변수</th><th>입력</th><th>영향 노드</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>AimPitch</code></td><td>controller pitch</td><td>aim offset BlendSpace</td><td>위 / 아래 조준 sample blend</td></tr>
+              <tr><td><code>AimYaw</code></td><td>controller yaw - actor yaw</td><td>aim offset BlendSpace</td><td>좌 / 우 조준 sample blend</td></tr>
+              <tr><td><code>IsADS</code></td><td>weapon ability tag</td><td>FullBody_Aiming 내부 분기</td><td>ADS 시 IdleAimOffset 사용, 아닐 시 RelaxedAimOffset</td></tr>
+              <tr><td><code>TimeSinceFiredWeapon</code></td><td>FireWeapon ability 시점부터 경과</td><td>HipFireUpperBodyOverrideWeight</td><td>사격 직후 상체 raise 가중치 산출</td></tr>
+              <tr><td><code>AimOffsetBlendWeight</code></td><td>velocity, ADS, crouch</td><td>FullBody_Aiming 합성 weight</td><td>이동 중 aim offset 감쇠</td></tr>
+              <tr><td><code>HipFireUpperBodyOverrideWeight</code></td><td>TimeSinceFiredWeapon, crouch</td><td>UpperBody slot blend</td><td>raise 동작 가중치</td></tr>
+              <tr><td><code>RaiseWeaponAfterFiringDuration</code></td><td>config (CDO)</td><td>HipFireUpperBodyOverrideWeight 계산</td><td>raise 유지 시간</td></tr>
+              <tr><td><code>RaiseWeaponAfterFiringWhenCrouched</code></td><td>config (CDO)</td><td>crouch 분기</td><td>crouch 시 raise 적용 여부</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-aim-pipeline">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>AimPitch / AimYaw 가 pose 까지 흐르는 과정</h2>
+          <p class="flow-desc">controller 회전 입력이 aim offset 으로 변환되어 cached pose 위에 얹히는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Controller pitch / yaw</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">player input 또는 AI controller 가 회전 입력을 만듦.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">AnimInstance NativeUpdate 가 <code>AimPitch</code>, <code>AimYaw</code> 갱신.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">linked layer 의 FullBody_Aiming 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">base ABP 가 무기별 layer 의 <code>FullBody_Aiming</code> 을 호출, layer 내부 aim offset BlendSpace 평가.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>AimOffsetBlendWeight</code> 로 합성 가중치 결정.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">cached pose 위에 aim offset 합성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">locomotion cached pose 위에 aim offset 이 weight 만큼 합성.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">FullBodyAdditives, FullBody_SkeletalControls 적용</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">추가 additive (사격 반동 등) 와 skeletal control (손가락 trigger pose) 합성.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-ads-vs-hipfire">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>ADS / hipfire / raise 분기 규칙</h2>
+          <p class="block-desc">aiming state 가 어떤 sample 세트와 weight 를 고르는지.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. ADS 상태</h3><p><code>IsADS == true</code> 이면 무기 layer 가 <code>IdleAimOffset</code> sample 사용 (조준 자세). <code>AimOffsetBlendWeight</code> 도 1 에 가까움.</p></li>
+          <li class="decision-item"><h3>2. hipfire 상태</h3><p><code>IsADS == false</code>, 사격 후 짧은 시간 이면 <code>RelaxedAimOffset</code> sample + raise 가중치. 사격 직후 무기가 잠시 들렸다 내려옴.</p></li>
+          <li class="decision-item"><h3>3. raise 종료 조건</h3><p><code>TimeSinceFiredWeapon</code> 이 <code>RaiseWeaponAfterFiringDuration</code> 초과 시 raise weight 0 으로 감쇠. crouch 시 <code>RaiseWeaponAfterFiringWhenCrouched</code> 가 false 면 raise 적용 안 함.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

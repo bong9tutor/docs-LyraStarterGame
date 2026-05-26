@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AssetBundle 메타 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-asset-bundles">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>7. AssetBundle 메타</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>UPROPERTY(meta=(AssetBundles=...))</code> 가 자산을 어떻게 분류하는가?</li>
+              <li>9 곳 메타 사용처는 무엇을 분류하는가?</li>
+              <li>UI 자산은 왜 <code>Client</code> 만이고 게임플레이 자산은 양쪽인가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>AssetBundle 메타는 soft pointer 자산을 자동 분류.</li>
+              <li>Dedicated server 메모리 절약이 핵심 동기.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-experience-state-machine.html">Experience 7 단계</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/asset-management-in-unreal-engine" target="_blank" rel="noopener">Asset Management (Bundles)</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-bundle-meta">1. AssetBundle 메타 9 사용처</a></li>
+          <li><a href="#flow-bundle-load">2. ChangeBundleStateForPrimaryAssets 흐름</a></li>
+          <li><a href="#decision-client-vs-server">3. Client / Server 분류 규칙</a></li>
+          <li><a href="#verification-las-bundles">4. LAS_ShooterGame_StandardHUD 검증</a></li>
+          <li><a href="#reference-equipped-bundle">5. FLyraBundles::Equipped 의미</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-bundle-meta">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>AssetBundle 메타 9 사용처</h2>
+          <p class="block-desc">라이라 <code>Source/LyraGame/</code> 안 9 곳의 <code>meta=(AssetBundles=...)</code> 사용. 모두 검증 완료.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>파일</th><th>프로퍼티</th><th>bundle</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>LyraExperienceDefinition.h</code></td><td><code>DefaultPawnData</code></td><td>Client,Server</td></tr>
+              <tr><td><code>LyraExperienceDefinition.h</code></td><td><code>Actions[]</code></td><td>Client,Server</td></tr>
+              <tr><td><code>LyraExperienceActionSet.h</code></td><td><code>Actions[]</code></td><td>Client,Server</td></tr>
+              <tr><td><code>LyraPawnData.h</code></td><td><code>AbilitySets[]</code></td><td>Client,Server</td></tr>
+              <tr><td><code>LyraPawnData.h</code></td><td><code>InputConfig</code></td><td>Client</td></tr>
+              <tr><td><code>GameFeatureAction_AddInputContextMapping.h</code></td><td><code>InputMapping</code></td><td>Client</td></tr>
+              <tr><td><code>GameFeatureAction_AddAbilities.h</code></td><td><code>AbilitiesList[].AbilitySet</code></td><td>Client,Server</td></tr>
+              <tr><td><code>GameFeatureAction_AddWidget.h</code></td><td><code>Widgets[]</code></td><td>Client (+ override 로 추가 수집)</td></tr>
+              <tr><td><code>LyraUserFacingExperienceDefinition.h</code></td><td><code>TileIcon</code> 등</td><td>Client</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-bundle-load">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>ChangeBundleStateForPrimaryAssets 흐름</h2>
+          <p class="flow-desc">runtime 에 bundle 단위 비동기 로드를 요청하면 메타 분류된 자산이 일괄 로드.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">StartExperienceLoad 가 BundlesToLoad 결정</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">NetMode 별 분기: server 이면 <code>[Server]</code>, listen 이면 <code>[Client, Server]</code>, client 이면 <code>[Client]</code>.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ChangeBundleStateForPrimaryAssets 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">AssetManager 가 BundleAssetList 와 BundlesToLoad 로 비동기 로드 시작.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">메타 자동 수집 + override 추가 수집</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>meta=(AssetBundles)</code> 자동 수집 외, <code>AddAdditionalAssetBundleData</code> override 가 커스텀 자산 추가.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">OnExperienceLoadComplete</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">모든 자산 로드 완료 시 콜백. 다음 state 진행.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-client-vs-server">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>Client / Server 분류 규칙</h2>
+          <p class="block-desc">자산을 어느 bundle 에 둘지 결정 기준.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. UI 자산</h3><p><code>Client</code> 만. dedicated server 는 렌더 안 함, 메모리 절약.</p></li>
+          <li class="decision-item"><h3>2. 게임플레이 자산</h3><p><code>Client,Server</code> 양쪽. ASC, AbilitySet, GE 등 server 도 실행 필요.</p></li>
+          <li class="decision-item"><h3>3. Input mapping</h3><p><code>Client</code> 만. server 는 입력 처리 안 함.</p></li>
+          <li class="decision-item"><h3>4. mesh / animation</h3><p>일반적으로 <code>Client,Server</code>. server 도 hit detection 위해 mesh 필요.</p></li>
+        </ol>
+      </section>
+
+      <section class="verification-section" id="verification-las-bundles">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>LAS_ShooterGame_StandardHUD 검증</h2>
+          <p class="block-desc">대표 ActionSet 의 AssetBundleData 자동 수집 검증.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>Layout 1 widget 수집</strong><p><code>W_ShooterHUDLayout</code> 이 <code>Client</code> bundle 에 등록.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>Widgets 11 widget 수집</strong><p>QuickBar / Reticle / ... 11 widget 이 <code>Client</code> bundle. override <code>AddAdditionalAssetBundleData</code> 가 자동 수집 보완.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>B_LyraDefaultExperience AssetBundleData = 1</strong><p>Experience CDO 가 AssetBundle 1 entry. (검증 원장)</p></div></li>
+        </ul>
+      </section>
+
+      <section class="reference-section" id="reference-equipped-bundle">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>FLyraBundles::Equipped 의미</h2>
+          <p class="block-desc">라이라가 추가로 정의한 bundle 이름. 무기 / 장비의 conditional 로드.</p>
+        </header>
+        <ul class="ref-list">
+          <li><code>FLyraBundles::Equipped</code>: 무기 / 장비가 실제로 장착되었을 때만 로드되는 bundle.</li>
+          <li>장비 instance 가 <code>ChangeBundleStateForPrimaryAssets(..., [Equipped])</code> 호출.</li>
+          <li>장착 해제 시 unload.</li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

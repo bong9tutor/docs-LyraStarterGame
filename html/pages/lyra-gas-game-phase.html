@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Game Phase · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-game-phase">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>8. Game Phase</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>왜 페이즈를 어빌리티 (<code>ULyraGamePhaseAbility</code>) 로 표현하는가?</li>
+              <li>GameState 의 ASC 가 페이즈 어빌리티의 owner / avatar 가 되는 이유는?</li>
+              <li>페이즈 계층 (Game.Playing + Game.Playing.SuddenDeath) 의 부모-자식 관계는?</li>
+              <li><code>EPhaseTagMatchType</code> 의 ExactMatch / PartialMatch 차이는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>페이즈를 ability 로 표현하면 BeginPhase / EndPhase 가 GAS lifecycle 로 자동 처리.</li>
+              <li>같은 GameState ASC 에서 여러 페이즈 ability 동시 활성 가능 (계층).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-asc-init.html">ASC 초기화</a> (GameState ASC).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-ability-system-for-unreal-engine" target="_blank" rel="noopener">GAS 공식</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-subsystem-api">1. ULyraGamePhaseSubsystem API</a></li>
+          <li><a href="#flow-phase-transition">2. 페이즈 전이 흐름</a></li>
+          <li><a href="#decision-match-type">3. EPhaseTagMatchType (Exact vs Partial)</a></li>
+          <li><a href="#reference-phase-assets">4. 6 Phase 자산</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-subsystem-api">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ULyraGamePhaseSubsystem API</h2>
+          <p class="block-desc">페이즈 시작 / 종료 / 구독 함수.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>함수</th><th>역할</th><th>호출자</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>StartPhase(PhaseAbilityClass)</code></td><td>페이즈 어빌리티 활성. GameState ASC 에 grant + activate.</td><td>GameMode / 트리거</td></tr>
+              <tr><td><code>WhenPhaseStartsOrIsActive(PhaseTag, MatchType, Callback)</code></td><td>페이즈 활성 시 콜백 등록. 이미 활성이면 즉시.</td><td>모든 구독자</td></tr>
+              <tr><td><code>WhenPhaseEnds(PhaseTag, MatchType, Callback)</code></td><td>페이즈 종료 시 콜백 등록.</td><td>모든 구독자</td></tr>
+              <tr><td><code>IsPhaseActive(PhaseTag, MatchType)</code></td><td>활성 여부 조회.</td><td>모든 구독자</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-phase-transition">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>페이즈 전이 흐름</h2>
+          <p class="flow-desc">Phase_Warmup 에서 Phase_Playing, Phase_PostGame.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">StartPhase(Phase_Warmup)</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">GameMode 가 매치 시작 시 호출. Warmup ability 가 GameState ASC 에 grant + activate.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">OnBeginPhase 콜백</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>WhenPhaseStartsOrIsActive(Phase_Warmup, ...)</code> 구독자 호출. 예: <code>GE_PregameLobby</code> 적용.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">Warmup 타이머 종료.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">StartPhase(Phase_Playing)</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">Playing ability 활성. <code>OnBeginPhase</code> 가 형제 페이즈 (Warmup) 자동 취소.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">매치 종료 후 StartPhase(Phase_PostGame)</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">PostGame ability 활성. 점수 표시 등.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-match-type">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>EPhaseTagMatchType (Exact vs Partial)</h2>
+          <p class="block-desc">페이즈 tag 매칭 규칙.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. ExactMatch</h3><p>정확히 같은 tag 만 매칭. 예: <code>Game.Playing</code> 구독 시 <code>Game.Playing.SuddenDeath</code> 활성에는 반응 안 함.</p></li>
+          <li class="decision-item"><h3>2. PartialMatch</h3><p>자식 tag 도 매칭. <code>Game.Playing</code> 구독 시 <code>Game.Playing.SuddenDeath</code> 활성에도 콜백 실행.</p></li>
+          <li class="decision-item"><h3>3. 형제 페이즈 자동 취소</h3><p><code>OnBeginPhase</code> 가 새 페이즈와 같은 부모를 가진 활성 페이즈 (형제) 만 취소. 부모는 유지.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-phase-assets">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>6 Phase 자산</h2>
+          <p class="block-desc">ShooterCore 3 + TopDownArena 3 페이즈 어빌리티. <code>OnInputTriggered</code> + <code>Independent</code> + <code>ServerOnly</code> 공통 정책 검증 완료.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>plugin</th><th>Phase ability</th><th>GamePhaseTag</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ShooterCore</td><td><code>Phase_Warmup</code></td><td><code>ShooterGame.GamePhase.Warmup</code></td></tr>
+              <tr><td>ShooterCore</td><td><code>Phase_Playing</code></td><td><code>ShooterGame.GamePhase.Playing</code></td></tr>
+              <tr><td>ShooterCore</td><td><code>Phase_PostGame</code></td><td><code>ShooterGame.GamePhase.PostGame</code></td></tr>
+              <tr><td>TopDownArena</td><td><code>Phase_Warmup</code></td><td><code>ShooterGame.GamePhase.Warmup</code> (두 모드 공유)</td></tr>
+              <tr><td>TopDownArena</td><td><code>Phase_Playing</code></td><td><code>ShooterGame.GamePhase.Playing</code></td></tr>
+              <tr><td>TopDownArena</td><td><code>Phase_PostGame</code></td><td><code>ShooterGame.GamePhase.PostGame</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

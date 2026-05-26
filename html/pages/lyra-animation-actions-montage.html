@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>상체 액션과 Montage Slot · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-actions-montage">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>7. 상체 액션과 Montage Slot</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>montage 가 어느 slot 으로 들어가는가?</li>
+              <li>ability 가 melee, reload, grenade toss 같은 montage 를 어떻게 재생 요청하는가?</li>
+              <li>locomotion 과 상체 montage 가 충돌할 때 무엇을 확인하는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Slot 노드는 base ABP 의 AnimGraph 에 박혀 있고, montage 가 자기 slot 이름과 매칭될 때 그 위치에 pose 가 끼워진다.</li>
+              <li><code>FullBody</code> slot 은 전신, <code>UpperBody</code> slot 은 layered blend per bone 으로 상체에만 적용.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-base-abp.html">Base ABP pose graph</a>: slot 5 개의 위치 표가 본 페이지 montage 의 합성 위치를 결정한다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-montage-in-unreal-engine" target="_blank" rel="noopener">Animation Montage</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-slot-usage">1. Slot 이름별 용도</a></li>
+          <li><a href="#reference-montage-samples">2. 대표 montage 자산</a></li>
+          <li><a href="#flow-ability-montage">3. Ability 에서 montage 재생 흐름</a></li>
+          <li><a href="#verification-collision">4. locomotion + montage 충돌 점검</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-slot-usage">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>Slot 이름별 용도</h2>
+          <p class="block-desc">base ABP 의 5 slot 이 어떤 montage 카테고리를 받는지 정리. montage 작성 시 이 표가 단일 출처.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>slot 이름</th><th>범위</th><th>받는 montage</th><th>합성 위치</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>FullBody</code></td><td>전신</td><td>jump, death, dash, melee</td><td>cached pose 직후 첫 합성 지점</td></tr>
+              <tr><td><code>UpperBody</code></td><td>상체 (layered blend per bone)</td><td>reload, grenade toss, weapon switch</td><td>FullBody slot 뒤에 layered blend</td></tr>
+              <tr><td><code>AdditiveHitReact</code></td><td>전신 additive</td><td>피격 반응 additive</td><td>slot 합성 후 additive 영역</td></tr>
+              <tr><td><code>FullBodyAdditivePreAim</code></td><td>전신 additive</td><td>aim 적용 전 보정 additive</td><td>aim offset 노드 직전</td></tr>
+              <tr><td><code>UpperBodyAdditive</code></td><td>상체 additive</td><td>상체 additive (작은 흔들림 등)</td><td>UpperBody slot 뒤 additive</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-montage-samples">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>대표 montage 자산</h2>
+          <p class="block-desc">슬롯과 무기별 대표 montage. <code>MM</code> 은 Manny, <code>MF</code> 는 Quinn / feminine variant.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>montage</th><th>slot</th><th>카테고리</th><th>트리거 위치</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>AM_MM_Dash_Forward</code></td><td>FullBody</td><td>action (dash)</td><td>Dash ability</td></tr>
+              <tr><td><code>AM_MM_Pistol_Melee</code></td><td>FullBody</td><td>action (melee)</td><td>Pistol melee ability</td></tr>
+              <tr><td><code>AM_MM_Rifle_GrenadeToss</code></td><td>UpperBody</td><td>action (grenade)</td><td>Grenade ability</td></tr>
+              <tr><td><code>AM_MM_Pistol_Fire</code></td><td>UpperBody</td><td>weapon (fire)</td><td>Pistol fire ability</td></tr>
+              <tr><td><code>AM_MM_Rifle_Reload</code></td><td>UpperBody</td><td>weapon (reload)</td><td>Rifle reload ability</td></tr>
+              <tr><td><code>AM_Weap_*</code></td><td>UpperBody</td><td>weapon (공용)</td><td>각 무기 ability</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-ability-montage">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>Ability 에서 montage 재생 흐름</h2>
+          <p class="flow-desc">GAS ability 가 montage 를 ABP slot 까지 전달하는 인과. ability 실패 시 <code>FailureTagToAnimMontage</code> 경로도 같은 slot 을 사용.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Ability 활성화</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraGameplayAbility</code> 가 input 등으로 활성화.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">PlayMontageAndWait task 또는 ability 내부 PlayMontage 호출.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PlayMontage on Owner SkeletalMesh</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">target montage 의 첫 slot 이름이 ABP slot 과 매칭되어 평가.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">ability 실패 분기: <code>FailureTagToAnimMontage</code> 매핑이 있으면 failure montage 재생.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ABP AnimGraph 에서 slot 합성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">cached pose 위에 montage pose 가 slot 위치에 끼워짐. blend weight 는 slot blend in / out 설정.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">출력 pose 에 반영</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">Control Rig 와 Inertialization 후 화면에 표시.</p></li>
+        </ol>
+      </section>
+
+      <section class="verification-section" id="verification-collision">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>locomotion + montage 충돌 점검</h2>
+          <p class="block-desc">montage 가 의도와 다르게 보일 때 확인할 항목.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>slot 이름 일치</strong><p>montage 첫 segment 의 slot 이름이 base ABP 의 slot 노드 이름과 정확히 일치.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>FullBody 와 UpperBody 동시 재생</strong><p>UpperBody slot 은 layered blend per bone 이라 FullBody 의 하체와 자연스럽게 합성. FullBody montage 가 동시 재생되면 UpperBody 가 hidden 될 수 있음.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>blend weight 0</strong><p>slot blend in / out 시간이 montage 보다 길면 montage 가 보이기 전에 끝남.</p></div></li>
+          <li class="verify-item"><span class="badge-partial">부분</span><div><strong>WeaponMeleeAnimationTest 통과 여부</strong><p>ShooterTests 의 <code>WeaponMeleeAnimationTest</code> 가 melee montage 의 slot 매칭과 길이 회귀를 잡음. <em>구체 테스트 코드 위치는 추가 확인 필요.</em></p></div></li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

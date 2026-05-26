@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lyra GAS 전체 지도 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-overview">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>1. Lyra GAS 전체 지도</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>GAS 의 5 대 컴포넌트 위에 라이라가 얹은 5 책임은 무엇인가?</li>
+              <li>"부여 / 활성 / 적용" 의 3 단 분리는 무엇을 의미하는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>GAS = ASC + GameplayAbility + GameplayEffect + GameplayCue + AttributeSet.</li>
+              <li>라이라는 ASC 위에 InputTag / TagRelationship / ActivationGroup 같은 정책을 얹는다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li>(없음. 시스템 진입점)</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-ability-system-for-unreal-engine" target="_blank" rel="noopener">GAS 공식</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-3-stages">1. 부여 / 활성 / 적용의 3 단</a></li>
+          <li><a href="#flow-asc-to-attribute">2. ASC, AbilitySet, 활성, GE, AttributeSet 흐름</a></li>
+          <li><a href="#reference-pages">3. 시스템 페이지 경로</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-3-stages">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>부여 / 활성 / 적용의 3 단</h2>
+          <p class="block-desc">라이라 GAS 학습의 골격. 세 단을 섞으면 "왜 어빌리티가 안 보이는가" 와 "왜 데미지가 안 들어가는가" 가 구분 안 됨.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>부여 (Grant)</h3>
+            <p>AbilitySet 으로 어빌리티 spec / GE / AttributeSet 을 ASC 에 등록. 한 번 일어남.</p>
+            <ul class="struct-meta"><li><code>ULyraAbilitySet</code></li><li><code>FLyraAbilitySet_GrantedHandles</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>활성 (Activate)</h3>
+            <p>입력 또는 자동 트리거로 어빌리티 spec 이 instance 화되어 실행. 매 활성마다.</p>
+            <ul class="struct-meta"><li><code>ActivationPolicy</code></li><li><code>ActivationGroup</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>적용 (Apply)</h3>
+            <p>활성된 어빌리티가 GE 를 만들어 attribute 를 변경. 매 GE 마다.</p>
+            <ul class="struct-meta"><li><code>UGameplayEffect</code></li><li><code>Execution Calculation</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>관계 (Relationship)</h3>
+            <p>어빌리티 간 block / cancel / required / blocked 를 데이터로 표현.</p>
+            <ul class="struct-meta"><li><code>ULyraAbilityTagRelationshipMapping</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">5</span>효과 (Cue)</h3>
+            <p>어빌리티 / 이펙트의 시각·음향 효과. delay-load 정책.</p>
+            <ul class="struct-meta"><li><code>ULyraGameplayCueManager</code></li><li><code>GCN_*</code></li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-asc-to-attribute">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>ASC, AbilitySet, 활성, GE, AttributeSet 흐름</h2>
+          <p class="flow-desc">플레이어가 입력을 눌러 어빌리티가 발동되고 데미지가 들어가기까지의 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PlayerState ASC 초기화</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ALyraPlayerState::AbilitySystemComponent</code> 가 owner = PS, avatar = Pawn 으로 init.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">PawnExtensionComponent 가 <code>InitState_DataInitialized</code> 시점에 호출.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AbilitySet grant</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>PawnData->AbilitySets[]</code> 의 각 set 이 <code>GiveToAbilitySystem</code> 으로 ASC 에 부여.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">InputTag binding 완료.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">InputTag 에서 Ability 활성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>AbilityInputTagPressed</code> 호출, <code>ProcessAbilityInput</code> 으로 spec 찾아 활성.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">ActivationPolicy / Group 검사 통과.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GE 적용 (예: GE_Damage_Rifle)</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ability 가 GE spec 생성, target ASC 에 적용. execution 이 attribute 계산.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AttributeSet 변경 + Cue</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>HealthSet::Health</code> 감소, <code>OnHealthChanged</code> broadcast. Cue 가 시각 / 음향 효과 재생.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-pages">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>시스템 페이지 경로</h2>
+          <p class="block-desc">3 단과 관계 / 효과 / 페이즈 / 글로벌을 깊이 학습하는 페이지들.</p>
+        </header>
+        <ul class="ref-list">
+          <li><a href="lyra-gas-asc-init.html"><code>asc-init</code></a>: ASC 초기화 4 경로.</li>
+          <li><a href="lyra-gas-ability-set.html"><code>ability-set</code></a>: AbilitySet 부여.</li>
+          <li><a href="lyra-gas-ability-policy.html"><code>ability-policy</code></a>: 활성 정책 (Policy / Group / Cost).</li>
+          <li><a href="lyra-gas-tag-relationships.html"><code>tag-relationships</code></a>: 태그 관계 매핑.</li>
+          <li><a href="lyra-gas-damage-pipeline.html"><code>damage-pipeline</code></a>: 데미지 / 힐 파이프라인.</li>
+          <li><a href="lyra-gas-cues.html"><code>cues</code></a>: GameplayCue 시스템.</li>
+          <li><a href="lyra-gas-game-phase.html"><code>game-phase</code></a>: Game Phase 어빌리티.</li>
+          <li><a href="lyra-gas-globals-context.html"><code>globals-context</code></a>: 글로벌 ASC + 컨텍스트 확장.</li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>태그 관계 매핑 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-tag-relationships">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>5. 태그 관계 매핑</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>FLyraAbilityTagRelationship</code> 의 4 컨테이너는 무엇이 다른가?</li>
+              <li>어빌리티의 <code>BlockAbilitiesWithTag</code> 와 mapping 의 <code>AbilityTagsToBlock</code> 이 어떻게 합쳐지는가?</li>
+              <li><code>TagRelationships_ShooterHero</code> 의 9 entry 는 어떤 관계를 정의하는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>어빌리티 정책 = 자신 (어빌리티 BP). 관계 = 데이터 (mapping 자산).</li>
+              <li>같은 PawnData 의 ability 끼리만 매핑이 적용.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-ability-policy.html">활성 정책</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-tags-in-unreal-engine" target="_blank" rel="noopener">Gameplay Tags</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-containers">1. FLyraAbilityTagRelationship 4 컨테이너</a></li>
+          <li><a href="#flow-asc-integration">2. ASC 통합 흐름</a></li>
+          <li><a href="#reference-shooter-hero">3. TagRelationships_ShooterHero 9 entry</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-containers">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>FLyraAbilityTagRelationship 4 컨테이너</h2>
+          <p class="block-desc">한 ability tag 가 다른 ability 와 어떤 관계를 갖는지 정의하는 4 종 tag container.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>컨테이너</th><th>의미</th><th>활성 시점</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>AbilityTagsToBlock</code></td><td>이 ability 활성 중 차단할 다른 ability tag</td><td>활성 중 지속</td></tr>
+              <tr><td><code>AbilityTagsToCancel</code></td><td>이 ability 활성 시 취소할 다른 ability tag</td><td>활성 직후 1 회</td></tr>
+              <tr><td><code>ActivationRequiredTags</code></td><td>활성 시 owner ASC 에 반드시 있어야 할 tag</td><td>활성 시 검사</td></tr>
+              <tr><td><code>ActivationBlockedTags</code></td><td>활성 시 owner ASC 에 있으면 차단할 tag</td><td>활성 시 검사</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-asc-integration">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>ASC 통합 흐름</h2>
+          <p class="flow-desc">어빌리티 자체 정책과 mapping 정책이 ASC 안에서 합쳐지는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PawnExtensionComponent 가 mapping 설정</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>PawnData->TagRelationshipMapping</code> 을 ASC 에 등록.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ApplyAbilityBlockAndCancelTags 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ability 활성 직후 ASC override 함수 실행. 어빌리티 자체 <code>BlockAbilitiesWithTag</code> + mapping 의 <code>AbilityTagsToBlock</code> 합집합 적용.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GetAdditionalActivationTagRequirements 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">활성 시도 시 ASC override. mapping 의 <code>ActivationRequiredTags</code> + <code>ActivationBlockedTags</code> 적용.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">실패 시 Ability_ActivateFail_TagsBlocked</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">차단 시 실패 태그 fire. <code>FailureTagToUserFacingMessages</code> 로 메시지 표시 가능.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-shooter-hero">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>TagRelationships_ShooterHero 9 entry</h2>
+          <p class="block-desc">ShooterCore hero 의 9 ability tag 관계 (검증 원장 전체 검증 완료).</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>ability tag</th><th>관계</th><th>대상 tag</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Ability.Type.Action.Dash</code></td><td>AbilityTagsToBlock + Cancel</td><td>모든 액션 (Sprint, Crouch, Melee, Reload, Emote, Fire 등)</td></tr>
+              <tr><td><code>Ability.Type.Action.Reload</code></td><td>AbilityTagsToBlock</td><td>Emote 만 차단</td></tr>
+              <tr><td><code>Ability.Type.Action.Emote</code></td><td>ActivationBlockedTags</td><td>Falling (낙하 중 emote 차단)</td></tr>
+              <tr><td><code>Ability.Type.Action.Melee</code></td><td>AbilityTagsToBlock</td><td>Reload, Emote</td></tr>
+              <tr><td><code>Ability.Type.Action.Sprint</code></td><td>AbilityTagsToBlock</td><td>ADS</td></tr>
+              <tr><td><code>Ability.Type.Passive.Crouch</code></td><td>(관계 entry)</td><td>Sprint 와 상호 배타</td></tr>
+              <tr><td><code>Ability.Type.Action.GrenadeToss</code></td><td>(관계 entry)</td><td>(원장 참조)</td></tr>
+              <tr><td><code>Ability.Type.Action.Fire</code></td><td>(관계 entry)</td><td>Reload 와 상호 배타</td></tr>
+              <tr><td><code>Ability.Type.Passive.ADS</code></td><td>ActivationBlockedTags</td><td>Sprint 활성 중 ADS 차단</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

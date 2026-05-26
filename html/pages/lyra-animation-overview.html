@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lyra 애니메이션 전체 지도 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-overview">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>1. 라이라 애니메이션 전체 지도</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>라이라 애니메이션의 다섯 가지 큰 시스템은 무엇인가?</li>
+              <li>캐릭터가 화면에 나타나기까지 어떤 인과를 거치는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Base ABP 는 상태 머신, cached pose, slot, 보정 노드의 배치를 맡는다.</li>
+              <li>무기별 실제 sequence set 은 <code>ALI_ItemAnimLayers</code> 구현 layer 가 제공한다.</li>
+              <li>C++ 코드는 pose 를 직접 만들기보다 ABP 가 읽을 상태와 선택 규칙을 제공한다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li>(없음. 이 페이지가 시스템 진입점)</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-in-lyra-sample-game-in-unreal-engine" target="_blank" rel="noopener">Animation in Lyra Sample Game</a></li>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/using-animation-blueprint-linking-in-unreal-engine" target="_blank" rel="noopener">Animation Blueprint Linking</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-runtime-map">1. 런타임 책임 지도</a></li>
+          <li><a href="#flow-cold-start">2. 캐릭터가 화면에 나타나기까지의 흐름</a></li>
+          <li><a href="#reference-pages">3. 시스템 페이지 경로</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-runtime-map">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>런타임 책임 지도</h2>
+          <p class="block-desc">라이라 애니메이션을 학습용 책임 단위로 묶은 지도. 이 구조를 먼저 잡으면 뒤 페이지의 상세 흐름을 읽기 쉽다.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>상태 입력</h3>
+            <p><code>ULyraAnimInstance</code> 가 GAS tag 를 ABP 변수로 미러링하고 <code>GroundDistance</code> 를 갱신한다.</p>
+            <ul class="struct-meta">
+              <li>GameplayTagPropertyMap</li>
+              <li>Movement mode · Crouch</li>
+              <li>Ground tracing</li>
+            </ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>Base character ABP</h3>
+            <p><code>ABP_Mannequin_Base</code>: 이동 상태 머신, cached pose, montage slot, 상하체 분리, root yaw, Control Rig, linked layer 호출 위치를 갖는다.</p>
+            <ul class="struct-meta">
+              <li>LocomotionSM</li>
+              <li>slot node 5 종</li>
+              <li>LinkedAnimLayer node 4 종</li>
+            </ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>Linked item layers</h3>
+            <p>base 가 상태와 호출 위치를 정하면 무기별 layer 가 실제 full-body state 와 aiming, additive, skeletal-control 구현을 제공한다.</p>
+            <ul class="struct-meta">
+              <li><code>ALI_ItemAnimLayers</code> 14 인터페이스 함수</li>
+              <li><code>ABP_ItemAnimLayersBase</code></li>
+              <li>무기별 child layer</li>
+            </ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>선택 규칙</h3>
+            <p><code>ULyraWeaponInstance</code> 와 cosmetic tag 가 equipped / unequipped layer 와 Manny / Quinn 계열 mesh 를 고른다.</p>
+            <ul class="struct-meta">
+              <li>EquippedAnimSet · UnequippedAnimSet</li>
+              <li>Cosmetic.AnimationStyle.Feminine</li>
+            </ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">5</span>효과·검증</h3>
+            <p>Anim Notify 가 Context Effect 로 분기, ShooterTests 자동화, 보정 스택 (Distance Matching, Warping, Control Rig, Post Process, Retarget).</p>
+            <ul class="struct-meta">
+              <li><code>AnimNotify_LyraContextEffects</code></li>
+              <li>ShooterTests Animation matrix</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-cold-start">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>캐릭터가 화면에 나타나기까지의 흐름</h2>
+          <p class="flow-desc">Pawn 이 spawn 되고 ASC 가 초기화되며 AnimInstance 가 connect 된 뒤 첫 frame 의 pose 가 만들어지기까지의 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">Pawn spawn + ASC init</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc"><code>ULyraAbilitySystemComponent::InitAbilityActorInfo</code> 가 ASC 와 Avatar 를 연결하면서 AnimInstance 의 GameplayTag 매핑이 활성화된다.</p>
+          </li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">ASC 가 Pawn 의 AnimInstance 를 찾고 <code>InitializeWithAbilitySystem</code> 으로 tag 미러를 시작.</p></li>
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">AnimInstance NativeInitialize</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc"><code>ULyraAnimInstance</code> 가 <code>FGameplayTagBlueprintPropertyMap</code> 으로 tag 변수를 ABP 와 묶고 character / movement 컴포넌트를 캐싱.</p>
+          </li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">매 frame 에 Game Thread 가 <code>BlueprintThreadSafeUpdateAnimation</code> 을 병렬로 호출.</p></li>
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">ThreadSafe Update 와 AnimGraph 평가</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc">ABP 변수 갱신 (10 단계 Update*Data) 후 LocomotionSM, linked layer 호출, slot 합성, Control Rig 를 거쳐 최종 pose 산출.</p>
+          </li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">결과 pose 가 SkeletalMesh 로 출력되고 cosmetic mesh 가 Copy Pose 로 따라온다.</p></li>
+          <li class="step" data-type="state">
+            <div class="step-head"><strong class="step-name">최종 pose 출력</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div>
+            <p class="step-desc">Post Process ABP (<code>ABP_Manny_PostProcess</code> 또는 <code>ABP_Quinn_PostProcess</code>) 가 추가 보정 후 화면에 표시.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-pages">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>시스템 페이지 경로</h2>
+          <p class="block-desc">위 책임 지도와 흐름을 깊이 학습하는 페이지들. 좌측 사이드바와 페이지 끝 페이저에서도 동일 순서로 이동.</p>
+        </header>
+        <ul class="ref-list">
+          <li><a href="lyra-animation-runtime-state.html"><code>runtime-state</code></a>: ASC tag 에서 ABP 변수 미러링과 ThreadSafe 갱신 구조.</li>
+          <li><a href="lyra-animation-base-abp.html"><code>base-abp</code></a>: Base ABP pose graph, cached pose, slot, linked layer 호출 지점.</li>
+          <li><a href="lyra-animation-locomotion-sm.html"><code>locomotion-sm</code></a>: Idle, Start, Cycle, Stop, Pivot, Jump / Fall 5 흐름.</li>
+          <li><a href="lyra-animation-linked-layers.html"><code>linked-layers</code></a>: ALI 14 함수 인터페이스와 무기별 layer 차이.</li>
+          <li><a href="lyra-animation-selection-rules.html"><code>selection-rules</code></a>: SelectBestLayer, body style rule, EquippedAnimSet.</li>
+          <li><a href="lyra-animation-actions-montage.html"><code>actions-montage</code></a>: Ability 에서 AnimMontage, ABP slot 까지의 인과.</li>
+          <li><a href="lyra-animation-aiming-additives.html"><code>aiming-additives</code></a>: Aim offset, ADS, additive 합성 frame pipeline.</li>
+          <li><a href="lyra-animation-warping-ik.html"><code>warping-ik</code></a>: Distance Matching, Warping, IK, Post Process, Retarget 보정 스택.</li>
+          <li><a href="lyra-animation-effects-tests-recipes.html"><code>effects-tests-recipes</code></a>: Notify 에서 Context Effect 와 ShooterTests, 확장 레시피.</li>
+          <li><a href="lyra-animation-animbp-ali-tradeoffs.html"><code>animbp-ali-tradeoffs</code></a>: 설계 페이지. 7 책임군 배치의 비용과 이득.</li>
+          <li><a href="lyra-animation-invisible-copy-pose.html"><code>invisible-copy-pose</code></a>: 설계 페이지. 보이지 않는 driving mesh 와 Copy Pose 아키텍처.</li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

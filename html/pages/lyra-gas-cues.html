@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GameplayCue 시스템 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-cues">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>7. GameplayCue 시스템</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>GameplayCue 와 GameplayCueNotify 의 차이는?</li>
+              <li>라이라의 delay-load 정책이 왜 필요한가?</li>
+              <li>21 GCN 자산이 어떤 trigger tag 에 매칭되는가?</li>
+              <li>이름 접두어 (<code>GCN_</code> / <code>GCNL_</code> / <code>GC_</code>) 의 의미는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Cue 는 시각·음향 효과 전용. attribute 변경 안 함.</li>
+              <li>GE 적용 시 cue 도 함께 trigger 가능.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-damage-pipeline.html">데미지 파이프라인</a> (GE 와 cue 의 함께 동작).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-cues-for-the-gameplay-ability-system-in-unreal-engine" target="_blank" rel="noopener">GameplayCue</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-naming">1. 이름 접두어 3 종</a></li>
+          <li><a href="#flow-cue-trigger">2. GE 적용에서 cue 호출 흐름</a></li>
+          <li><a href="#decision-delay-load">3. delay-load 정책 결정</a></li>
+          <li><a href="#reference-21-gcn">4. 21 GCN 자산 매핑</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-naming">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>이름 접두어 3 종</h2>
+          <p class="block-desc">라이라 cue 자산의 이름 규칙.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>접두어</th><th>의미</th><th>예시</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>GCN_</code></td><td>GameplayCueNotify_Burst. 1 회 재생.</td><td><code>GCN_Weapon_Hit</code></td></tr>
+              <tr><td><code>GCNL_</code></td><td>GameplayCueNotify_Looping. 시작 / 종료 매칭.</td><td><code>GCNL_DamageImmunity</code></td></tr>
+              <tr><td><code>GC_</code></td><td>일반 GameplayCue 자산 또는 BP.</td><td><code>GC_Heal_Aura</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-cue-trigger">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>GE 적용에서 cue 호출 흐름</h2>
+          <p class="flow-desc">GE 가 적용될 때 cue 가 자동 trigger 되는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GE spec 의 GameplayCues[] 결정</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">GE 자산이 <code>GameplayCues</code> 배열에 cue tag 들고 있음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GE 적용 시 ASC 가 cue tag fire</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ApplyGameplayEffectSpec</code> 마지막에 <code>InvokeGameplayCueEvent</code>.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">CueManager 가 매칭 GCN 찾기</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraGameplayCueManager</code> 의 tag, asset 매핑. 이미 로드되어 있으면 즉시 실행, 아니면 async load.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GCN 인스턴스 spawn / 실행</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">Burst 는 1 회, Looping 은 OnActive / OnRemove 매칭. VFX, sound, 캐릭터 반응.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-delay-load">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>delay-load 정책 결정</h2>
+          <p class="block-desc">cue 자산을 언제 로드할지.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. LoadAlwaysLoadedCues</h3><p>부팅 시 일괄 로드. 자주 사용되는 cue (예: 발자국). 메모리 비용.</p></li>
+          <li class="decision-item"><h3>2. PreloadedCues</h3><p>Experience 또는 무기 활성화 시 preload. 사용 직전에 미리 로드.</p></li>
+          <li class="decision-item"><h3>3. 첫 사용 시 async load</h3><p>위 두 분류에 없는 cue 는 첫 호출 때 async load. 첫 회 hitch 가능.</p></li>
+          <li class="decision-item"><h3>4. DumpGameplayCues 콘솔 명령</h3><p>현재 로드 / 미로드 cue 확인. 메모리 디버깅용.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-21-gcn">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>21 GCN 자산 매핑</h2>
+          <p class="block-desc">전체 검증 완료. 대표 7 entry. 나머지는 검증 원장 <code>gas-blueprint-analysis.md</code>.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>GCN 자산</th><th>cue tag</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>GCN_Weapon_Hit</code></td><td><code>GameplayCue.Weapon.Hit</code></td><td>피격 VFX + sound</td></tr>
+              <tr><td><code>GCN_Weapon_Fire</code></td><td><code>GameplayCue.Weapon.Fire</code></td><td>총구 화염 + sound</td></tr>
+              <tr><td><code>GCNL_DamageImmunity</code></td><td><code>GameplayCue.Status.DamageImmunity</code></td><td>무적 상태 시각 효과 (loop)</td></tr>
+              <tr><td><code>GCN_Death</code></td><td><code>GameplayCue.Character.Death</code></td><td>사망 효과</td></tr>
+              <tr><td><code>GCN_Heal</code></td><td><code>GameplayCue.Character.Heal</code></td><td>회복 효과</td></tr>
+              <tr><td><code>GCN_Footstep</code></td><td><code>GameplayCue.Movement.Footstep</code></td><td>발자국 (자주 사용)</td></tr>
+              <tr><td><code>GCN_Jump</code></td><td><code>GameplayCue.Movement.Jump</code></td><td>점프 효과</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

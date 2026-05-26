@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>위젯 주입 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-widget-injection">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>5. 위젯 주입 (AddWidgets · UIExtension)</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>Layout[]</code> 과 <code>Widgets[]</code> 는 무엇이 다른가?</li>
+              <li><code>UUIExtensionPointWidget</code> 이 slot 을 어떻게 구독하는가?</li>
+              <li>한 slot 에 widget 2 개가 등록되면 어떻게 표시되는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Layer 와 Slot 은 다른 시스템. Layer 는 z-order, Slot 은 layout 내부 위치 indicator.</li>
+              <li>Per-context 데이터 분리로 PIE 멀티 세션 격리.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-ui-hud-manager.html">HUD 액터 · UI 매니저</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/game-features-and-modular-gameplay-in-unreal-engine" target="_blank" rel="noopener">Game Features and Modular Gameplay</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-data-structs">1. FLyraHUDLayoutRequest · FLyraHUDElementEntry</a></li>
+          <li><a href="#flow-add-widgets-call">2. AddWidgets 호출 흐름</a></li>
+          <li><a href="#reference-layer-slot-tags">3. UI.Layer 4 + HUD.Slot 15 태그</a></li>
+          <li><a href="#decision-extension-match">4. EUIExtensionPointMatch 매칭 규칙</a></li>
+          <li><a href="#verification-las-cdo">5. LAS_ShooterGame_StandardHUD CDO 검증</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-data-structs">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>FLyraHUDLayoutRequest · FLyraHUDElementEntry</h2>
+          <p class="block-desc"><code>UGameFeatureAction_AddWidgets</code> 의 두 배열 entry 구조.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>struct</th><th>필드</th><th>의미</th></tr>
+            </thead>
+            <tbody>
+              <tr><td rowspan="2"><code>FLyraHUDLayoutRequest</code></td><td><code>LayoutClass</code></td><td>layer 에 push 할 layout widget class</td></tr>
+              <tr><td><code>LayerID</code> (FGameplayTag)</td><td>push 대상 layer tag (<code>UI.Layer.*</code>)</td></tr>
+              <tr><td rowspan="2"><code>FLyraHUDElementEntry</code></td><td><code>WidgetClass</code></td><td>slot 에 register 할 widget class</td></tr>
+              <tr><td><code>SlotID</code> (FGameplayTag)</td><td>register 대상 slot tag (<code>HUD.Slot.*</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-add-widgets-call">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>AddWidgets 호출 흐름</h2>
+          <p class="flow-desc"><code>NAME_GameActorReady</code> 부터 layer push + slot register 까지.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">HandleActorExtension(Added)</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">HUD 의 <code>NAME_GameActorReady</code> 이벤트가 dispatcher 에 도달.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">per-context 데이터 (<code>TMap&lt;FGameFeatureStateChangeContext, FPerContextData&gt;</code>) 에서 context 검색.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AddWidgets 함수 실행</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>Layout[]</code> 의 entry 마다 <code>PushContentToLayer_ForPlayer</code> 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Widgets[] 마다 RegisterExtensionAsWidgetForContext</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>UUIExtensionSubsystem::RegisterExtensionAsWidgetForContext(SlotID, LocalPlayer, WidgetClass, -1)</code> 로 slot 에 widget 등록.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">UIExtensionPointWidget 매칭</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">layout 안의 extension point widget 이 자기 SlotID 와 매칭된 widget 을 표시.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-layer-slot-tags">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>UI.Layer 4 + HUD.Slot 15 태그</h2>
+          <p class="block-desc">라이라가 사용하는 layer / slot tag. layer 는 4 종, slot 은 15 종 (검증 원장).</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>구분</th><th>태그</th><th>대표 콘텐츠</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Layer</td><td><code>UI.Layer.Game</code></td><td>in-game HUD layout</td></tr>
+              <tr><td>Layer</td><td><code>UI.Layer.GameMenu</code></td><td>scoreboard, inventory</td></tr>
+              <tr><td>Layer</td><td><code>UI.Layer.Menu</code></td><td>escape menu, settings</td></tr>
+              <tr><td>Layer</td><td><code>UI.Layer.Modal</code></td><td>controller disconnect, error</td></tr>
+              <tr><td>Slot</td><td><code>HUD.Slot.Equipment</code></td><td>W_QuickBar (무기 슬롯)</td></tr>
+              <tr><td>Slot</td><td><code>HUD.Slot.Reticle</code></td><td>W_Reticle</td></tr>
+              <tr><td>Slot</td><td><code>HUD.Slot.Health</code></td><td>W_HealthBar</td></tr>
+              <tr><td>Slot</td><td><code>HUD.Slot.Score</code></td><td>W_Score, W_TeamScore</td></tr>
+              <tr><td>Slot</td><td><code>HUD.Slot.RightSideTouchInputs</code></td><td>W_OnScreenJoystick_Right + W_FireButton (2 widgets)</td></tr>
+              <tr><td>Slot</td><td>그 외 10 종</td><td>(원장 <code>ui-blueprint-analysis.md</code> 참조)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-extension-match">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>EUIExtensionPointMatch 매칭 규칙</h2>
+          <p class="block-desc">extension point widget 이 어떤 widget 을 받을지 결정하는 규칙.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. ExactMatch</h3><p>SlotID 가 정확히 일치하는 widget 만 받음. 가장 엄격.</p></li>
+          <li class="decision-item"><h3>2. PartialMatch</h3><p>SlotID 의 자식 태그도 매칭 (예: <code>HUD.Slot.Equipment</code> point 가 <code>HUD.Slot.Equipment.Primary</code> widget 도 받음).</p></li>
+          <li class="decision-item"><h3>3. AllowedDataClasses contract</h3><p>extension point 가 받을 데이터 클래스를 제한. <code>FUIExtensionPoint::DoesExtensionPassContract</code> 검사.</p></li>
+          <li class="decision-item"><h3>4. 한 slot 에 widget 2 개</h3><p>둘 다 등록되어 priority 순으로 표시. priority <code>-1</code> 동등 시 등록 순서. 예: <code>HUD.Slot.RightSideTouchInputs</code> 에 joystick + fire button.</p></li>
+        </ol>
+      </section>
+
+      <section class="verification-section" id="verification-las-cdo">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>LAS_ShooterGame_StandardHUD CDO 검증</h2>
+          <p class="block-desc">대표 ActionSet 의 위젯 주입 CDO 확인.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>Layout[] = 1 entry</strong><p><code>W_ShooterHUDLayout</code> 을 <code>UI.Layer.Game</code> 에 push.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>Widgets[] = 11 entry</strong><p>QuickBar / Reticle / Health / Score / 등 11 widget 을 각 slot 에 register.</p></div></li>
+          <li class="verify-item"><span class="badge-partial">부분</span><div><strong>다른 ActionSet CDO</strong><p><code>B_LyraShooterGame_ControlPoints</code> 등 다른 ActionSet 의 AddWidgets CDO 는 추가 확인 필요.</p></div></li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

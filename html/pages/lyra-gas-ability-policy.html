@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>활성 정책 (Policy · Group · Cost) · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-ability-policy">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>4. 활성 정책 (Policy · Group · Cost)</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>ActivationPolicy</code> 3 종은 무엇이 다른가?</li>
+              <li><code>ActivationGroup</code> 가 동시 활성을 어떻게 제어하는가?</li>
+              <li>InputTag 가 어떻게 어빌리티 활성으로 이어지는가?</li>
+              <li>AdditionalCosts 3 종은 무엇을 검증하는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>같은 ASC 에서 여러 어빌리티가 동시 활성 가능. 그룹이 그것을 제한.</li>
+              <li>실패는 태그 (<code>Ability_ActivateFail_*</code>) + 메시지 + montage 로 표시.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-ability-set.html">AbilitySet · Grant</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-ability-system-for-unreal-engine" target="_blank" rel="noopener">GAS Ability</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-activation-policy">1. ActivationPolicy 3 종</a></li>
+          <li><a href="#reference-activation-group">2. ActivationGroup 3 종</a></li>
+          <li><a href="#flow-input-to-activation">3. InputTag 라우팅 흐름</a></li>
+          <li><a href="#reference-additional-costs">4. AdditionalCosts 3 종</a></li>
+          <li><a href="#reference-derived-abilities">5. 파생 어빌리티 4 종 + 실패 처리</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-activation-policy">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ActivationPolicy 3 종</h2>
+          <p class="block-desc"><code>ELyraAbilityActivationPolicy</code> enum. 어빌리티가 언제 활성되는지.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>policy</th><th>활성 시점</th><th>전형 사용</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>OnInputTriggered</code></td><td>InputTag 입력 시 1 회 활성</td><td>Melee, Reload, Dash</td></tr>
+              <tr><td><code>WhileInputActive</code></td><td>InputTag 누르고 있는 동안 유지</td><td>Sprint, Crouch, ADS</td></tr>
+              <tr><td><code>OnSpawn</code></td><td>ASC 초기화 직후 자동 활성</td><td>passive ability (예: regen)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-activation-group">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ActivationGroup 3 종</h2>
+          <p class="block-desc"><code>ELyraAbilityActivationGroup</code> enum. 동시 활성을 그룹 단위로 제어.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>group</th><th>동시 활성 정책</th><th>전형 사용</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Independent</code></td><td>제한 없음 (다른 ability 와 동시 활성)</td><td>passive, Reload</td></tr>
+              <tr><td><code>Exclusive_Replaceable</code></td><td>같은 그룹 활성 시 기존 ability 가 취소되고 새 ability 활성</td><td>Dash, Sprint</td></tr>
+              <tr><td><code>Exclusive_Blocking</code></td><td>같은 그룹 활성 중에는 새 ability 활성 차단</td><td>Death, Reset</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-info">
+          <strong>구현:</strong> ASC 가 <code>ActivationGroupCounts[]</code> 로 그룹별 활성 카운트 관리. <code>IsActivationGroupBlocked</code> 가 새 활성 차단 결정.
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-input-to-activation">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>InputTag 라우팅 흐름</h2>
+          <p class="flow-desc">키 입력이 어빌리티 활성으로 이어지는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">InputComponent, InputAction, InputTag</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">EnhancedInput 의 InputAction 에 InputTag 매핑.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AbilityInputTagPressed 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ASC 가 InputTag 와 spec 의 <code>DynamicAbilityTags</code> 매칭. 매칭된 spec 리스트.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ProcessAbilityInput (다음 tick)</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">tick 시점에 누적된 input 일괄 처리. <code>TAG_Gameplay_AbilityInputBlocked</code> 검사.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">ActivationGroup / TagRequirement / Cost 검사.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">TryActivateAbility</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">통과 시 ability instance 생성, <code>ActivateAbility</code> 실행. 실패 시 <code>ClientNotifyAbilityFailed</code> RPC.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-additional-costs">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>AdditionalCosts 3 종</h2>
+          <p class="block-desc">표준 GE cost 외 라이라 추가 비용 클래스.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>클래스</th><th>비용 대상</th><th>예시</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ULyraAbilityCost_InventoryItem</code></td><td>인벤토리 아이템 개수</td><td>탄약 1 발 소비</td></tr>
+              <tr><td><code>ULyraAbilityCost_ItemTagStack</code></td><td>아이템의 tag stack</td><td>장비 stack 차감</td></tr>
+              <tr><td><code>ULyraAbilityCost_PlayerTagStack</code></td><td>플레이어 PS 의 tag stack</td><td>score / 자원 차감</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-derived-abilities">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>파생 어빌리티 4 종 + 실패 처리</h2>
+          <p class="block-desc">라이라가 <code>ULyraGameplayAbility</code> 위에 만든 파생 + 실패 표시.</p>
+        </header>
+        <ul class="ref-list">
+          <li><code>ULyraGameplayAbility_Death</code>: <code>GameplayEvent_Death</code> 트리거 자동 활성. <code>Exclusive_Blocking</code>.</li>
+          <li><code>ULyraGameplayAbility_Jump</code>: 점프 처리.</li>
+          <li><code>ULyraGameplayAbility_Reset</code>: <code>GameplayEvent_RequestReset</code> 트리거. 라운드 리셋.</li>
+          <li><code>ULyraGameplayAbility_FromEquipment</code> 또는 <code>_RangedWeapon</code>: 장비 / 무기 ability. <code>GetAssociatedEquipment</code>. <code>ELyraAbilityTargetingSource</code> 6 종.</li>
+          <li>실패 처리: <code>FailureTagToUserFacingMessages</code> 가 UI 메시지, <code>FailureTagToAnimMontage</code> 가 실패 montage.</li>
+        </ul>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

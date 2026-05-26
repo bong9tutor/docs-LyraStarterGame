@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Distance Matching, Warping, IK · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-warping-ik">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>9. Distance Matching, Warping, IK</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>start / stop / pivot 의 발 미끄러짐이 어떻게 잡히는가?</li>
+              <li>cycle play rate 와 stride warping 이 어떻게 속도와 맞춰지는가?</li>
+              <li>hand IK alpha 와 Control Rig 는 언제 켜지는가?</li>
+              <li>post process / retarget ABP 의 역할은 무엇인가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Distance Matching 은 curve 값과 distance-to-target 을 맞춰 play position 을 직접 결정.</li>
+              <li>Stride Warping 은 root motion 의 stride 를 캐릭터의 실제 속도에 맞춰 조절.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-locomotion-sm.html">LocomotionSM</a>: 어느 state 에서 어떤 보정이 켜지는지 알기 위함.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/distance-matching-in-unreal-engine" target="_blank" rel="noopener">Distance Matching</a></li>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/motion-warping-in-unreal-engine" target="_blank" rel="noopener">Motion Warping</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-correction-stack">1. 보정 스택 5 계층</a></li>
+          <li><a href="#reference-state-corrections">2. state 별 보정 매핑</a></li>
+          <li><a href="#flow-distance-match-stop">3. Distance Matching 으로 stop 정렬 흐름</a></li>
+          <li><a href="#decision-ik-enable">4. IK / Control Rig 활성 조건</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="reference-correction-stack">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>보정 스택 5 계층</h2>
+          <p class="block-desc">final pose 근처에서 작동하는 보정 단계. 위에서 아래로 평가.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>Distance Matching</h3>
+            <p>start / stop / pivot / jump 시퀀스의 play position 을 distance curve 와 매칭. 발 미끄러짐 방지.</p>
+            <ul class="struct-meta"><li><code>LocomotionDistanceCurveName</code></li><li><code>JumpDistanceCurveName</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>Stride Warping</h3>
+            <p>cycle 의 stride 를 실제 속도에 맞춰 root bone 회전과 leg IK 로 조절. cycle play rate 보조.</p>
+            <ul class="struct-meta"><li>stride warping alpha</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">3</span>Turn In Place / Root Yaw</h3>
+            <p>controller yaw 가 actor yaw 와 다를 때 root bone 회전. <code>RootYawOffset</code> + <code>TurnYawCurveValue</code>.</p>
+            <ul class="struct-meta"><li><code>RootYawOffsetMode</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">4</span>Hand IK / Foot IK (Control Rig)</h3>
+            <p>weapon space 가상 본 (<code>VB IK_Hand_L_weaponSpace</code>) 기준으로 손 위치 보정. foot placement 도 Control Rig 노드.</p>
+            <ul class="struct-meta"><li><code>FullBody_SkeletalControls</code></li><li><code>LeftHandPose_OverrideState</code></li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">5</span>Post Process + Retarget</h3>
+            <p>mesh 별 final-pose 후처리 (<code>ABP_Manny_PostProcess</code>, <code>ABP_Quinn_PostProcess</code>). UE4 mannequin 호환은 <code>ABP_Mannequin_Retarget</code>.</p>
+            <ul class="struct-meta"><li>mesh 마다 1 회 평가</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-state-corrections">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>state 별 보정 매핑</h2>
+          <p class="block-desc">LocomotionSM 각 state 에서 어떤 보정 함수가 호출되는지.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>state</th><th>보정 함수</th><th>목적</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Start</td><td><code>UpdateStartAnim</code></td><td>Distance Matching 으로 start 시퀀스 정렬</td></tr>
+              <tr><td>Cycle</td><td><code>UpdateCycleAnim</code></td><td>play rate 와 stride warping alpha 조절</td></tr>
+              <tr><td>Stop</td><td><code>UpdateStopAnim</code></td><td><code>GetPredictedStopDistance</code> 로 정확한 정지 지점 정렬</td></tr>
+              <tr><td>Pivot</td><td><code>UpdatePivotAnim</code></td><td>방향 전환 시퀀스 정렬</td></tr>
+              <tr><td>JumpStart / JumpApex / FallLoop</td><td><code>JumpDistanceCurveName</code> 매칭</td><td>jump 곡선 따라 play position</td></tr>
+              <tr><td>Turn In Place</td><td><code>SetupTurnInPlaceAnim</code> + <code>UpdateTurnInPlaceAnim</code></td><td>root yaw 회전 적용</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-distance-match-stop">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>Distance Matching 으로 stop 정렬 흐름</h2>
+          <p class="flow-desc">Cycle 에서 입력이 끊겼을 때 stop 시퀀스가 정확한 위치에서 끝나도록 play position 을 매 frame 조절.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Cycle → Stop 전이</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ShouldDistanceMatchStop</code> 평가, true 면 distance matching 활성.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>GetPredictedStopDistance</code> 로 남은 거리 계산.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">stop 시퀀스의 distance curve 와 매칭</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">sequence 의 <code>LocomotionDistanceCurveName</code> curve 와 남은 거리 비교, 매칭되는 play position 으로 jump.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">매 frame play position 갱신</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">남은 거리가 줄어드는 만큼 play position 도 앞으로. 시퀀스 끝에 도달할 때 캐릭터가 정확히 멈춤.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-ik-enable">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>IK / Control Rig 활성 조건</h2>
+          <p class="block-desc">hand IK, foot placement, Control Rig 가 켜지는 분기.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. hand IK alpha</h3><p><code>UpdateSkelControlData</code> 에서 무기 종류와 ADS 상태에 따라 alpha 결정. 무기 없는 idle 에는 alpha 0.</p></li>
+          <li class="decision-item"><h3>2. foot placement</h3><p><code>ShouldEnableFootPlacement</code> 가 true 일 때만. 일반적으로 idle / cycle 에서 켜지고 jump / fall 에서 꺼짐.</p></li>
+          <li class="decision-item"><h3>3. Control Rig</h3><p><code>ShouldEnableControlRig</code> 가 true 일 때만. mesh 가 Control Rig 자산을 갖고 있어야 함.</p></li>
+          <li class="decision-item"><h3>4. Post Process ABP</h3><p>mesh 의 <code>PostProcessAnimBlueprint</code> 슬롯에 ABP 가 설정돼 있으면 자동 활성. main ABP 의 출력 pose 위에 한 번 더 평가.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

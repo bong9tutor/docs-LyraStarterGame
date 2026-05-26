@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HUDLayout · Escape Menu · 컨트롤러 분리 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-hud-layout">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>4. HUDLayout · Escape Menu · 컨트롤러 분리</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>Escape 키가 어떤 경로로 게임 메뉴를 push 하는가?</li>
+              <li>컨트롤러 분리는 어떻게 감지되고 modal 화면이 어떻게 뜨는가?</li>
+              <li>HUD layout BP 4 종은 무엇이 다른가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li><code>UCommonUIExtensions::PushStreamedContentToLayer_ForPlayer</code> 는 async load + push. 일반 push 와 다름.</li>
+              <li>controller disconnect 감지는 PC 에서 비활성 (<code>Platform.Trait.Input.PrimarlyController</code> 없음).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-ui-hud-manager.html">HUD 액터 · UI 매니저</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/common-ui-input-action-data-tables-in-unreal-engine" target="_blank" rel="noopener">Common UI Input Action Data Tables</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#flow-escape-action">1. Escape 액션에서 게임 메뉴 push 흐름</a></li>
+          <li><a href="#flow-controller-disconnect">2. 컨트롤러 분리에서 modal 화면 흐름</a></li>
+          <li><a href="#reference-layout-bps">3. HUD layout BP 4 종</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-escape-action">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>Escape 액션에서 게임 메뉴 push 흐름</h2>
+          <p class="flow-desc"><code>UI.Action.Escape</code> 액션이 <code>ULyraHUDLayout</code> 에서 binding 되어 게임 메뉴를 layer 에 push.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">RegisterUIActionBinding 등록</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraHUDLayout::NativeOnInitialized</code> 에서 <code>UI.Action.Escape</code> 액션을 <code>HandleEscapeAction</code> 함수에 binding.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">Escape 키 또는 game pad 의 매핑된 입력.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">HandleEscapeAction 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">콜백이 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PushStreamedContentToLayer_ForPlayer</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>UCommonUIExtensions::PushStreamedContentToLayer_ForPlayer(LocalPlayer, UI.Layer.Menu, EscapeMenuClass)</code> 로 async load + push.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">W_LyraGameMenu 표시</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>W_DefaultHUDLayout</code> CDO 의 <code>EscapeMenuClass</code> = <code>/Game/UI/Hud/W_LyraGameMenu</code>.</p></li>
+        </ol>
+      </section>
+
+      <section class="flow-section" id="flow-controller-disconnect">
+        <header class="flow-head">
+          <span class="flow-num">흐름 2</span>
+          <h2>컨트롤러 분리에서 modal 화면 흐름</h2>
+          <p class="flow-desc">platform device mapper delegate 가 분리 감지 후 modal 화면을 layer 에 push.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">IPlatformInputDeviceMapper delegate</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">컨트롤러 연결 / 페어링 변경 시 delegate 발생.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>Platform.Trait.Input.PrimarlyController</code> 검사. PC 에는 trait 없음 → 비활성.</p></li>
+          <li class="step" data-type="decision"><div class="step-head"><strong class="step-name">trait 매칭 시</strong><span class="badge-verified">검증</span><span class="step-kind">Decision</span></div><p class="step-desc">콘솔 환경에서만 분리 화면 표시 로직 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PushContentToLayer_ForPlayer</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>UI.Layer.Menu</code> 에 <code>W_DefaultHUDLayout</code> CDO 의 <code>/Game/UI/Foundation/Dialogs/W_ControllerDisconnected</code> push.</p></li>
+        </ol>
+        <div class="note note-info">
+          <strong>참고:</strong> PC 에서 컨트롤러를 뽑아도 modal 이 안 뜨는 건 의도. <code>Platform.Trait.Input.PrimarlyController</code> trait 이 없기 때문.
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-layout-bps">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>HUD layout BP 4 종</h2>
+          <p class="block-desc">Experience 마다 다른 layout 이 push. <code>W_DefaultHUDLayout</code> 만 CDO 검증 완료.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>layout BP</th><th>용도</th><th>parent 검증</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>W_DefaultHUDLayout</code></td><td>일반 in-game HUD. EscapeMenu / ControllerDisconnected CDO 보유</td><td>검증 완료</td></tr>
+              <tr><td><code>W_FrontEndHUDLayout</code></td><td>프론트엔드 (메인 메뉴) HUD</td><td>부분</td></tr>
+              <tr><td><code>W_ShooterHUDLayout</code></td><td>슈터 모드 HUD</td><td>부분</td></tr>
+              <tr><td><code>W_TopDownArenaHUDLayout</code></td><td>탑다운 아레나 모드 HUD</td><td>부분</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

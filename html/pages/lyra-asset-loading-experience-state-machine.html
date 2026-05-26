@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Experience 7 단계 state · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-experience-state-machine" data-validation="partial">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>6. Experience 7 단계 state</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>ELyraExperienceLoadState</code> 7 값의 의미는?</li>
+              <li>Server / Client 동기화는 어떻게 되는가?</li>
+              <li>Priority 3 단 콜백은 무엇이 다른가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Experience 자체는 동기 로드 (소스 주석 명시). 비동기는 bundle + GameFeature 부터.</li>
+              <li>NumGameFeaturePluginsLoading 카운트다운으로 모든 plugin 활성화 대기.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-primary-asset-types.html">Primary Asset Type</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/game-features-and-modular-gameplay-in-unreal-engine" target="_blank" rel="noopener">Game Features and Modular Gameplay</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="흐름 목차">
+        <h2>흐름 목차</h2>
+        <ol>
+          <li><a href="#flow-load">1. 7 단계 state 진행 흐름</a></li>
+          <li><a href="#reference-states">2. ELyraExperienceLoadState 7 값</a></li>
+          <li><a href="#decision-priority-callbacks">3. Priority 3 단 콜백</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-load">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>7 단계 state 진행 흐름</h2>
+          <p class="flow-desc">Experience 선택부터 LoadingScreen 종료까지의 state 진행.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Unloaded</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">초기 state. <code>SetCurrentExperience(FPrimaryAssetId)</code> 호출 대기.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>SetCurrentExperience</code> 호출, <code>AssetPath.TryLoad()</code> 동기.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">LoadingGameFeatures</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">Experience 의 <code>GameFeaturesToEnable[]</code> 일괄 활성화 시작. <code>NumGameFeaturePluginsLoading</code> 증가.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">LoadingChaosTestingDelay</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">CVar 로 조정 가능한 chaos testing delay. 비동기 timing 검증용.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ExecutingActions</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">Experience 의 Actions[] + ActionSets 의 Actions[] 일괄 실행 (AddWidgets / AddComponents / ...).</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Loaded</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">모든 단계 완료. <code>OnExperienceLoaded_*</code> delegate broadcast.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Deactivating</strong><span class="badge-partial">부분</span><span class="step-kind">State</span></div><p class="step-desc">map 전환 시 Experience 해제 시작. <em>구체 deactivation 순서는 부분 검증.</em></p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">Deactivated</strong><span class="badge-partial">부분</span><span class="step-kind">State</span></div><p class="step-desc">해제 완료, 다음 Experience 로드 대기.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-states">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ELyraExperienceLoadState 7 값</h2>
+          <p class="block-desc">enum 값과 transition.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>값</th><th>의미</th><th>다음 state</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Unloaded</code></td><td>초기 / 해제 완료</td><td>LoadingGameFeatures</td></tr>
+              <tr><td><code>LoadingGameFeatures</code></td><td>GameFeature plugin 활성화 중</td><td>LoadingChaosTestingDelay</td></tr>
+              <tr><td><code>LoadingChaosTestingDelay</code></td><td>CVar delay 대기 중</td><td>ExecutingActions</td></tr>
+              <tr><td><code>ExecutingActions</code></td><td>Action 실행 중</td><td>Loaded</td></tr>
+              <tr><td><code>Loaded</code></td><td>게임 가능</td><td>Deactivating (map 전환 시)</td></tr>
+              <tr><td><code>Deactivating</code></td><td>해제 시작</td><td>Deactivated</td></tr>
+              <tr><td><code>Deactivated</code></td><td>해제 완료</td><td>Unloaded</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-priority-callbacks">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>Priority 3 단 콜백</h2>
+          <p class="block-desc"><code>CallOrRegister_OnExperienceLoaded_*</code> 3 종 콜백의 용도 분리.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. HighPriority</h3><p>먼저 broadcast. 다른 시스템이 의존하는 setup (예: GameState 초기화).</p></li>
+          <li class="decision-item"><h3>2. Normal</h3><p>중간 broadcast. 일반 등록 콜백.</p></li>
+          <li class="decision-item"><h3>3. LowPriority</h3><p>가장 늦게 broadcast. 다른 모든 system 이 준비된 후 실행 (예: UI 표시).</p></li>
+        </ol>
+        <div class="note note-info">
+          <strong>주의:</strong> Priority 는 실행 순서 보장이지 비동기 분리 아님. 모두 같은 frame 에 순차 호출.
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

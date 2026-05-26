@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AssetManager 부팅 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-assetmanager-bootstrap">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>2. AssetManager 부팅</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>왜 <code>UAssetManager</code> 를 파생하는가?</li>
+              <li><code>AssetManagerClassName</code> ini 키가 어떻게 동작하는가?</li>
+              <li><code>UPROPERTY(Config)</code> 가 어떻게 ini 값을 멤버로 매핑하는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li><code>UAssetManager</code> 는 게임 인스턴스 수명. 부팅 직후 1 회 생성.</li>
+              <li><code>StartInitialLoading</code> 은 부팅 인터셉트 hook.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-overview.html">전체 지도</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/asset-manager-in-unreal-engine" target="_blank" rel="noopener">Asset Manager</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-ini-settings">1. ini 설정 3 종</a></li>
+          <li><a href="#flow-bootstrap">2. AssetManager 부팅 흐름</a></li>
+          <li><a href="#decision-startinitialloading-vs-prebeginpie">3. StartInitialLoading vs PreBeginPIE</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-ini-settings">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ini 설정 3 종</h2>
+          <p class="block-desc">라이라 AssetManager 의 ini 설정. <code>AssetManagerClassName</code> 만 DefaultEngine.ini 에, 나머지 2 종은 DefaultGame.ini 에.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>ini 파일</th><th>절</th><th>키 와 의미</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>DefaultEngine.ini</td><td><code>[/Script/Engine.Engine]</code></td><td><code>AssetManagerClassName=/Script/LyraGame.LyraAssetManager</code>: 엔진이 사용할 AssetManager 클래스 결정</td></tr>
+              <tr><td>DefaultGame.ini</td><td><code>[/Script/LyraGame.LyraAssetManager]</code></td><td><code>LyraGameDataPath=/Game/System/DefaultGameData.DefaultGameData</code>: GameData 자산 경로</td></tr>
+              <tr><td>DefaultGame.ini</td><td><code>[/Script/LyraGame.LyraAssetManager]</code></td><td><code>DefaultPawnData=/Game/Characters/Heroes/Mannequin/PawnData.PawnData</code>: 기본 PawnData</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-warning">
+          <strong>주의:</strong> <code>UPROPERTY(Config)</code> + <code>UCLASS(Config = Game)</code> 패턴이라 멤버는 <code>DefaultGame.ini</code> 에서 읽힘. <code>DefaultEngine.ini</code> 에 두면 무시.
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-bootstrap">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>AssetManager 부팅 흐름</h2>
+          <p class="flow-desc">엔진이 ini 설정을 읽고 라이라 AssetManager 를 생성, <code>StartInitialLoading</code> 호출까지.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">엔진 부팅 초기</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>DefaultEngine.ini</code> 의 <code>AssetManagerClassName</code> 읽음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ULyraAssetManager 생성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>GEngine-&gt;AssetManager</code> 에 인스턴스 저장. <code>UPROPERTY(Config)</code> 멤버가 <code>DefaultGame.ini</code> 에서 자동 채워짐.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">StartInitialLoading 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">엔진이 부팅 hook 호출. 라이라가 override 해서 StartupJob 큐 등록 + 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GameInstance 진행</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">초기 로드 완료 후 일반 게임 부팅 진행.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-startinitialloading-vs-prebeginpie">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>StartInitialLoading vs PreBeginPIE</h2>
+          <p class="block-desc">부팅 hook 의 두 override 지점. 어떤 경우에 어떤 것을 쓰는가.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. StartInitialLoading</h3><p>실제 게임 부팅 (cooked build) 과 PIE 모두에서 호출. 라이라는 이 hook 만 override.</p></li>
+          <li class="decision-item"><h3>2. PreBeginPIE</h3><p>에디터 PIE 진입 직전에만 호출. PIE 전용 reset 이 필요할 때.</p></li>
+          <li class="decision-item"><h3>3. 라이라 선택</h3><p>PIE / 실 빌드 일치 위해 <code>StartInitialLoading</code> 만 사용. PIE 분기는 <code>GIsEditor</code> 로 함수 내부에서 처리.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

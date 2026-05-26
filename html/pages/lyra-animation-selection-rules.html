@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>장비·Cosmetic 선택 규칙 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="animation-selection-rules">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>6. 장비·Cosmetic 선택 규칙</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>장비 상태에 따라 어떤 layer 가 선택되는가?</li>
+              <li><code>Cosmetic.AnimationStyle.Feminine</code> 태그가 어떤 mesh / layer 를 고르게 하는가?</li>
+              <li>body mesh 선택과 layer 선택이 같은 규칙을 쓰는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>weapon instance CDO 가 <code>EquippedAnimSet</code> 과 <code>UneuippedAnimSet</code> 두 set 을 들고 있다 (<code>UneuippedAnimSet</code> 은 코드 원본의 오타로 그대로 사용).</li>
+              <li>각 set 은 cosmetic tag → layer class 의 우선순위 매칭 리스트.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-animation-linked-layers.html">Linked Item Layers</a>: 선택된 layer 가 base 의 어디로 들어가는지 알아야 본 페이지의 결과가 의미를 가진다.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-tags-in-unreal-engine" target="_blank" rel="noopener">Gameplay Tags</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#flow-equip-change">1. 장비 변경 시 layer 결정 흐름</a></li>
+          <li><a href="#decision-select-best-layer">2. SelectBestLayer 우선순위 규칙</a></li>
+          <li><a href="#reference-equipped-cdo">3. weapon instance CDO 의 두 set</a></li>
+          <li><a href="#decision-body-style">4. body style mesh 선택 규칙</a></li>
+        </ol>
+      </nav>
+
+      <section class="flow-section" id="flow-equip-change">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>장비 변경 시 layer 결정 흐름</h2>
+          <p class="flow-desc">무기 장착·해제 시 base ABP 의 LinkedAnimLayer 가 새 layer class 로 교체되는 인과.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">EquipmentManager 가 무기 장착</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">새 <code>ULyraWeaponInstance</code> 인스턴스가 활성화되고 owner pawn 에 부착.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">cosmetic tag 와 weapon instance 가 결합.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PickBestAnimLayer 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraWeaponInstance::PickBestAnimLayer</code> 가 owner pawn 의 cosmetic tag set 을 인자로 받음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">equipped 여부에 따라 <code>EquippedAnimSet</code> 또는 <code>UneuippedAnimSet</code> 분기.</p></li>
+          <li class="step" data-type="decision"><div class="step-head"><strong class="step-name">SelectBestLayer 평가</strong><span class="badge-verified">검증</span><span class="step-kind">Decision</span></div><p class="step-desc"><code>FLyraAnimLayerSelectionSet::SelectBestLayer(MergedTags)</code> 가 첫 매칭 layer class 반환.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">LinkAnimClassLayers 적용</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">base ABP 가 새 layer class 로 교체되고 다음 frame 부터 새 sequence set 사용.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-select-best-layer">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>SelectBestLayer 우선순위 규칙</h2>
+          <p class="block-desc"><code>FLyraAnimLayerSelectionSet</code> 은 <code>Layers</code> 배열을 순서대로 평가, 첫 매칭 반환. 매칭 규칙은 layer entry 의 <code>RequiredTags</code> 가 입력 tag set 의 부분집합이면 매칭.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. RequiredTags 가 비어 있는 entry</h3><p>모든 cosmetic tag set 에 매칭. fallback 으로 사용 시 배열 마지막에 둠.</p></li>
+          <li class="decision-item"><h3>2. RequiredTags 가 입력 tag 의 부분집합</h3><p>예: entry RequiredTags = {<code>Cosmetic.AnimationStyle.Feminine</code>}, 입력 = {<code>Cosmetic.AnimationStyle.Feminine</code>, <code>Cosmetic.Body.Default</code>} 이면 매칭.</p></li>
+          <li class="decision-item"><h3>3. 매칭이 없으면 nullptr</h3><p>nullptr 반환 시 base ABP 는 <code>UneuippedAnimSet</code> default 또는 기존 layer 유지 (코드 경로별로 다름).</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-equipped-cdo">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>weapon instance CDO 의 두 set</h2>
+          <p class="block-desc">기본 무기 BP 들의 <code>EquippedAnimSet</code> 과 <code>UneuippedAnimSet</code> 값. 학습 시 이 표가 단일 출처. 실제 BP 의 CDO 에서 확인.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>weapon instance</th><th>EquippedAnimSet (주요 entry)</th><th>UneuippedAnimSet (주요 entry)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>B_WeaponInstance_Base</code></td><td>비어 있음 (자식이 override)</td><td>비어 있음</td></tr>
+              <tr><td><code>B_WeaponInstance_Pistol</code></td><td><code>ABP_PistolAnimLayers</code> (RequiredTags 비어 있음)</td><td><code>ABP_UnarmedAnimLayers</code></td></tr>
+              <tr><td><code>B_WeaponInstance_Rifle</code></td><td><code>ABP_RifleAnimLayers</code> (RequiredTags 비어 있음)</td><td><code>ABP_UnarmedAnimLayers</code></td></tr>
+              <tr><td><code>B_WeaponInstance_Shotgun</code></td><td><code>ABP_ShotgunAnimLayers</code> (RequiredTags 비어 있음)</td><td><code>ABP_UnarmedAnimLayers</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-warning">
+          <strong>주의:</strong> 프로퍼티명 <code>UneuippedAnimSet</code> 은 Lyra 원본 코드의 오타입니다. 본 문서는 식별자를 원본 그대로 사용합니다.
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-body-style">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>body style mesh 선택 규칙</h2>
+          <p class="block-desc"><code>ULyraPawnComponent_CharacterParts::BroadcastChanged</code> 가 cosmetic tag 변경 시 <code>BodyMeshes.SelectBestBodyStyle(MergedTags)</code> 로 invisible driving mesh 를 결정.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. SelectBestBodyStyle 호출</h3><p><code>FLyraAnimBodyStyleSelectionSet</code> 도 layer selection 과 같은 RequiredTags 부분집합 규칙. 첫 매칭 mesh entry 반환.</p></li>
+          <li class="decision-item"><h3>2. 매칭된 entry 의 mesh + ForcedPhysicsAsset 적용</h3><p><code>SetSkeletalMesh(InvisibleMesh, true)</code> 로 driving mesh 교체. <code>ForcedPhysicsAsset</code> 이 있으면 함께 적용.</p></li>
+          <li class="decision-item"><h3>3. delegate broadcast</h3><p>변경 알림. cosmetic actor (<code>B_Manny</code>, <code>B_Quinn</code>) 의 visible mesh 가 <code>ABP_Mannequin_CopyPose</code> 로 pose 를 따라옴.</p></li>
+        </ol>
+        <div class="note note-info">
+          <strong>관련:</strong> 왜 driving mesh 와 visible cosmetic mesh 가 분리됐는지는 <a href="lyra-animation-invisible-copy-pose.html">invisible-copy-pose</a> 페이지 참조.
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

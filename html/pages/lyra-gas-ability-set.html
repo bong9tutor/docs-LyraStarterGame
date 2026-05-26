@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AbilitySet · Grant · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-ability-set">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>3. AbilitySet · Grant</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>AbilitySet 의 3 종 묶음은 무엇이 다른가?</li>
+              <li>InputTag 가 어떻게 어빌리티에 연결되는가?</li>
+              <li>장비 grant 와 PawnData grant 의 차이는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>AbilitySet 은 어빌리티 + 이펙트 + AttributeSet 의 묶음 자산.</li>
+              <li><code>FLyraAbilitySet_GrantedHandles</code> 가 회수에 사용.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-asc-init.html">ASC 초기화</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-ability-system-for-unreal-engine" target="_blank" rel="noopener">GAS 공식</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-structs">1. AbilitySet 의 3 종 USTRUCT</a></li>
+          <li><a href="#flow-grant">2. GiveToAbilitySystem 4 단계</a></li>
+          <li><a href="#reference-11-assets">3. 11 AbilitySet 자산</a></li>
+          <li><a href="#decision-grant-source">4. PawnData grant vs Equipment grant</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-structs">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>AbilitySet 의 3 종 USTRUCT</h2>
+          <p class="block-desc"><code>ULyraAbilitySet</code> 이 보유하는 3 배열의 entry 구조.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>USTRUCT</th><th>주요 필드</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>FLyraAbilitySet_GameplayAbility</code></td><td><code>Ability</code>, <code>AbilityLevel</code>, <code>InputTag</code></td><td>어빌리티 클래스 + 입력 binding</td></tr>
+              <tr><td><code>FLyraAbilitySet_GameplayEffect</code></td><td><code>GameplayEffect</code>, <code>EffectLevel</code></td><td>passive GE (예: 기본 attribute 초기화)</td></tr>
+              <tr><td><code>FLyraAbilitySet_AttributeSet</code></td><td><code>AttributeSet</code></td><td>AttributeSet 클래스 (HealthSet, CombatSet 등)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-grant">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>GiveToAbilitySystem 4 단계</h2>
+          <p class="flow-desc"><code>ULyraAbilitySet::GiveToAbilitySystem</code> 의 grant 순서.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">1. Authority 검사</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">server 만 grant 진행. client 는 replication 으로 받음.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">2. AttributeSet 생성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>NewObject</code> 로 AttributeSet 인스턴스 생성 후 ASC 에 추가.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">3. Ability grant</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>GiveAbility</code> 로 ASC 에 spec 등록. <code>InputTag</code> 가 spec 의 <code>DynamicAbilityTags</code> 에 들어감.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">4. Effect apply</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">passive GE 적용. infinite duration 으로 ASC 에 유지.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">handles 기록</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>FLyraAbilitySet_GrantedHandles</code> 에 ability handle, effect handle, attribute set ptr 저장. 회수 시 사용.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-11-assets">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>11 AbilitySet 자산</h2>
+          <p class="block-desc">라이라 + Game Feature 의 모든 AbilitySet (Monolith 검증 완료).</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>plugin</th><th>AbilitySet</th><th>grant 내용</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>LyraGame</td><td><code>AbilitySet_LyraHero</code></td><td>기본 Hero 어빌리티 (Jump, Reset, Death 등)</td></tr>
+              <tr><td>ShooterCore</td><td><code>AbilitySet_ShooterHero</code></td><td>11 종 ability (Sprint, Crouch, Melee 등)</td></tr>
+              <tr><td>ShooterCore</td><td><code>AbilitySet_Pistol</code></td><td>Pistol fire / reload</td></tr>
+              <tr><td>ShooterCore</td><td><code>AbilitySet_Rifle</code></td><td>Rifle fire / reload</td></tr>
+              <tr><td>ShooterCore</td><td><code>AbilitySet_Shotgun</code></td><td>Shotgun fire / reload</td></tr>
+              <tr><td>ShooterExplorer</td><td><code>AbilitySet_Explorer</code></td><td>탐험 모드 ability</td></tr>
+              <tr><td>TopDownArena</td><td><code>AbilitySet_ArenaHero</code></td><td>아레나 모드 ability + 2 AttributeSet</td></tr>
+              <tr><td>(외 4)</td><td>플러그인 별</td><td>(검증 원장 참조)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-grant-source">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>PawnData grant vs Equipment grant</h2>
+          <p class="block-desc">AbilitySet 이 어디서 grant 되는지 두 경로.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. PawnData grant</h3><p><code>LyraPawnData->AbilitySets[]</code> 가 <code>PawnExtensionComponent::InitializeAbilitySystem</code> 에서 일괄 grant. pawn 의 영구 능력.</p></li>
+          <li class="decision-item"><h3>2. Equipment grant</h3><p><code>ULyraEquipmentInstance::OnEquipped</code> 가 무기 / 장비 장착 시 grant. unequip 시 회수.</p></li>
+          <li class="decision-item"><h3>3. 차이</h3><p>PawnData 는 영구 (pawn 수명), Equipment 는 conditional (장착 수명). 같은 AbilitySet 시스템을 두 수명으로 사용.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

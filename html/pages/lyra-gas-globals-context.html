@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Globals · Context 확장 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-globals-context" data-validation="partial">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>9. Globals · Context 확장</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>ULyraGlobalAbilitySystem::ApplyEffectToAll</code> 은 언제 쓰는가?</li>
+              <li>새 ASC 가 등록될 때 어떻게 기존 글로벌 효과가 자동 적용되는가?</li>
+              <li><code>FLyraGameplayEffectContext::CartridgeID</code> 가 무엇을 식별하는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>글로벌 ASC = 모든 등록된 ASC 에 일괄 적용하는 보조 시스템.</li>
+              <li>Effect Context = GE 가 들고 다니는 정보 (instigator, hit result 등). 라이라가 확장.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-damage-pipeline.html">데미지 파이프라인</a> (Context 가 흐름에서 쓰임).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-effects-for-the-gameplay-ability-system-in-unreal-engine" target="_blank" rel="noopener">GameplayEffect</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-global-api">1. ULyraGlobalAbilitySystem API</a></li>
+          <li><a href="#flow-register-asc">2. RegisterASC 흐름 (기존 글로벌 효과 자동 적용)</a></li>
+          <li><a href="#reference-context-fields">3. FLyraGameplayEffectContext 확장 필드</a></li>
+          <li><a href="#reference-source-interface">4. ILyraAbilitySourceInterface 구현체</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-global-api">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ULyraGlobalAbilitySystem API</h2>
+          <p class="block-desc">모든 등록된 ASC 에 일괄 적용 / 회수.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>함수</th><th>역할</th><th>대상</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ApplyAbilityToAll(AbilityClass)</code></td><td>모든 ASC 에 ability grant</td><td><code>FGlobalAppliedAbilityList</code></td></tr>
+              <tr><td><code>ApplyEffectToAll(EffectClass)</code></td><td>모든 ASC 에 GE apply</td><td><code>FGlobalAppliedEffectList</code></td></tr>
+              <tr><td><code>RegisterASC(ASC)</code></td><td>새 ASC 등록 + 기존 글로벌 효과 적용</td><td>ASC 초기화 시</td></tr>
+              <tr><td><code>UnregisterASC(ASC)</code></td><td>ASC 해제 + 글로벌 효과 회수</td><td>ASC 해제 시</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-register-asc">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>RegisterASC 흐름 (기존 글로벌 효과 자동 적용)</h2>
+          <p class="flow-desc">늦게 등록된 ASC 도 이미 활성 중인 글로벌 효과를 받음.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">새 ASC 가 RegisterASC 호출</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ASC 초기화 시 글로벌 시스템에 자기 등록.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">FGlobalAppliedAbilityList 순회</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">이미 등록된 글로벌 ability 를 새 ASC 에 grant.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">FGlobalAppliedEffectList 순회</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">이미 등록된 글로벌 GE 를 새 ASC 에 apply.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">handle 추적</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">ASC 해제 시 회수할 수 있도록 grant / apply handle 저장.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-context-fields">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>FLyraGameplayEffectContext 확장 필드</h2>
+          <p class="block-desc">표준 <code>FGameplayEffectContext</code> 에 라이라가 추가한 필드. <code>ULyraAbilitySystemGlobals</code> 가 발급 override.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>필드</th><th>용도</th><th>NetSerialize</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>AbilitySource</code> (<code>ILyraAbilitySourceInterface*</code>)</td><td>distance / material attenuation 호출 대상</td><td>예 (weak ptr)</td></tr>
+              <tr><td><code>CartridgeID</code></td><td>탄환 발사를 식별. multi-bullet 무기에서 같은 발사 묶음 식별.</td><td>예 (int32)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-source-interface">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ILyraAbilitySourceInterface 구현체</h2>
+          <p class="block-desc">데미지 감쇠 함수 인터페이스. 무기 인스턴스가 주 구현체.</p>
+        </header>
+        <ul class="ref-list">
+          <li><code>GetDistanceAttenuation(Distance, Tags)</code>: 거리별 감쇠 곡선 (예: shotgun pellet 의 거리 감쇠).</li>
+          <li><code>GetPhysicalMaterialAttenuation(Material, Tags)</code>: 부위 / 재질별 (헤드, 갑옷).</li>
+          <li>구현체: <code>ULyraRangedWeaponInstance</code> 등 무기 인스턴스. <em>구체 cpp 위치는 weapons 원장에서 추가 확인.</em></li>
+        </ul>
+        <div class="note note-info">
+          <strong>흐름:</strong> DamageExecution 이 GE context 에서 <code>AbilitySource</code> 를 꺼내 이 두 함수 호출, 최종 데미지 산출.
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

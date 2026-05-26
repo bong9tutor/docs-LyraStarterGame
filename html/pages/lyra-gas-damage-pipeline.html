@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>데미지 파이프라인 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-damage-pipeline" data-validation="partial">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>6. 데미지 파이프라인</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>왜 데미지를 GE modifier 가 아니라 execution 으로 계산하는가?</li>
+              <li>CombatSet (source) 과 HealthSet (target) 의 책임 분리는?</li>
+              <li>meta attribute 와 일반 attribute 의 차이는?</li>
+              <li>DamageExecution 의 5 단계는?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>execution 은 GE 한 번에 attribute 여러 개를 동적 계산.</li>
+              <li>meta attribute 는 modifier 에 노출되지 않는 임시 전달용 attribute.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-ability-set.html">AbilitySet · Grant</a> (AttributeSet 부여).</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-attributes-and-attribute-sets-for-the-gameplay-ability-system-in-unreal-engine" target="_blank" rel="noopener">Attributes</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#structure-attribute-sets">1. AttributeSet 2 종 (CombatSet · HealthSet)</a></li>
+          <li><a href="#flow-damage-execution">2. DamageExecution 5 단계</a></li>
+          <li><a href="#decision-modifier-vs-execution">3. modifier vs execution 선택</a></li>
+          <li><a href="#reference-ge-assets">4. GE_Damage 자산</a></li>
+          <li><a href="#flow-death-trigger">5. OnOutOfHealth 에서 Death 자동 트리거</a></li>
+        </ol>
+      </nav>
+
+      <section class="structure-section" id="structure-attribute-sets">
+        <header class="block-head">
+          <span class="block-kind">구조</span>
+          <h2>AttributeSet 2 종 (CombatSet · HealthSet)</h2>
+          <p class="block-desc">데미지 파이프라인의 source / target attribute 분리.</p>
+        </header>
+        <div class="structure-grid">
+          <article class="struct-node">
+            <h3><span class="struct-num">1</span>ULyraCombatSet (source)</h3>
+            <p>공격자 측 attribute. instigator 의 ASC 에 있음.</p>
+            <ul class="struct-meta"><li><code>BaseDamage</code> (일반)</li><li><code>BaseHeal</code> (일반)</li></ul>
+          </article>
+          <article class="struct-node">
+            <h3><span class="struct-num">2</span>ULyraHealthSet (target)</h3>
+            <p>피격자 측 attribute. target 의 ASC 에 있음.</p>
+            <ul class="struct-meta"><li><code>Health</code>, <code>MaxHealth</code> (일반)</li><li><code>Damage</code>, <code>Healing</code> (meta, <code>HideFromModifiers</code>)</li></ul>
+          </article>
+        </div>
+        <div class="note note-info">
+          <strong>meta attribute:</strong> <code>Damage</code> 와 <code>Healing</code> 은 execution 이 계산해 임시로 넣는 값. <code>PostGameplayEffectExecute</code> 에서 <code>Health</code> 에 반영 후 0 으로 reset.
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-damage-execution">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>DamageExecution 5 단계</h2>
+          <p class="flow-desc"><code>ULyraDamageExecution::Execute_Implementation</code> 의 계산 순서.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">1. BaseDamage capture</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>FGameplayEffectAttributeCaptureDefinition</code> (Source, Snapshot) 로 source 의 <code>BaseDamage</code> 캡처.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">2. HitResult 읽기</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">GE context 에서 hit location, bone, physical material 추출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="decision"><div class="step-head"><strong class="step-name">3. Team check</strong><span class="badge-verified">검증</span><span class="step-kind">Decision</span></div><p class="step-desc"><code>ULyraTeamSubsystem::CanCauseDamage(Instigator, Target)</code> 검사. friendly fire 차단.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">4. Distance attenuation</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ILyraAbilitySourceInterface::GetDistanceAttenuation(Distance)</code> 곱하기. 무기 인스턴스가 인터페이스 구현.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">5. Physical material attenuation</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>GetPhysicalMaterialAttenuation(Material, Tags)</code> 곱하기. 헤드 / 갑옷 등 부위별.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">결과 → Damage meta attribute</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>OutExecutionOutput.AddOutputModifier(Damage, Additive, FinalDamage)</code> 로 meta attribute 에 적용. <code>PostGameplayEffectExecute</code> 가 Health 에 반영.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-modifier-vs-execution">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>modifier vs execution 선택</h2>
+          <p class="block-desc">attribute 변경을 modifier 로 할지 execution 으로 할지.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. modifier 만으로 충분한 경우</h3><p>단순 더하기 / 빼기 / 곱하기. 예: 회복 GE 가 Health 에 +50.</p></li>
+          <li class="decision-item"><h3>2. execution 필요한 경우</h3><p>여러 attribute 참조 + 동적 계산. 라이라 데미지는 BaseDamage + HitResult + Team + Distance + Material 5 입력으로 execution.</p></li>
+          <li class="decision-item"><h3>3. meta attribute 사용 이유</h3><p>execution 출력을 직접 Health 에 쓰면 modifier 가 끼어들기 어려움. meta 에 두면 PostExecute 에서 다른 정책 (immunity 등) 거쳐 Health 갱신.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-ge-assets">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>GE_Damage 자산</h2>
+          <p class="block-desc">무기별 데미지 GE. 모두 modifier 없이 execution 만, 차이는 <code>AssetTagsGameplayEffectComponent.DamageType.*</code> 태그 1 개.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>GE</th><th>execution</th><th>DamageType tag</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>GE_Damage_Basic_Instant</code></td><td>DamageExecution</td><td>(없음 / 기본)</td></tr>
+              <tr><td><code>GE_Damage_Pistol</code></td><td>DamageExecution</td><td><code>DamageType.Pistol</code></td></tr>
+              <tr><td><code>GE_Damage_Rifle</code></td><td>DamageExecution</td><td><code>DamageType.Rifle</code></td></tr>
+              <tr><td><code>GE_Damage_Shotgun</code></td><td>DamageExecution</td><td><code>DamageType.Shotgun</code></td></tr>
+              <tr><td><code>GE_Damage_Melee</code></td><td>DamageExecution</td><td><code>DamageType.Melee</code></td></tr>
+              <tr><td><code>GE_Damage_Basic_Periodic</code></td><td>(추정) DamageExecution</td><td><em>부분 검증</em></td></tr>
+              <tr><td><code>GE_Damage_SetByCaller</code></td><td>(추정) DamageExecution</td><td><em>부분 검증</em></td></tr>
+              <tr><td><code>GE_Heal_Instant</code></td><td>HealExecution</td><td>(없음)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-death-trigger">
+        <header class="flow-head">
+          <span class="flow-num">흐름 2</span>
+          <h2>OnOutOfHealth 에서 Death 자동 트리거</h2>
+          <p class="flow-desc">Health 가 0 이 되면 GameplayEvent_Death 가 fire 되어 Death ability 자동 활성.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">PostGameplayEffectExecute 에서 Health 변경</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">meta Damage 가 Health 에 반영. immunity 검사 후 최종 Health.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc">Health 가 0 이하.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">OnOutOfHealth delegate broadcast</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>ULyraHealthSet::OnOutOfHealth</code> fire. <code>ULyraHealthComponent</code> 가 구독.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">GameplayEvent_Death fire</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">HealthComponent 가 <code>HandleGameplayEvent(GameplayEvent_Death)</code> 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">ULyraGameplayAbility_Death 자동 활성</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">trigger tag 매칭으로 Death ability 활성. <code>Exclusive_Blocking</code> 이라 다른 ability 차단.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

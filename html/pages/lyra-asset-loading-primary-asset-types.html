@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Primary Asset Type 8 종 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="asset-loading-primary-asset-types">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>5. Primary Asset Type 8 종</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>라이라가 등록한 8 종 type 의 효과는?</li>
+              <li><code>Directories</code> 와 <code>SpecificAssets</code> 의 차이는?</li>
+              <li><code>bHasBlueprintClasses</code> 는 언제 true 인가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>Primary Asset Type 은 AssetManager 가 indexing 하는 자산의 분류.</li>
+              <li>ini 의 <code>-</code> 는 배열 항목 제거, <code>+</code> 는 추가.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-asset-loading-assetmanager-bootstrap.html">AssetManager 부팅</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/asset-management-in-unreal-engine" target="_blank" rel="noopener">Asset Management</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-8-types">1. 8 종 Primary Asset Type</a></li>
+          <li><a href="#decision-directories-vs-specific">2. Directories vs SpecificAssets</a></li>
+          <li><a href="#reference-engine-defaults">3. 엔진 기본 type 제거 + 라이라 추가 패턴</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-8-types">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>8 종 Primary Asset Type</h2>
+          <p class="block-desc"><code>Config/DefaultGame.ini</code> 의 <code>[/Script/Engine.AssetManagerSettings]</code> 절에 등록.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>type</th><th>base class</th><th>blueprint</th><th>특이사항</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Map</code></td><td><code>World</code></td><td>아니오</td><td>SpecificAssets = FrontEnd + DefaultEditor map</td></tr>
+              <tr><td><code>LyraGameData</code></td><td><code>ULyraGameData</code></td><td>아니오</td><td>전역 데이터 자산</td></tr>
+              <tr><td><code>LyraExperienceDefinition</code></td><td><code>ULyraExperienceDefinition</code></td><td>예</td><td>Experience 정의</td></tr>
+              <tr><td><code>LyraExperienceActionSet</code></td><td><code>ULyraExperienceActionSet</code></td><td>예</td><td>Action 묶음. Directories 비어 있고 plugin 측 자동 발견</td></tr>
+              <tr><td><code>LyraPawnData</code></td><td><code>ULyraPawnData</code></td><td>예</td><td>pawn 의 ability set 묶음</td></tr>
+              <tr><td><code>LyraInventoryItemDefinition</code></td><td><code>ULyraInventoryItemDefinition</code></td><td>예</td><td>인벤토리 아이템</td></tr>
+              <tr><td><code>LyraWeaponInstance</code></td><td><code>ULyraWeaponInstance</code></td><td>예</td><td>무기 인스턴스</td></tr>
+              <tr><td><code>LyraUserFacingExperienceDefinition</code></td><td><code>ULyraUserFacingExperienceDefinition</code></td><td>아니오</td><td>매치 옵션 (frontend)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-directories-vs-specific">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>Directories vs SpecificAssets</h2>
+          <p class="block-desc">type 의 자산 위치 지정 두 방식.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. Directories 사용</h3><p>지정 디렉토리 아래 모든 자산 자동 indexing. 일반 게임플레이 자산 (PawnData, Experience).</p></li>
+          <li class="decision-item"><h3>2. SpecificAssets 사용</h3><p>명시한 자산만 indexing. Map type 이 FrontEnd / DefaultEditor 만 cooking 대상으로 좁힘.</p></li>
+          <li class="decision-item"><h3>3. Directories 비움 + plugin 자동 발견</h3><p>LyraExperienceActionSet 은 Directories 가 비어 있지만 GameFeature plugin 측에서 자동 발견. plugin 의 <code>AddedAssetTypes</code> 가 그 역할.</p></li>
+          <li class="decision-item"><h3>4. bHasBlueprintClasses</h3><p><code>true</code> 이면 BP 파생 클래스도 indexing 대상. Experience / PawnData / Item / Weapon 은 BP override 위해 true.</p></li>
+          <li class="decision-item"><h3>5. CookRule</h3><p><code>AlwaysCook</code> 으로 두면 dependency 분석과 무관하게 cooking. Map / GameData 등 boot 필수에 적합.</p></li>
+        </ol>
+      </section>
+
+      <section class="reference-section" id="reference-engine-defaults">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>엔진 기본 type 제거 + 라이라 추가 패턴</h2>
+          <p class="block-desc">엔진이 기본 등록하는 2 type (<code>Map</code>, <code>PrimaryAssetLabel</code>) 을 <code>-</code> 로 제거 후 라이라 정책으로 <code>+</code> 추가.</p>
+        </header>
+        <ul class="ref-list">
+          <li><code>-PrimaryAssetTypesToScan=(PrimaryAssetType="Map", ...)</code>: 엔진 기본 제거.</li>
+          <li><code>+PrimaryAssetTypesToScan=(PrimaryAssetType="Map", SpecificAssets=("/Game/System/FrontEnd"), ...)</code>: 라이라 정책 추가 (cooking 범위 축소).</li>
+          <li><code>-PrimaryAssetTypesToScan=(PrimaryAssetType="PrimaryAssetLabel", ...)</code>: 사용 안 함.</li>
+        </ul>
+        <div class="note note-info">
+          <strong>왜:</strong> 엔진 기본은 <code>Game/</code> 전체 Map indexing 으로 cooking 비용 증가. 라이라는 FrontEnd / DefaultEditor 만 cooking 하고 in-game map 은 Experience 기반 로드.
+        </div>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

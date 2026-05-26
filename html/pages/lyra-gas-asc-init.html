@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASC 초기화 4 경로 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="gas-asc-init">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>2. ASC 초기화 4 경로</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li>일반 플레이어의 ASC 는 어디에 있는가? GameState 의 ASC 는?</li>
+              <li>pawn 이 바뀌어도 어빌리티가 유지되는 이유는?</li>
+              <li>InitState 4 단계는 무엇인가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li>ASC 의 owner 와 avatar 는 다를 수 있음. owner 가 ASC 를 갖고, avatar 는 입출력 대상.</li>
+              <li>PawnExtensionComponent 가 ASC 와 Pawn 을 연결.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-gas-overview.html">GAS 전체 지도</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://github.com/tranek/GASDocumentation" target="_blank" rel="noopener">GAS Documentation (커뮤니티)</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#reference-4-paths">1. ASC 보유 위치 4 경로</a></li>
+          <li><a href="#flow-init">2. PawnExtensionComponent 초기화 흐름</a></li>
+          <li><a href="#decision-pawn-avatar-change">3. pawn 교체 시 avatar 만 갱신</a></li>
+        </ol>
+      </nav>
+
+      <section class="reference-section" id="reference-4-paths">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>ASC 보유 위치 4 경로</h2>
+          <p class="block-desc">라이라의 ASC 가 어느 actor 에 붙는지.</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>경로</th><th>보유 actor</th><th>용도</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>PlayerState ASC</td><td><code>ALyraPlayerState</code></td><td>일반 플레이어 어빌리티 (가장 흔함). owner = PS, avatar = Pawn.</td></tr>
+              <tr><td>GameState ASC</td><td><code>ALyraGameState</code></td><td>GamePhase 어빌리티 owner. avatar 도 GS.</td></tr>
+              <tr><td>CharacterWithAbilities</td><td><code>ALyraCharacterWithAbilities</code></td><td>자기 ASC 를 갖는 캐릭터 (봇 등). owner = avatar = self.</td></tr>
+              <tr><td>PawnExtensionComponent</td><td><code>ULyraPawnExtensionComponent</code></td><td>ASC 와 Pawn 의 연결 매니저. ASC 자체는 보유하지 않음.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="flow-section" id="flow-init">
+        <header class="flow-head">
+          <span class="flow-num">흐름 1</span>
+          <h2>PawnExtensionComponent 초기화 흐름</h2>
+          <p class="flow-desc">PlayerState ASC + Pawn avatar 연결. InitState 4 단계가 순차 진행.</p>
+        </header>
+        <ol class="flow-steps">
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">InitState_Spawned</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">Pawn spawn 직후. PawnExtensionComponent 생성.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">InitState_DataAvailable</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">PawnData 와 PlayerState 가 모두 준비됨.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">InitState_DataInitialized</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>InitializeAbilitySystem</code> 호출. <code>ULyraAbilitySystemComponent::InitAbilityActorInfo(PS, Pawn)</code> 실행.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span><p class="cond-desc"><code>bHasNewPawnAvatar</code> 분기.</p></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">AbilitySet grant + AnimInstance 연결</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc"><code>PawnData->AbilitySets[]</code> 일괄 grant. <code>ULyraAnimInstance::InitializeWithAbilitySystem</code> 호출.</p></li>
+          <li class="step-arrow"><span class="arrow">↓</span></li>
+          <li class="step" data-type="state"><div class="step-head"><strong class="step-name">InitState_GameplayReady</strong><span class="badge-verified">검증</span><span class="step-kind">State</span></div><p class="step-desc">최종 상태. <code>TryActivateAbilitiesOnSpawn</code> 으로 <code>OnSpawn</code> ability 활성.</p></li>
+        </ol>
+      </section>
+
+      <section class="decision-section" id="decision-pawn-avatar-change">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>pawn 교체 시 avatar 만 갱신</h2>
+          <p class="block-desc">새 pawn 으로 possess 될 때 ASC 와 어빌리티가 그대로 유지되는 이유.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. ASC 는 PlayerState 소유</h3><p>PS 가 player session 수명. pawn 교체와 무관하게 유지.</p></li>
+          <li class="decision-item"><h3>2. InitAbilityActorInfo 재호출</h3><p>새 pawn 으로 <code>InitAbilityActorInfo(PS, NewPawn)</code> 호출. owner 는 그대로 PS, avatar 만 새 pawn.</p></li>
+          <li class="decision-item"><h3>3. bHasNewPawnAvatar = true 분기</h3><p>새 avatar 감지 시 <code>OnPawnAvatarSet</code> 디스패치, 어빌리티 연결 재설정.</p></li>
+          <li class="decision-item"><h3>4. 어빌리티 spec 은 ASC 보유</h3><p>spec 은 PS 의 ASC 에 남아 있음. 새 pawn 에서 같은 어빌리티 사용 가능.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

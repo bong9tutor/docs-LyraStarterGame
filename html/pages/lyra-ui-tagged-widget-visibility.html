@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tagged Widget · 가시성 게이팅 · 학습</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page-id="ui-tagged-widget-visibility">
+  <header class="page-header">
+    <button class="menu-toggle" type="button" aria-label="메뉴 열기">☰</button>
+    <div class="header-inner">
+      <h1>6. Tagged Widget · 가시성 게이팅</h1>
+      <span class="verified-at">검증일: 2026-05-26</span>
+      <nav class="page-nav"><a href="../index.html">← 홈</a></nav>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" type="button" aria-label="다크모드 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+
+      <aside class="chapter-brief" aria-label="챕터 브리프">
+        <h2>챕터 브리프</h2>
+        <div class="brief-grid">
+          <section class="brief-block">
+            <h3>이 챕터의 질문</h3>
+            <ul>
+              <li><code>ULyraTaggedWidget::HiddenByTags</code> 가 의도하는 동작은?</li>
+              <li>왜 현재 UE 5.7 에서 동작하지 않는가?</li>
+              <li>대안 <code>UCommonUIVisibilitySubsystem</code> 은 어디서 쓰이는가?</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>먼저 알아둘 것</h3>
+            <ul>
+              <li><code>HiddenByTags</code> 의 의도: ASC 또는 viewmodel 의 특정 tag 가 활성화되면 위젯을 hidden 으로 토글.</li>
+              <li>대안 시스템: platform trait 기반 정적 가시성.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>선행 학습</h3>
+            <ul>
+              <li><a href="lyra-ui-widget-injection.html">위젯 주입</a>.</li>
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3>보충 자료</h3>
+            <ul>
+              <li><a href="https://issues.unrealengine.com/issue/UE-142237" target="_blank" rel="noopener">UE-142237 (Epic 이슈)</a></li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <nav class="learn-index" aria-label="학습 목차">
+        <h2>학습 목차</h2>
+        <ol>
+          <li><a href="#verification-unimplemented">1. 미구현 사실 확인</a></li>
+          <li><a href="#reference-visibility-subsystem">2. UCommonUIVisibilitySubsystem 라이라 사용처</a></li>
+          <li><a href="#decision-alternative">3. 가시성 게이팅이 필요할 때 권장 방식</a></li>
+        </ol>
+      </nav>
+
+      <section class="verification-section" id="verification-unimplemented">
+        <header class="block-head">
+          <span class="block-kind">검증</span>
+          <h2>미구현 사실 확인</h2>
+          <p class="block-desc">현재 시점 UE 5.7 에서 <code>HiddenByTags</code> 의 런타임 listening 이 동작하지 않음.</p>
+        </header>
+        <ul class="verify-list">
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>코드 주석에 UE-142237 명시</strong><p><code>ULyraTaggedWidget</code> 의 <code>NativeConstruct</code> / <code>NativeDestruct</code> 에 <code>@TODO UE-142237</code> 주석.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>bHasHiddenTags = false 하드코딩</strong><p>현재 구현이 항상 false 반환. 런타임 tag 변경 listening 미작동.</p></div></li>
+          <li class="verify-item"><span class="badge-verified">검증</span><div><strong>SetVisibility 가 호출되지 않음</strong><p>tag 변경에 따른 visibility 토글 경로가 끊겨 있음.</p></div></li>
+        </ul>
+        <div class="note note-warning">
+          <strong>중요:</strong> <code>ULyraTaggedWidget</code> 의 <code>HiddenByTags</code> 필드를 설정해도 런타임에 무시. UI 가 의도와 다르게 항상 표시될 수 있음.
+        </div>
+      </section>
+
+      <section class="reference-section" id="reference-visibility-subsystem">
+        <header class="block-head">
+          <span class="block-kind">참조</span>
+          <h2>UCommonUIVisibilitySubsystem 라이라 사용처</h2>
+          <p class="block-desc">platform trait container 기반 가시성. 라이라가 4 파일에서 사용 (검증 완료).</p>
+        </header>
+        <div class="table-wrap">
+          <table class="reference-table">
+            <thead>
+              <tr><th>파일</th><th>용도</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>LyraHUDLayout.cpp</code></td><td>HUD layout 안 platform trait 분기</td></tr>
+              <tr><td><code>LyraControllerDisconnectedScreen.cpp</code></td><td>controller disconnect 화면의 trait 게이팅</td></tr>
+              <tr><td><code>LyraSettingValueDiscrete_PerfStat.cpp</code></td><td>설정 값의 plat 별 가시성</td></tr>
+              <tr><td><code>LyraPlatformEmulationSettings.cpp</code></td><td>에디터 platform 에뮬레이션 설정</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="decision-section" id="decision-alternative">
+        <header class="block-head">
+          <span class="block-kind">결정</span>
+          <h2>가시성 게이팅이 필요할 때 권장 방식</h2>
+          <p class="block-desc"><code>HiddenByTags</code> 가 미작동인 현 시점 권장 대안.</p>
+        </header>
+        <ol class="decision-list">
+          <li class="decision-item"><h3>1. Platform trait 기반</h3><p><code>UCommonUIVisibilitySubsystem</code> 사용. 정적 (런타임 미변경) 가시성에 적합.</p></li>
+          <li class="decision-item"><h3>2. Viewmodel binding</h3><p>위젯 BP 의 binding 으로 viewmodel property 변화에 따라 visibility 갱신. 동적 변화에 적합.</p></li>
+          <li class="decision-item"><h3>3. GAS event listening</h3><p>위젯이 ASC 의 tag change delegate 를 직접 구독해 <code>SetVisibility</code> 호출. ASC tag 변화 추적.</p></li>
+          <li class="decision-item"><h3>4. Widget BP custom binding</h3><p>UMG 의 visibility binding 함수에서 직접 조건 평가. 가장 유연하지만 BP 컴파일 비용.</p></li>
+        </ol>
+      </section>
+
+    </main>
+    <aside class="page-toc" id="page-toc"></aside>
+  </div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

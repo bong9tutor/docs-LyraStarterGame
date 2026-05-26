@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__monolith__blueprint_query",
+      "mcp__jetbrains__get_file_text_by_path",
+      "mcp__monolith__animation_query",
+      "mcp__monolith__project_query",
+      "mcp__monolith__monolith_discover",
+      "mcp__monolith__monolith_status",
+      "mcp__jetbrains__list_directory_tree",
+      "mcp__jetbrains__search_in_files_by_text",
+      "mcp__monolith__ai_query",
+      "mcp__jetbrains__search_symbol",
+      "mcp__monolith__gas_query",
+      "mcp__ccd_session_mgmt__search_session_transcripts",
+      "mcp__monolith__editor_query",
+      "mcp__jetbrains__find_files_by_glob",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__jetbrains__get_solution_projects"
+    ]
+  }
+}
